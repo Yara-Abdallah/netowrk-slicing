@@ -1,8 +1,7 @@
-
 from Service.IService import Service
 
-class FactoryTelecomm(Service):
 
+class FactoryEntertainment(Service):
 
     def calculate_arrival_rate(self):
-        return 3
+        return 1

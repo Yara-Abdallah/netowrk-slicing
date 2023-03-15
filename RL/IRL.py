@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class RL(ABC):
+class RL():
     def __init__(self, episode, epsilon, gamma, alpha, batch_size, time_step):
         self.episode = episode
         self.epsilon = epsilon
