@@ -26,6 +26,7 @@ if __name__ == '__main__':
     factEnt=FactoryService(100, 10, 2, 100, 15, [1,1,1]).produce_services("entertainment")
     print(service.calculate_arrival_rate())
     print(outlet.calculate_downlink())
+    print("yara")
 
 
 
