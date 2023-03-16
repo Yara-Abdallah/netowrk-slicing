@@ -1,15 +1,9 @@
-# This is a sample Python script.
-from typing import NamedTuple
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
+from Communications.BridgeCommunications.ComsThreeG import ComsThreeG
 from Outlet.Cellular.ThreeG import ThreeG
 from RL.Agent.IAgent import Agent
 from Service.Entertainment.Entertainment import FactoryEntertainment
-from Vehicle.Car import Car
 from Service.FactoryService import FactoryService
-from Communications.BridgeCommunications.ComsThreeG import ComsThreeG
+from Vehicle.Car import Car
 
 
 def print_hi(name):
@@ -24,11 +18,9 @@ if __name__ == '__main__':
     agent = Agent(100, 0.9, 0.9, 0.9, 32, 50)
     car = Car(1, 100, [2, 2], 50, service, [1, 2, 3, 4])
     comm = ComsThreeG(0, 0, 0, 0, 0, 0, 0, 0, 0)
-    outlet = ThreeG(agent,comm,[0.1, 0.1], 1, 1, 1, 1, services_list=[10, 3])
+    outlet = ThreeG(agent, comm, [0.1, 0.1], 1, 1, 1, 1, services_list=[10, 3])
     factEnt = FactoryService(100, 10, 2, 100, 15, [1, 1, 1]).produce_services("entertainment")
     print(service.calculate_arrival_rate())
     print(outlet.calculate_coverage_area())
 
     print("yara")
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
