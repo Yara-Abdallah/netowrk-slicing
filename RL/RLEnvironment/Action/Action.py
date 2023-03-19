@@ -2,18 +2,22 @@ from typing import Tuple
 
 from RL.RLEnvironment.Reward.Reward import Reward
 from RL.RLEnvironment.State.State import State
+from RL.RLEnvironment.Action.ActionResponse import ActionResponse
+from RL.RLEnvironment.Action.ActionAsignment import ActionAssignment
+from typing import Union
 
 
-class Action :
-    def __init__(self) :
+class Action:
+    def __init__(self, command: Union[ActionResponse, ActionAssignment]):
+        self._command = command
         pass
 
-    def execute(self,state: State) -> Tuple[State,Reward]:
+    def execute(self, state: State) -> None:
+        self._command.excute(state)
         raise NotImplementedError
 
     def explore(self):
-        raise NotImplementedError
+        return 1
+
     def exploit(self):
-        raise NotImplementedError
-
-
+        return 2
