@@ -1,14 +1,10 @@
-from typing import Tuple
-
-from RL.RLEnvironment.Reward.Reward import Reward
-from RL.RLEnvironment.State.State import State
-from RL.RLEnvironment.Action.ActionResponse import ActionResponse
 from RL.RLEnvironment.Action.ActionAsignment import ActionAssignment
-from typing import Union
+from RL.RLEnvironment.Action.ActionResponse import ActionResponse
+from RL.RLEnvironment.State.State import State
 
 
 class Action:
-    def __init__(self, command: Union[ActionResponse, ActionAssignment]):
+    def __init__(self, command: ActionResponse | ActionAssignment):
         self._command = command
         pass
 
