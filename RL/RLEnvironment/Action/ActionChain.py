@@ -1,51 +1,61 @@
-import numpy as np
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Optional
-from RL.RLEnvironment.Action.Action import *
+
+import numpy as np
 
 
 class IHandler(ABC):
-    def init(self, successor: Optional["Handler"] = None):
+    def __init__(self, successor: Optional["IHandler"] = None):
         self.successor = successor
 
-    def handle(self, request: int) -> None:
+    def handle(self, test, epsilon):
+        res = self.check_epsilon(test, epsilon)
+        if not res:
+            self.successor.handle(test, epsilon)
+
+    @abstractmethod
+    def check_epsilon(self, test, epsilon) -> Optional[bool]:
         pass
 
 
-class Explor(IHandler):
+class Explore(IHandler):
     "A Concrete Handler"
 
-    @staticmethod
-    def handle(self, test, epsilon):
-        if test <= epsilon and test > 0:
-            action = Action.explor()
-            self.successor = Exploit()
-        return action
+    def check_epsilon(self, test, epsilon):
+        if 0 < epsilon < test < 1:
+            # action = Action.explore()
+            print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
+            return True
 
 
 class Exploit(IHandler):
     "A Concrete Handler"
 
-    @staticmethod
-    def handle(self, test, epsilon):
-        if test > epsilon and test < 1:
-            action = Action.exploit()
-            self.successor = FallbackHandler()
-        return action
+    def check_epsilon(self, test, epsilon):
+        if 1 > epsilon >= test > 0:
+            # action = Action.exploit()
+            print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
+            return True
 
 
 class FallbackHandler(IHandler):
-    @staticmethod
-    def handle(self, test, epsilon):
+
+    def check_epsilon(self, test, epsilon):
+        print(f'handled in {self.__class__.__name__}')
         raise ValueError("epsilon must be in range 0 to 1 :", epsilon)
 
 
 class Chain():
     "A chain with a default first successor"
-    test = np.random.rand()
+
     epsilon = 0.8
 
     @staticmethod
-    def start(test, epsilon):
+    def start(epsilon):
+        test = np.random.rand()
         "Setting the first successor that will modify the payload"
-        return Explor().handle(test, epsilon)
+        handler = Explore(Exploit(FallbackHandler()))
+        handler.handle(test, epsilon)
+
+
+Chain().start(0.4)
