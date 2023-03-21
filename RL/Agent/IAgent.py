@@ -5,13 +5,13 @@ from RL.RLEnvironment.Action.Action import Action
 from RL.RLEnvironment.State.State import State
 
 
-class Agent(ABC):
+class Agent():
     def __init__(self, epsilon=0.95, gamma=0.95, epsilon_decay=0.09, min_epsilon=0.01, episodes=7, cumulative_reward=0,
                  step=60 * 60 * 24):
         self.epsilon = epsilon
         self.gamma = gamma
         self.buffer = deque()
-        self.epsilon_dcay = epsilon_decay
+        self.epsilon_decay = epsilon_decay
         self.min_epsilon = min_epsilon
         self.episodes = episodes
         self.cumulative_reward = cumulative_reward
