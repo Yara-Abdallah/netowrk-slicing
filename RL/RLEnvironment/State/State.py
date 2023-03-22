@@ -1,9 +1,13 @@
-class State:
+from abc import ABC, abstractmethod
+
+
+class State(ABC):
     def __call__(self, *args, **kwargs):
-        raise NotImplementedError
+        pass
 
     def __init__(self):
-        raise NotImplementedError
+        pass
 
-    def calculate_state(self):
+    @abstractmethod
+    def calculate_state(self, supported_services):
         pass

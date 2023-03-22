@@ -31,8 +31,9 @@ class Cellular(Outlet):
         self.agent = agent
         self.coms = coms
         self.supported_services = supported_services
-        self.services_list = kwargs.get('services_list', [])
-        self.vehicles_list = kwargs.get('vehicles_list', [])
+        self.services = kwargs.get('services_list', [])
+        self.vehicles = kwargs.get('vehicles_list', [])
+        self._supported_services_distinct = []
 
     @abstractmethod
     def calculate_coverage_area(self):
@@ -43,4 +44,9 @@ class Cellular(Outlet):
     def calculate_downlink(self):
         pass
 
-    pass
+    @property
+    def supported_services_distinct(self):
+        return [self.supported_services,self._distinct]
+
+
+

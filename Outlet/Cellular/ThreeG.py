@@ -19,3 +19,5 @@ class ThreeG(Cellular):
             float
             The downlink that the tower will use it for responsing the requests ."""
         return 2
+
+
