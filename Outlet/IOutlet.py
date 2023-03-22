@@ -8,25 +8,30 @@ class Outlet(ABC):
 
         """
 
+    __id = -1
 
-    def __init__(self, _id: int, position: Tuple[float], radius: float, power: float):
-
+    def __init__(self, position: Tuple[float], radius: float, power: [float]):
         """
             Parameters
             ----------
-            position : Tuple[float,float,float]
+            position : Tuple[float]
                 The coordinates of the outlet.
             radius : float
                 The radius of the coverage area.
-            power : float
+            power : [float]
                 The power or the outlet.
 
             """
-
-        self._id = _id
+        self.__class__.__id += 1
+        self._distinct = self.__class__.__id
         self.position = position
         self.radius = radius
         self.power = power
+        self._power_distinct = []
+
+    @property
+    def distinct(self):
+        return self._distinct
 
     @abstractmethod
     def calculate_coverage_area(self):
@@ -43,3 +48,7 @@ class Outlet(ABC):
             nothing , it is an abstract method
                The downlink that the tower will use it for responsing the requests ."""
         pass
+
+    @property
+    def power_distinct(self):
+        return [self.power,self._distinct]

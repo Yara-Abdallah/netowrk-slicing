@@ -1,20 +1,25 @@
+from RL.RLEnvironment.State.State import State
 from abc import ABC, abstractmethod
 from typing import Optional
 
 import numpy as np
 
 
+
 class IHandler(ABC):
-    def __init__(self, successor: Optional["IHandler"] = None):
+    def __init__(self,action, successor: Optional["IHandler"] = None):
         self.successor = successor
+        self.action = action
 
     def handle(self, test, epsilon):
-        res = self.check_epsilon(test, epsilon)
-        if not res:
-            self.successor.handle(test, epsilon)
+        self.action = self.check_epsilon(test, epsilon)
+        if not self.action:
+            self.action = self.successor.handle(test, epsilon)
+        return self.action
 
     @abstractmethod
     def check_epsilon(self, test, epsilon) -> Optional[bool]:
+
         pass
 
 
@@ -25,7 +30,9 @@ class Explore(IHandler):
         if 0 < epsilon < test < 1:
             # action = Action.explore()
             print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
-            return True
+
+            print("....  ",self.action.explore())
+            return self.action.explore()
 
 
 class Exploit(IHandler):
@@ -35,7 +42,9 @@ class Exploit(IHandler):
         if 1 > epsilon >= test > 0:
             # action = Action.exploit()
             print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
-            return True
+
+            print("....  ",self.action.explore())
+            return self.action.explore()
 
 
 class FallbackHandler(IHandler):
@@ -54,8 +63,9 @@ class Chain():
     def start(epsilon):
         test = np.random.rand()
         "Setting the first successor that will modify the payload"
-        handler = Explore(Exploit(FallbackHandler()))
+        a=Action(ActionResponse())
+        handler = Exploit(a,Explore(a,FallbackHandler(a)))
         handler.handle(test, epsilon)
+        print(handler.action)
 
-
-Chain().start(0.4)
+Chain().start(-1)

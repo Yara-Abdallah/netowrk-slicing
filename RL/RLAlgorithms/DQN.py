@@ -61,5 +61,6 @@ print(a.agents)
 #
 a.env = env
 a.agents = agent
+
 model = a.create_model()
 print(model.summary())
