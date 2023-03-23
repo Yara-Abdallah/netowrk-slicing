@@ -1,21 +1,20 @@
 from abc import abstractmethod
+
 from RL.RLMeta import RLMeta, rlabc
-
-
 
 
 @rlabc
 class AbstractRL(metaclass=RLMeta):
-
     _agents = []
     _env = None
-    def __init__(self,agents,env):
-        self._agents=agents
-        self._env=env
 
+    def __init__(self, agents, env):
+        self._agents = agents
+        self._env = env
 
     def len_(self):
         return len(self._agents)
+
     @property
     @abstractmethod
     def env(self):

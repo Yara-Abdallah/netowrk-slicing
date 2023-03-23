@@ -84,5 +84,7 @@ c.allocated_power = outlet2.power_distinct
 c.supported_services = outlet2.supported_services_distinct
 print(c.allocated_power)
 print(c.supported_services)
-c.filtered_powers = c.allocated_power
+c.power = c.allocated_power
+print(c.power)
 print(c.calculate_state(c.supported_services))
+# print(c.supported_services(*outlet.supported_services_distinct))
