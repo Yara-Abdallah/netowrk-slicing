@@ -1,11 +1,17 @@
 from abc import abstractmethod, ABC
 from collections import deque
 from typing import runtime_checkable, Protocol
-from RL.RLEnvironment.Action.ActionAsignment import ActionAssignment
+
+from Communications.BridgeCommunications.ComsThreeG import ComsThreeG
+from Outlet.Cellular.ThreeG import ThreeG
+from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
+from RL.RLEnvironment.Action.ActionChain import Exploit, Explore, FallbackHandler
 from RL.RLEnvironment.Action.ActionResponse import ActionResponse
 
 from RL.RLEnvironment.Action.Action import Action
+from RL.RLEnvironment.State.CentralizedState import CentralizedState
 from RL.RLEnvironment.State.State import State
+import numpy as np
 
 
 @runtime_checkable
@@ -17,10 +23,11 @@ class AgentProtocol(Protocol):
 
 
 class Agent():
-    def __init__(self, epsilon=0.95, gamma=0.95, epsilon_decay=0.09, min_epsilon=0.01, episodes=7,
+    def __init__(self, action_type, epsilon=0.95, gamma=0.95, epsilon_decay=0.09, min_epsilon=0.01,
+                 episodes=7,
                  cumulative_reward=0,
                  step=60 * 60 * 24):
-        self._action = 1
+        self.action_type = Action(action_type)
         self.epsilon = epsilon
         self.gamma = gamma
         self.buffer = deque()
@@ -50,14 +57,29 @@ class Agent():
         """ Return q values for state. """
         pass
 
+    def chain(self, model,state, epsilon):
+        "A chain with a default first successor"
+        test = np.random.rand()
+        "Setting the first successor that will modify the payload"
+        action = self.action_type
+        handler = Exploit(action, model,state, Explore(action, FallbackHandler(action)))
+        return action,handler.handle(test, epsilon)
 
-command1 = ActionAssignment()
-action1 = Action(command1)
-state= 10
-print(action1.execute(state))
-
-command2 = ActionResponse()
-action2 = Action(command2)
-
-print(action2.execute(state))
-print(isinstance(action1, AgentProtocol))
+# comm = ComsThreeG(0, 0, 0, 0, 0)
+# outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22])
+# outlet2 = ThreeG(0, comm, [0, 0, 1], 1, 1, [10, 15, 28])
+#
+# c = CentralizedState()
+# # print(c.calculate_state(4, 3))
+# c.allocated_power = outlet.power_distinct
+# c.supported_services = outlet.supported_services_distinct
+# c.allocated_power = outlet2.power_distinct
+# c.supported_services = outlet2.supported_services_distinct
+# c.filtered_powers = c.allocated_power
+# # state=c.calculate_state(c.supported_services)
+#
+# #print(c.calculate_state(c.supported_services))
+#
+# state=c.calculate_state(c.supported_services)
+# print(state)
+# action = Chain().start(0.1)

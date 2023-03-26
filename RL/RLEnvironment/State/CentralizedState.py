@@ -18,15 +18,15 @@ class CentralizedState(State):
 
     def __init__(self):
         super().__init__()
-        self.gridCell = 2
+        self.grid_cell = 2
         self.num_services = 3
-        self.state_shape = CentralizedState.state_shape(self.num_services, self.gridCell)
+        self.state_shape = CentralizedState.state_shape(self.num_services, self.grid_cell)
         self._allocated_power = np.zeros(self.state_shape)
         self._supported_services = copy.deepcopy(self.allocated_power)
 
     @staticmethod
-    def state_shape(num_services, gridCell):
-        return [num_services, gridCell]
+    def state_shape(num_services, grid_cell):
+        return [num_services, grid_cell]
 
     @property
     def allocated_power(self):
@@ -48,41 +48,30 @@ class CentralizedState(State):
         self.accumulated_powers.append(sum(x))
 
     def filter_power(self, x):
-        print("... ", x[0], "    ", x[1])
         self.indices.append(x)
-
         x = list(map(self.filtered_powers[x[0]].__getitem__, x[1]))
         return x
 
     def calculate_state(self, binary):
+        self.accumulated_powers = []
         xs = rx.from_(binary)
         disposable = xs.pipe(
             ops.map_indexed(
                 lambda x, i: (i, np.where(np.array(x) == 1.0))),
-
             ops.map(lambda x: [x[0], x[1][0]]),
             ops.map(self.filter_power))
-
         disposable.subscribe(self.observer_sum)
         return self.accumulated_powers
 
-
-comm = ComsThreeG(0, 0, 0, 0, 0)
-outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22])
-outlet2 = ThreeG(0, comm, [0, 0, 1], 1, 1, [10, 15, 28])
-
-print(outlet.distinct)
-print('..... ', outlet.power)
-print(outlet2.distinct)
-print('..... ', outlet2.power)
-
-c = CentralizedState()
-# print(c.calculate_state(4, 3))
-c.allocated_power = outlet.power_distinct
-c.supported_services = outlet.supported_services_distinct
-c.allocated_power = outlet2.power_distinct
-c.supported_services = outlet2.supported_services_distinct
-print(c.allocated_power)
-print(c.supported_services)
-c.filtered_powers = c.allocated_power
-print(c.calculate_state(c.supported_services))
+# comm = ComsThreeG(0, 0, 0, 0, 0)
+# outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22])
+# outlet2 = ThreeG(0, comm, [0, 0, 1], 1, 1, [10, 15, 28])
+#
+# c = CentralizedState()
+# # print(c.calculate_state(4, 3))
+# c.allocated_power = outlet.power_distinct
+# c.supported_services = outlet.supported_services_distinct
+# c.allocated_power = outlet2.power_distinct
+# c.supported_services = outlet2.supported_services_distinct
+# c.filtered_powers = c.allocated_power
+# print(c.calculate_state(c.supported_services))

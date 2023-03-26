@@ -1,9 +1,19 @@
+from abc import abstractmethod
+
+
 class Reward:
-    def __call__(self, *args, **kwargs):
+
+    _reward_value: int
+
+    def __call__(self):
         pass
 
-    def __init__(self, value=0):
-        self.value = value
+    @property
+    def reward_value(self):
+        return self._reward_value
 
-    def calculate_reward(self,params):
+    @reward_value.setter
+    def reward_value(self,reward_value):
+        self._reward_value = reward_value
+    def calculate_reward(self):
         pass
