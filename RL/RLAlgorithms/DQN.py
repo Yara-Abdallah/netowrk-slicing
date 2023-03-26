@@ -52,7 +52,7 @@ c.supported_services = outlet2.supported_services_distinct
 c.filtered_powers = c.allocated_power
 state = c.calculate_state(c.supported_services)
 print(state)
-model = Model(3, 6, 'relu', 'mse', Adam, 0.5, 'linear').build_model()
+model = Model(3, 6, 'relu', 'mse', Adam, 0.5, 'sigmoid').build_model()
 agent = Agent(ActionAssignment())
 action, action_value = agent.chain(model,state,0.9)
 print(action.execute(c, action_value))

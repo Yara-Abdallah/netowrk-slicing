@@ -63,7 +63,8 @@ class Agent():
         "Setting the first successor that will modify the payload"
         action = self.action_type
         handler = Exploit(action, model,state, Explore(action, FallbackHandler(action)))
-        return action,handler.handle(test, epsilon)
+        act = np.where(handler.handle(test, epsilon) > 0.5, 1, 0)
+        return action,act
 
 # comm = ComsThreeG(0, 0, 0, 0, 0)
 # outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22])
