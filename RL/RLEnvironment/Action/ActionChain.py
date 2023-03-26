@@ -1,11 +1,5 @@
-from RL.RLEnvironment.Action.Action import Action
-from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
-from RL.RLEnvironment.Action.ActionResponse import ActionResponse
-from RL.RLEnvironment.State.State import State
 from abc import ABC, abstractmethod
 from typing import Optional
-
-import numpy as np
 
 
 class IHandler(ABC):
@@ -36,24 +30,20 @@ class Explore(IHandler):
 
 class Exploit(IHandler):
     "A Concrete Handler"
-    def __init__(self,action,model,state,successor):
-        super().__init__(action,successor)
+
+    def __init__(self, action, model, state, successor):
+        super().__init__(action, successor)
         self.model = model
-        self.state=state
+        self.state = state
+
     def check_epsilon(self, test, epsilon):
         if 1 > epsilon >= test > 0:
             # action = Action.exploit()
             print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
-            return self.action.exploit(self.model,self.state)
+            return self.action.exploit(self.model, self.state)
 
 
 class FallbackHandler(IHandler):
     def check_epsilon(self, test, epsilon):
         print(f'handled in {self.__class__.__name__}')
         raise ValueError("epsilon must be in range 0 to 1 :", epsilon)
-
-
-
-
-# act=Chain().start(0.1)
-# print(act)

@@ -1,3 +1,4 @@
 class ActionResponse:
-    def excute(self,state,action_decision):
-        return 24
+    def execute(self, state, action_decision):
+        _, next_state = state.update_queue(action_decision)
+        return next_state
