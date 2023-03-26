@@ -31,6 +31,6 @@ class RLEnvironment():
         self._reward = r
 
 
-yara = RLEnvironment(State(), Reward(9))
+# yara = RLEnvironment(State(), Reward(9))
 
-print(isinstance(yara,RLProtocol))
+# print(isinstance(yara,RLProtocol))

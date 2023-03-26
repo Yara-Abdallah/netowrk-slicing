@@ -4,31 +4,20 @@ from keras.optimizers import Adam
 from RL.RLAlgorithms.AbstractRL import AbstractRL
 from RL.RLAlgorithms.Model import Model
 from RL.Agent.IAgent import Agent
+from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
 from RL.RLEnvironment.RLEnvironment import RLEnvironment
+from Communications.BridgeCommunications.ComsThreeG import ComsThreeG
+from Outlet.Cellular.ThreeG import ThreeG
+from RL.RLEnvironment.State.CentralizedState import CentralizedState
 
 
-
-def single_agent(class_):
-    original_agents = class_.agents
-    oa = class_.agents.fget(class_)
-
-    print(len(oa))
-    #class_.agents = oa[0]
-    return class_
-@single_agent
 class DQN(AbstractRL):
     def __init__(self, model, *args):
         super().__init__(*args)
         self.model = model
 
-    def create_model(self) -> Sequential:
-        model_ = Sequential()
-        model_.add(Dense(24, input_dim=self.model.state_size, activation=self.model.activation_function))
-        model_.add(Dense(24, activation=self.model.activation_function))
-        model_.add(Dense(self.model.action_size, activation=self.model.output_activation))
-        model_.compile(loss=self.model.loss_function,
-                       optimizer=self.model.optimization_algorithm(learning_rate=self.model.learning_rate))
-        return model_
+    #def create_model(self) -> Sequential:
+    #    return self.model.build_model()
 
     def load(self, filename):
         self.model.load(filename)
@@ -52,15 +41,25 @@ class DQN(AbstractRL):
     def agents(self, a):
         self._agents = a
 
-
-model = Model(2, 2, 'relu', 'mse', Adam, 0.5, 'linear')
-agent = Agent()
-env = RLEnvironment()
-a = DQN(model,agent,env)
+comm = ComsThreeG(0, 0, 0, 0, 0)
+outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22])
+outlet2 = ThreeG(0, comm, [0, 0, 1], 1, 1, [10, 15, 28])
+c = CentralizedState()
+c.allocated_power = outlet.power_distinct
+c.supported_services = outlet.supported_services_distinct
+c.allocated_power = outlet2.power_distinct
+c.supported_services = outlet2.supported_services_distinct
+c.filtered_powers = c.allocated_power
+state = c.calculate_state(c.supported_services)
+print(state)
+model = Model(3, 6, 'relu', 'mse', Adam, 0.5, 'sigmoid').build_model()
+agent = Agent(ActionAssignment())
+action, action_value = agent.chain(model,state,0.9)
+print(action.execute(c, action_value))
+# env = RLEnvironment()
+env = ''
+"""a = DQN(model, agent, env)
 print(a.agents)
-#
 a.env = env
-a.agents = agent
-
-model = a.create_model()
+a.agents = agent"""
 print(model.summary())
