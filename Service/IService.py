@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class Service(ABC):
 
     def __init__(self, frequency: float, spectrum: float, data_rate: float, energy_consumption: float,
-                 transition_delay: float,power_factor:float, **kwargs):
+                 transition_delay: float,power_factor:[float], **kwargs):
         """
             Parameters
             ----------
