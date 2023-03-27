@@ -5,6 +5,8 @@ import random
 from uuid import uuid4
 
 
+class env:
+
 def prepare_route():
     """
     add routes to env_variables
@@ -72,10 +74,15 @@ def select_outlets_to_show_in_gui():
     select outlets in network to display type of each outlet
     """
     for key in env_variables.outlets.keys():
-        print(key)
-        print(env_variables.outlets[key])
         for id_, _ in env_variables.outlets[key]:
             traci.gui.toggleSelection(id_, 'poi')
+
+
+def get_positions_of_outlets():
+    positions_of_outlets = []
+    for key in env_variables.outlets.keys():
+        positions_of_outlets.extend(list(map(lambda id_: id_[1], env_variables.outlets[key])))
+    return positions_of_outlets
 
 
 def get_position_all_vehicles(id_vehicles):
@@ -87,11 +94,12 @@ def get_position_all_vehicles(id_vehicles):
     env_variables.vehicles_id_pos = list(map(lambda id_: (id_, traci.vehicle.getPosition(id_)), id_vehicles))
 
 
+# def main():
 sumoCmd = ["sumo-gui", "-c", env_variables.network_path]
 traci.start(sumoCmd)
 
-
 get_all_outlets()
+print(get_positions_of_outlets())
 prepare_route()
 step = 0
 generate_vehicles(5)
@@ -100,6 +108,8 @@ while step < env_variables.TIME:
     traci.simulationStep()
     get_position_all_vehicles(traci.vehicle.getIDList())
     # to make generate vehicles not growing put this condition
+    id_veh = traci.vehicle.getIDList()[0]
+    veh_position = traci.vehicle.getPosition(id_veh)
     if step % 200 == 0:
         generate_vehicles(150)
 
@@ -108,8 +118,9 @@ while step < env_variables.TIME:
         select_outlets_to_show_in_gui()
 
     # to check output:
-    if step == 30:
-        print('the outlets {}'.format(env_variables.outlets))
-        print('the vehicles {}'.format(env_variables.vehicles_id_pos))
+    # if step == 30:
+    #     # print('the outlets {}'.format(env_variables.outlets))
+    # print(step)
+    # print('the vehicles {}'.format(env_variables.vehicles_id_pos))
     step += 1
 traci.close()
