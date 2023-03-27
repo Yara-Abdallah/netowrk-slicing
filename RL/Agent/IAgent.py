@@ -22,7 +22,6 @@ class AbstractAgent():
         self.action_type = Action(action_type)
         self.epsilon = epsilon
         self.gamma = gamma
-        self.buffer = deque()
         self.epsilon_decay = epsilon_decay
         self.min_epsilon = min_epsilon
         self.episodes = episodes

@@ -7,8 +7,9 @@ import rx.operators as ops
 from Communications.BridgeCommunications.ComsThreeG import ComsThreeG
 from Outlet.Cellular.ThreeG import ThreeG
 from RL.RLEnvironment.State.State import State
-
+from Utils.Statistics import Statistics
 from collections import deque
+import itertools
 
 
 class DeCentralizedState(State):
@@ -18,15 +19,15 @@ class DeCentralizedState(State):
     indices = []
     accumulated_powers = []
     filtered_powers = []
+    request_buffer = []
 
     def __init__(self):
         super().__init__()
-        self.buffer_state = deque()
-        self.num_statistical_information = 5
+        self.num_statistical_information = 4
         self.num_state = 2
         self.state_shape = DeCentralizedState.state_shape(self.num_state, self.num_statistical_information)
-        self._allocated_power = np.zeros(self.state_shape)
-        self._power_factor = copy.deepcopy(self.power_factor)
+        self._allocated_power = []
+        self._power_factor = []
 
     @staticmethod
     def state_shape(num_state, num_statistical_information):
@@ -42,18 +43,21 @@ class DeCentralizedState(State):
 
     @allocated_power.setter
     def allocated_power(self, power_array):
-        self._allocated_power[:, power_array[1]] = power_array[0]
+        self._allocated_power = power_array
 
     @power_factor.setter
     def power_factor(self, power_factor):
-        self._power_factor[:, power_factor[1]] = power_factor[0]
+        self._power_factor = power_factor
 
+    def update_state(self, buffer_state, binary):
+        if binary == 1:
+            buffer_state.extend(np.stack((
+                np.array(self.power_factor), np.array(self.allocated_power)), axis=1)
+            )
+            return True
+        else:
+            return False
 
-
-    def update_state(self):
-        self.buffer_state.append([self.power_factor, self.allocated_power])
-
-
-
-
-
+    def calculate_state(self, buffer_state):
+        return [Statistics.mean(buffer_state), Statistics.std(buffer_state), Statistics.max(buffer_state),
+                Statistics.min(buffer_state)]

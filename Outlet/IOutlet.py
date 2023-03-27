@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
-
+from collections import deque
 
 class Outlet(ABC):
     """
@@ -10,7 +10,7 @@ class Outlet(ABC):
 
     __id = -1
 
-    def __init__(self, position: Tuple[float], radius: float, power: [float]):
+    def __init__(self, position: Tuple[float], radius: float, power: [float],requests_allocated_power:[float]):
         """
             Parameters
             ----------
@@ -27,7 +27,9 @@ class Outlet(ABC):
         self.position = position
         self.radius = radius
         self.power = power
+        self.requests_allocated_power=requests_allocated_power
         self._power_distinct = []
+        self.request_buffer = []
 
     @property
     def distinct(self):

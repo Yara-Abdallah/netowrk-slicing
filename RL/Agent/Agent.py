@@ -19,6 +19,7 @@ class Agent(AbstractAgent):
         test = np.random.rand()
         "Setting the first successor that will modify the payload"
         action = self.action_type
+        print("inside chain ,,, ", action)
         handler = Exploit(action, model, state, Explore(action, FallbackHandler(action)))
-        act = np.where(handler.handle(test, epsilon) > 0.5, 1, 0)
-        return action, act
+        # = np.where(handler.handle(test, epsilon) > 0.5, 1, 0)
+        return action, handler.handle(test, epsilon)
