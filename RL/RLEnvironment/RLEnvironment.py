@@ -1,14 +1,36 @@
-class Singleton(type):
-    """ Metaclass that creates a Singleton base type when called. """
-    _instances = {}
+from typing import Protocol, runtime_checkable
 
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls)\
-                .__call__(*args, **kwargs)
-        return cls._instances[cls]
+from RL.RLEnvironment.Reward.Reward import Reward
+from RL.RLEnvironment.State.State import State
+
+@runtime_checkable
+class RLProtocol(Protocol):
+    state: State
+    reward: Reward
 
 
-class RLEnvironment(metaclass=Singleton):
-    def __init__(self):
-        pass
+class RLEnvironment():
+    def __init__(self, state: State, reward: Reward):
+        self._state = state
+        self._reward = reward
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, s):
+        self._state = s
+
+    @property
+    def reward(self):
+        return self._reward
+
+    @reward.setter
+    def reward(self, r):
+        self._reward = r
+
+
+# yara = RLEnvironment(State(), Reward(9))
+
+# print(isinstance(yara,RLProtocol))

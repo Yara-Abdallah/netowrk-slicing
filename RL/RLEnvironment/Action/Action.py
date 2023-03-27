@@ -1,19 +1,31 @@
-from RL.RLEnvironment.Action.ActionAsignment import ActionAssignment
+from abc import abstractmethod,ABC
+
+from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
 from RL.RLEnvironment.Action.ActionResponse import ActionResponse
 from RL.RLEnvironment.State.State import State
 
+import numpy as np
 
-class Action:
+
+class Action():
+
     def __init__(self, command: ActionResponse | ActionAssignment):
-        self._command = command
-        pass
 
-    def execute(self, state: State) -> None:
-        self._command.excute(state)
-        raise NotImplementedError
+        self._command = command
+        print("comm ",self._command)
+
+
+    def execute(self, state, action_decision, request_buffer):
+        next_state = self._command.execute(state, action_decision, request_buffer)
+        return next_state
 
     def explore(self):
-        return 1
+        print("command  : ",self._command)
+        return self._command.explore()
 
-    def exploit(self):
-        return 2
+    def exploit(self, model, state):
+        return self._command.exploit(model, state)
+
+
+
+
