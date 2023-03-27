@@ -1,13 +1,11 @@
-from keras import Sequential
-from keras.layers import Dense
 from keras.optimizers import Adam
-from RL.RLAlgorithms.AbstractRL import AbstractRL
-from RL.RLAlgorithms.Model import Model
-from RL.Agent.IAgent import Agent
-from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
-from RL.RLEnvironment.RLEnvironment import RLEnvironment
+
 from Communications.BridgeCommunications.ComsThreeG import ComsThreeG
 from Outlet.Cellular.ThreeG import ThreeG
+from RL.Agent.Agent import Agent
+from RL.RLAlgorithms.AbstractRL import AbstractRL
+from RL.RLAlgorithms.Model import Model
+from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
 from RL.RLEnvironment.State.CentralizedState import CentralizedState
 
 
@@ -16,7 +14,7 @@ class DQN(AbstractRL):
         super().__init__(*args)
         self.model = model
 
-    #def create_model(self) -> Sequential:
+    # def create_model(self) -> Sequential:
     #    return self.model.build_model()
 
     def load(self, filename):
@@ -41,6 +39,7 @@ class DQN(AbstractRL):
     def agents(self, a):
         self._agents = a
 
+
 comm = ComsThreeG(0, 0, 0, 0, 0)
 outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22])
 outlet2 = ThreeG(0, comm, [0, 0, 1], 1, 1, [10, 15, 28])
@@ -54,7 +53,7 @@ state = c.calculate_state(c.supported_services)
 print(state)
 model = Model(3, 6, 'relu', 'mse', Adam, 0.5, 'sigmoid').build_model()
 agent = Agent(ActionAssignment())
-action, action_value = agent.chain(model,state,0.9)
+action, action_value = agent.chain(model, state, 0.9)
 print(action.execute(c, action_value))
 # env = RLEnvironment()
 env = ''
@@ -62,4 +61,4 @@ env = ''
 print(a.agents)
 a.env = env
 a.agents = agent"""
-print(model.summary())
+# print(model.summary())
