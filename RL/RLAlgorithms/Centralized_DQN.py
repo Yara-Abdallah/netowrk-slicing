@@ -2,7 +2,7 @@ from keras.optimizers import Adam
 
 from Communications.BridgeCommunications.ComsThreeG import ComsThreeG
 from Outlet.Cellular.ThreeG import ThreeG
-from RL.Agent.Agent import Agent
+from RL.Agent.IAgent import Agent
 from RL.RLAlgorithms.AbstractRL import AbstractRL
 from RL.RLAlgorithms.Model import Model
 from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
@@ -61,4 +61,4 @@ env = ''
 print(a.agents)
 a.env = env
 a.agents = agent"""
-# print(model.summary())
+print(model.summary())
