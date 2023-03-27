@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
+from RL.RLEnvironment.Action.ActionResponse import ActionResponse
+
 
 class IHandler(ABC):
-    def __init__(self, action, successor: Optional["IHandler"] = None):
+    def __init__(self, action: ActionResponse | ActionAssignment, successor: Optional["IHandler"] = None):
         self.successor = successor
         self.action = action
 
@@ -20,17 +23,16 @@ class IHandler(ABC):
 
 class Explore(IHandler):
     "A Concrete Handler"
-
     def check_epsilon(self, test, epsilon):
         if 0 < epsilon < test < 1:
             # action = Action.explore()
             print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
-            return self.action.explore()
+            explore_val = self.action.explore()
+            return explore_val
 
 
 class Exploit(IHandler):
     "A Concrete Handler"
-
     def __init__(self, action, model, state, successor):
         super().__init__(action, successor)
         self.model = model

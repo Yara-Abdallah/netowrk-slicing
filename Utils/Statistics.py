@@ -5,25 +5,31 @@ class Statistics:
     def __init__(self, data):
         self.data = data
 
-    def mean(self):
-        return np.mean(self.data)
+    @staticmethod
+    def mean(data):
+        return np.mean(data,axis=0)
 
-    def std(self):
-        return np.std(self.data)
+    @staticmethod
+    def std(data):
+        return np.std(data,axis=0)
 
-    def percentile(self, p):
-        return np.percentile(self.data, p)
+    @staticmethod
+    def percentile(data, p):
+        return np.percentile(data, p ,axis=0)
 
-    def min(self):
-        return np.min(self.data)
+    @staticmethod
+    def min(data):
+        return np.min(data,axis=0)
 
-    def max(self):
-        return np.max(self.data)
+    @staticmethod
+    def max(data):
+        return np.max(data,axis=0)
 
-    def range(self):
-        return self.max() - self.min()
+    @staticmethod
+    def range(data):
+        return Statistics.max() - Statistics.min()
 
-    def summary(self):
+    """def summary(data):
         return {
             "mean": self.mean(),
             "std": self.std(),
@@ -33,4 +39,4 @@ class Statistics:
             "min": self.min(),
             "max": self.max(),
             "range": self.range()
-        }
+        }"""
