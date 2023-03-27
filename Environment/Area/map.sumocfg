@@ -1,7 +1,7 @@
  <configuration>
      <input>
          <net-file value="map1.net.xml"/>
-         <route-files value ="map.rou.xml"/>
+         <!-- <route-files value ="map.rou.xml"/> -->
          <additional-files value="map1.poly.xml"/>
 
      </input>

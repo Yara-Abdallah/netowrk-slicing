@@ -1,3 +1,6 @@
+network_path = 'F:\\Rachis_systems\\ns\Environment\Area\map.sumocfg'
+random_routes_path = 'F:\\Rachis_systems\\ns\Environment\Area\map.rou.xml'
+
 types_outlets = ['3G', '4G', '5G', 'SAT', 'wifi', 'UAV']
 
 outlets = {
@@ -17,3 +20,6 @@ default_types_vehicles = [
     'DEFAULT_TAXITYPE',
     'DEFAULT_VEHTYPE']
 
+# position_of_oultets = []
+vehicles_id_pos = []
+TIME = 2000
