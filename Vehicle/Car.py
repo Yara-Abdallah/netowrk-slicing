@@ -2,4 +2,5 @@ from Vehicle.IVehicle import Vehicle
 
 
 class Car(Vehicle):
-    pass
+    def __init__(self):
+        pass

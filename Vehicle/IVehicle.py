@@ -4,8 +4,7 @@ from typing import List
 
 class Vehicle(ABC):
     # TODO: replace int with road object in annotation
-    def __init__(self, _id: int, speed: float, position: List[float],
-                 acceleration: float, path: List[int], **kwargs):
+    def __init__(self, _id: int,position: List[float], **kwargs):
         """
            Parameters
            ----------
@@ -20,8 +19,40 @@ class Vehicle(ABC):
             services : list[Service]
 
         """
-        self.speed = speed
         self.position = position
-        self.acceleration = acceleration
-        self.path = path
         self.services = kwargs.get('services', [])
+        self.observers = []
+        self.x = None
+        self.y = None
+
+    def attach(self, observer):
+        self.observers.append(observer)
+
+    def detach(self, observer):
+        self.observers.remove(observer)
+
+    def notify(self):
+        for observer in self.observers:
+            observer.update(self)
+
+    def set_state(self, x, y):
+        self.x = x
+        self.y = y
+        self.notify()
+
+    @property
+    def x(self):
+        return self.x
+
+    @property
+    def y(self):
+        return self.y
+
+    @x.setter
+    def x(self,v):
+        self.x=v
+
+    @y.setter
+    def y(self, v):
+        self.y = v
+
