@@ -4,7 +4,7 @@ from typing import List
 
 class Vehicle(ABC):
     # TODO: replace int with road object in annotation
-    def __init__(self, _id,x,y ,**kwargs):
+    def __init__(self, _id: int,x,y, **kwargs):
         """
            Parameters
            ----------
@@ -21,7 +21,6 @@ class Vehicle(ABC):
         """
         #self.position = position
         self.services = kwargs.get('services', [])
-        self._id=_id
         self.outlets_serve=[]
         self.observers = []
         self.x = x
