@@ -6,6 +6,8 @@
 # Node artifact files
 node_modules/
 dist/
+venv/
+htmlcov/
 
 # Compiled Java class files
 *.class
@@ -47,4 +49,5 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
-
+.coverage
+.pytest_cache/
