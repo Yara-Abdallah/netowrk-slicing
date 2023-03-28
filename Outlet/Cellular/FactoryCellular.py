@@ -48,5 +48,6 @@ class FactoryCellular:
             object of type outlet
                will compare if the type of outlet is in the dictionary then return the object from this type."""
         if product in self.cellular_dict:
+            print("in : ",product)
             return self.cellular_dict[product]
         raise Exception(f'{product} factory not available at the moment!')
