@@ -1,8 +1,12 @@
+import numpy as np
 import traci
 import env_variables
 import xml.etree.ElementTree as ET
 import random
 from uuid import uuid4
+from Outlet.Cellular.ThreeG import ThreeG
+from Vehicle.Car import Car
+from Vehicle.VehicleOutletObserver import ConcreteObserver
 
 
 def prepare_route():
@@ -87,19 +91,31 @@ def get_position_all_vehicles(id_vehicles):
     env_variables.vehicles_id_pos = list(map(lambda id_: (id_, traci.vehicle.getPosition(id_)), id_vehicles))
 
 
+# def main():
 sumoCmd = ["sumo-gui", "-c", env_variables.network_path]
 traci.start(sumoCmd)
 
+def get_positions_of_outlets():
+    positions_of_outlets = []
+    for key in env_variables.outlets.keys():
+        positions_of_outlets.extend(list(map(lambda id_: id_[1], env_variables.outlets[key])))
+    return positions_of_outlets
 
 get_all_outlets()
+outlets_pos=get_positions_of_outlets()
 prepare_route()
 step = 0
+
 generate_vehicles(5)
+
+
 # while traci.simulation.getMinExpectedNumber() > 0:
 while step < env_variables.TIME:
     traci.simulationStep()
     get_position_all_vehicles(traci.vehicle.getIDList())
     # to make generate vehicles not growing put this condition
+    id_veh = traci.vehicle.getIDList()[0]
+    veh_position = traci.vehicle.getPosition(id_veh)
     if step % 200 == 0:
         generate_vehicles(150)
 
@@ -107,9 +123,50 @@ while step < env_variables.TIME:
         generate_vehicles(150)
         select_outlets_to_show_in_gui()
 
+    for index,i in enumerate(traci.vehicle.getIDList()):
+        veh_position=traci.vehicle.getPosition(i)
+        print("car ..... id ", index)
+        print("in time step .... ",step)
+        car1 = Car(id_veh, veh_position[0], veh_position[1])
+        observer = ConcreteObserver(outlets_pos)
+        car1.attach(observer)
+        car1.set_state(veh_position[0], veh_position[1])
     # to check output:
-    if step == 30:
-        print('the outlets {}'.format(env_variables.outlets))
-        print('the vehicles {}'.format(env_variables.vehicles_id_pos))
+    # if step == 90:
+    #     car1 = Car(id_veh, veh_position[0], veh_position[1])
+    #     observer = ConcreteObserver(outlets_pos)
+    #     car1.attach(observer)
+    #     car1.set_state(veh_position[0], veh_position[1])
+    print(step)
+
     step += 1
+
 traci.close()
+# Example usage
+
+
+
+
+
+
+
+# outlet1 = ThreeG(0, 1, [1, 1, 1], [2,2], 20, [10, 15, 22], [10, 20, 30])
+# outlet2 = ThreeG(0, 1, [1, 1, 1], [10,5], 30, [10, 15, 22], [10, 20, 30])
+# outlet3 = ThreeG(0, 1, [1, 1, 1], [4,8], 40, [10, 15, 22], [10, 20, 30])
+# outlet=[]
+# outlet.append(outlet1)
+# outlet.append(outlet2)
+# outlet.append(outlet3)
+#
+# #
+# # car1 = Car(id_veh , veh_position[0] , veh_position[1])
+# # observer = ConcreteObserver(outlets_pos)
+# # car1.attach(observer)
+# # car1.set_state(2, 3)  # This should trigger the observer to update
+# # print("outlets can serve this service ",car1.outlets_serve)
+# # car2 = Car(5, 15 , 20)
+# # car2.attach(observer)
+# # car2.set_state(15, 20)
+# # print("outlets can serve this service ",car2.outlets_serve)
+#
+# print(env_variables.outlets)

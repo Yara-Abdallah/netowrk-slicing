@@ -1,5 +1,6 @@
-network_path = 'F:\\Rachis_systems\\ns\Environment\Area\map.sumocfg'
-random_routes_path = 'F:\\Rachis_systems\\ns\Environment\Area\map.rou.xml'
+network_path = 'H:\\work_projects\\network_slicing\\ns\\Environment\\Area\\map.sumocfg'
+random_routes_path = 'H:\\work_projects\\network_slicing\\ns\\Environment\\Area\\map.rou.xml'
+
 
 types_outlets = ['3G', '4G', '5G', 'SAT', 'wifi', 'UAV']
 
@@ -22,4 +23,4 @@ default_types_vehicles = [
 
 # position_of_oultets = []
 vehicles_id_pos = []
-TIME = 2000
+TIME = 100
