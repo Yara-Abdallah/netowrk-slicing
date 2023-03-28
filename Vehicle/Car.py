@@ -2,6 +2,10 @@ from Vehicle.IVehicle import Vehicle
 
 
 class Car(Vehicle):
+
+    def get_id(self):
+        return self.id
+
     def attach(self, observer):
         self.observers.append(observer)
 
@@ -16,7 +20,3 @@ class Car(Vehicle):
         self.x = x
         self.y = y
         self.notify()
-
-
-
-
