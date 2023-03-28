@@ -40,7 +40,7 @@ class FactoryCellular:
                               '4G': self.four_gen,
                               '5G': self.five_gen,
                               'Sub6G': self.sub_six,
-                              'Wifi': self.wifi}
+                              'wifi': self.wifi}
 
     def produce_cellular_outlet(self, product):
         """Returns
