@@ -26,7 +26,7 @@ class Outlet(ABC):
         self._distinct = self.__class__.__id
         self.position = position
         self.radius = radius
-        self.power = power
+        self.power = power # bit rate
         self.requests_allocated_power=requests_allocated_power
         self._power_distinct = []
         self.request_buffer = []
