@@ -1,4 +1,3 @@
-# import numpy as np
 import traci
 from Environment import env_variables
 import xml.etree.ElementTree as ET
@@ -46,32 +45,20 @@ class Environment:
                 self.route.add(id_, edges_)
                 env_variables.all_routes.append(id_)
 
-    def generate_vehicles(self,number_vehicles):
-        """
-        It generates vehicles and adds it to the simulation
-        and get random route for each vehicle from routes in env_variables.py
-        :param number_vehicles: number of vehicles to be generated
-        """
-        for i in range(number_vehicles):
-            id_route_ = random.choice(env_variables.all_routes)
-            uid = str(uuid4())
-            # veh = Car(id_=uid, route_=id_route_)
-            # env_variables.vehicles.append(veh)
-            self.vehicle.add(vehID='Veh' + uid, routeID=id_route_)
-
     def get_all_outlets(self):
         """
         get all outlets and add id with position to env variables
         """
-        outlets=[]
+        outlets = []
         poi_ids = traci.poi.getIDList()
         for id_ in poi_ids:
             type_poi = traci.poi.getType(id_)
             if type_poi in env_variables.types_outlets:
                 position_ = traci.poi.getPosition(id_)
                 env_variables.outlets[type_poi].append((id_, position_))
-                factory = FactoryCellular(1,1,[1,1,0],[position_[0],position_[1]],10000,[10,20,30],[10,10,10])
-                outlet=factory.produce_cellular_outlet(str(type_poi))
+                factory = FactoryCellular(1, 1, [1, 1, 0], [position_[0], position_[1]], 10000, [10, 20, 30],
+                                          [10, 10, 10])
+                outlet = factory.produce_cellular_outlet(str(type_poi))
                 outlets.append(outlet)
         return outlets
 
@@ -90,35 +77,47 @@ class Environment:
             positions_of_outlets.append(out.position)
         return positions_of_outlets
 
-    def get_position_all_vehicles(self, id_vehicles):
-        """
-        get ids and positions of vehicles which running in simulation and add they to env variables
-        :param id_vehicles: list of ids vehicles
-        :return:
-        """
-        env_variables.vehicles_id_pos = list(map(lambda id_: (id_, traci.vehicle.getPosition(id_)), id_vehicles))
-
     def get_positions_of_outlets(self):
         positions_of_outlets = []
         for key in env_variables.outlets.keys():
             positions_of_outlets.extend(list(map(lambda id_: id_[1], env_variables.outlets[key])))
         return positions_of_outlets
+
+    def generate_vehicles(self, number_vehicles):
+        """
+        It generates vehicles and adds it to the simulation
+        and get random route for each vehicle from routes in env_variables.py
+        :param number_vehicles: number of vehicles to be generated
+        """
+        for i in range(number_vehicles):
+            id_route_ = random.choice(env_variables.all_routes)
+            uid = str(uuid4())
+            self.vehicle.add(vehID=uid, routeID=id_route_)
+
     def starting(self):
         """
         The function starts the simulation by calling the sumoBinary, which is the sumo-gui or sumo
         depending on the nogui option
         """
-        sumoCmd = ["sumo-gui", "-c", env_variables.network_path]
-        traci.start(sumoCmd)
+        sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
+        traci.start(sumo_cmd)
         self.get_all_outlets()
         self.prepare_route()
 
-    def get_current_vehicles(self):
-        def veh_isruning(veh):
-            return True if veh.get_id() in self.vehicle.getIDList() else False
+    def set_current_vehicles(self):
+        ids_vehicles = self.vehicle.getIDList()
+        if not env_variables.vehicles:
+            env_variables.vehicles = list(map(lambda veh: Car(veh), ids_vehicles))
 
-        current_vehs = list(map(lambda veh: veh, filter(lambda veh: veh_isruning(veh) , env_variables.vehicles)))
-        env_variables.vehicles = current_vehs
+        else:
+            def veh_is_running(veh):
+                return True if veh.get_id() in self.vehicle.getIDList() else False
+
+            # current_vehs = list(map(lambda veh: veh, filter(lambda veh: veh_isruning(veh), env_variables.vehicles)))
+            current_vehs = list(filter(lambda veh: veh_is_running(veh), env_variables.vehicles))
+            print("the count of veh", len(current_vehs))
+
+            env_variables.vehicles = current_vehs
         return env_variables.vehicles
 
     def run(self):
@@ -126,40 +125,31 @@ class Environment:
         step = 0
         outlets_pos = self.get_positions_of_outlets()
         observer = ConcreteObserver(outlets_pos)
-        # self.generate_vehicles(5)
         while step < env_variables.TIME:
             traci.simulationStep()
+            self.set_current_vehicles()
+            print('the vehicles in sumo: {}'.format(traci.vehicle.getIDCount()))
+            print('the vehicles in env: {}'.format(len(env_variables.vehicles)))
+            print('the arrived in env: {}'.format(len(traci.simulation.getArrivedIDList())))
+            print('the loaded in env: {}'.format(len(traci.simulation.getLoadedIDList())))
+            print('the loaded in env: {}'.format(len(traci.simulation.getLoadedIDList())))
 
-            # id_veh = traci.vehicle.getIDList()[0]
-            if step % 200 == 0:
-                self.generate_vehicles(150)
-                print(self.vehicle.getIDCount())
-                print(len(self.get_current_vehicles()))
+            # if step % 200 == 0:
+            #     self.generate_vehicles(150)
+            #     print(self.vehicle.getIDCount())
+            #     print(len(self.get_current_vehicles()))
 
             if step == 0:
                 self.generate_vehicles(150)
                 self.select_outlets_to_show_in_gui()
 
-            for index, i in enumerate(traci.vehicle.getIDList()):
-                veh_position = traci.vehicle.getPosition(i)
-                print("car ..... id ", index)
-                # print("in time step .... ", step)
-                car1 = Car(index, veh_position[0], veh_position[1])
-                car1.attach(observer)
-                car1.set_state(veh_position[0], veh_position[1])
+            # for index, i in enumerate(traci.vehicle.getIDList()):
+            #     veh_position = traci.vehicle.getPosition(i)
+            #     print("car ..... id ", index)
+            #     # print("in time step .... ", step)
+            #     car1 = Car(index, veh_position[0], veh_position[1])
+            #     car1.attach(observer)
+            #     car1.set_state(veh_position[0], veh_position[1])
             step += 1
 
         traci.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
