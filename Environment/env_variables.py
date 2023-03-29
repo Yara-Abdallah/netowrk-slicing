@@ -1,5 +1,10 @@
-network_path = 'H:\\work_projects\\network_slicing\\ns\\Environment\\Area\\map.sumocfg'
-random_routes_path = 'H:\\work_projects\\network_slicing\\ns\\Environment\\Area\\map.rou.xml'
+import os
+# Get the current working directory
+current_dir = os.getcwd()
+
+
+network_path = current_dir+'\\Environment\\Area\\map.sumocfg'
+random_routes_path = current_dir+'\\Environment\\Area\\map.rou.xml'
 
 types_outlets = ['3G', '4G', '5G', 'Wifi']
 
@@ -20,6 +25,5 @@ default_types_vehicles = [
     'DEFAULT_TAXITYPE',
     'DEFAULT_VEHTYPE']
 
-# position_of_oultets = []
-vehicles_id_pos = []
-TIME = 100
+vehicles = []
+TIME = 200
