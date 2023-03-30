@@ -65,7 +65,7 @@ band = Bandwidth(2, 3)
 cost_ = Cost(band, 3)
 cost_.cost_setter(9)
 
-property_name = Cost.cost.fget
-property_name = property_name.__wrapped__.__name__
-value = cost_.cost
-print('property_name: ', property_name)
+# property_name = Cost.cost.fget
+# property_name = property_name.__wrapped__.__name__
+# value = cost_.cost
+# print('property_name: ', property_name)

@@ -1,6 +1,6 @@
 from Service.Entertainment.Entertainment import FactoryEntertainment
 from Service.Safety.safety import FactorySafety
-from Service.Telecomm.telecomm import FactoryTelecomm
+from Service.Autonomous.autonomous import FactoryAutonomous
 
 
 # noinspection PyAbstractClass
@@ -13,10 +13,10 @@ class FactoryService:
 
         self.entertainment = FactoryEntertainment(*args)
         self.safety = FactorySafety(*args)
-        self.telecom = FactoryTelecomm(*args)
-        self.var = {"entertainment": self.entertainment,
-                    "safety": self.safety,
-                    "telecom": self.telecom}
+        self.telecom = FactoryAutonomous(*args)
+        self.var = {"ENTERTAINMENT": self.entertainment,
+                    "SAFETY": self.safety,
+                    "AUTONOMOUS": self.telecom}
 
     def produce_services(self, product):
         if product in self.var.keys():

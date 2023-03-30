@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 
 class Service(ABC):
 
-    def __init__(self, frequency: float, spectrum: float, data_rate: float, energy_consumption: float,
-                 transition_delay: float,power_factor:[float], **kwargs):
+    def __init__(self, criticality, bandwidth, realtime, **kwargs):
         """
             Parameters
             ----------
@@ -22,13 +21,12 @@ class Service(ABC):
                 The communications that supported the service if not initialized set to empty array to be appended at runtime
 
             """
-        self.frequency = frequency
-        self.spectrum = spectrum
-        self.data_rate = data_rate
-        self.energy_consumption = energy_consumption
-        self.transition_delay = transition_delay
-        self.communication = kwargs.get('communications', [])
-        self.power_factor = power_factor
+        self.bandwidth = bandwidth
+        self.criticality = criticality
+        self.realtime = realtime
+    def __str__(self):
+        return f"service criticality : {self.criticality} ,  service bandwidth : {self.bandwidth} , " \
+               f"service real time : {self.realtime}"
 
     @abstractmethod
     def calculate_arrival_rate(self):
