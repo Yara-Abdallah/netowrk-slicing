@@ -4,7 +4,7 @@ from Utils.Bandwidth import Bandwidth
 from dotenv import load_dotenv
 import os
 from Utils import config as cf
-from Utils.Logging import log_method
+from Utils.FileLogging import log_method
 
 load_dotenv()
 
