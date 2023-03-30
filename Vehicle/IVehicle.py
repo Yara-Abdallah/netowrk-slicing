@@ -24,11 +24,12 @@ class Vehicle(ABC):
         """
 
         self.id = id_
-        self.services = kwargs.get('services', [])
+        self.services = []
         self.outlets_serve = []
         self.observers = []
         self.x = 0
         self.y = 0
+
 
     def check_position(self):
         position = env_variables.get_position_vehicle(self.id)

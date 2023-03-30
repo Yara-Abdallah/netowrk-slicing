@@ -1,7 +1,7 @@
 from Service.IService import Service
 
 
-class FactoryTelecomm(Service):
+class FactoryAutonomous(Service):
 
     def calculate_arrival_rate(self):
         # TODO: add doc string
