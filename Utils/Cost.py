@@ -4,7 +4,7 @@ from Utils.Bandwidth import Bandwidth
 from dotenv import load_dotenv
 import os
 from Utils import config as cf
-from Utils.Log_ing import log_method
+from Utils.Logging import log_method
 
 load_dotenv()
 
@@ -14,10 +14,10 @@ class Cost:
         self.realtime = realtime
         self.bit_rate = bandwidth.allocated
         self._cost: float = 0.0
-        #self.logger = logger
+        # self.logger = logger
 
-    @log_method
     @property
+    @log_method
     def cost(self):
         return self._cost
 
@@ -42,7 +42,7 @@ class RequestCost(Cost):
     @property
     def cost(self):
         cost = self._cost * float(os.getenv('MB_COST'))
-        #self.logger.log(f"RequestCost: {cost}")
+        # self.logger.log(f"RequestCost: {cost}")
         return cost
 
     def __str__(self):
@@ -55,20 +55,17 @@ class TowerCost(Cost):
     @log_method
     def cost(self):
         cost = self._cost * float(os.getenv('KW_COST'))
-        #self.logger.log(f"Tower Cost: {cost}")
         return cost
 
     def __str__(self):
         return f'Request Fee: {self.cost}'
 
 
-
-# log = Logger('cost.log',logger.INFO)
-band=Bandwidth(2,3)
-cost_=Cost(band,3)
+band = Bandwidth(2, 3)
+cost_ = Cost(band, 3)
 cost_.cost_setter(9)
-# value = getattr(Cost, '_cost')
-# print(value)
-property_name = Cost.cost.__name__
+
+property_name = Cost.cost.fget
+property_name = property_name.__wrapped__.__name__
 value = cost_.cost
-print(property_name)
+print('property_name: ', property_name)
