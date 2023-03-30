@@ -1,3 +1,9 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 class Bandwidth:
     def __init__(self, bandwidth_demand: int, criticality: int) -> None:
         self.bandwidth_demand = bandwidth_demand

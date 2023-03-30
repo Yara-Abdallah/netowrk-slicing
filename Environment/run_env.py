@@ -136,14 +136,21 @@ class Environment:
         step = 0
         outlets_pos = self.get_positions_of_outlets()
         observer = ConcreteObserver(outlets_pos)
+
+        # car = Car(1)
+        # observer = ConcreteObserver([[10, 10], [0, 1]])
+        # car.attach(observer)
+        # car.set_state(1, 1)
+        # car.send_request()
         while step < env_variables.TIME:
             traci.simulationStep()
             self.get_current_vehicles()
-            print('============================================================')
-            print('the vehicles in sumo: {}'.format(traci.vehicle.getIDCount()))
-            print('the vehicles in env: {}'.format(len(env_variables.vehicles)))
-            print('the arrived in env: {}'.format(len(traci.simulation.getArrivedIDList())))
-            print('the derpated in env: {}'.format(len(traci.simulation.getDepartedIDList())))
+
+            # print('============================================================')
+            # print('the vehicles in sumo: {}'.format(traci.vehicle.getIDCount()))
+            # print('the vehicles in env: {}'.format(len(env_variables.vehicles)))
+            # print('the arrived in env: {}'.format(len(traci.simulation.getArrivedIDList())))
+            # print('the derpated in env: {}'.format(len(traci.simulation.getDepartedIDList())))
 
             # if step % 200 == 0:
             #     self.generate_vehicles(150)
@@ -155,7 +162,11 @@ class Environment:
                 self.select_outlets_to_show_in_gui()
 
             def print_position(car):
-                pass
+
+                car.attach(observer)
+                car.set_state(car.get_x(), car.get_y())
+                car.send_request()
+
                 # print("{} position ( {} ,{} )".format(car.get_id(), car.get_x(), car.get_y()))
 
             list(map(lambda veh: print_position(veh), env_variables.vehicles.values()))

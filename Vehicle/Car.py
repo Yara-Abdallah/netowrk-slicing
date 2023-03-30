@@ -1,5 +1,7 @@
 import random
+import math
 
+from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Service.FactoryService import FactoryService
 from Vehicle.IVehicle import Vehicle
 from Utils.config import SERVICES_TYPES
@@ -20,14 +22,14 @@ class Car(Vehicle):
         types = ["ENTERTAINMENT", "SAFETY", "AUTONOMOUS"]
 
 
-        for i in range(10):
-            type_ = random.choice(types)
-            factory = FactoryService(SERVICES_TYPES[type_]["REALTIME"],
-                                     SERVICES_TYPES[type_]["BANDWIDTH"],
-                                     SERVICES_TYPES[type_]["CRITICAL"])
-            self.services.append(factory.produce_services(type_))
+        # for i in range(10):
+        type_ = random.choice(types)
+        factory = FactoryService(SERVICES_TYPES[type_]["REALTIME"],
+                                 SERVICES_TYPES[type_]["BANDWIDTH"],
+                                 SERVICES_TYPES[type_]["CRITICAL"])
+        self.services.append(factory.produce_services(type_))
         for id,serv in enumerate(self.services) :
-            service_mapping_car.append([self.__class__,serv])
+            service_mapping_car.append([self.get_id(),serv])
         return service_mapping_car
 
     # def send_request(self):
@@ -51,10 +53,22 @@ class Car(Vehicle):
         self.y = y
         self.notify()
 
+    def greedy(self):
+        distance=[]
+        for i,outlet in enumerate(self.outlets_serve):
+            distance.append(math.sqrt((outlet.position[0] - self.x) ** 2 + (outlet.position[1] - self.y) ** 2))
+        return self.outlets_serve[distance.index(min(distance))]
 
-car = Car(1)
-observer = ConcreteObserver([[10, 10], [0, 1]])
-car.attach(observer)
-car.set_state(1, 1)
-print(car.car_requests())
+    def send_request(self):
+        outlet = self.greedy()
+        outlet.services=[]
+        outlet.services.append(self.car_requests())
+        print(".... \n",outlet.services)
+
+
+# car = Car(1)
+# observer = ConcreteObserver([[10, 10], [0, 1]])
+# car.attach(observer)
+# car.set_state(1, 1)
+# car.send_request()
 #print(car.send_request())
