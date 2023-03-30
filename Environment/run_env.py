@@ -16,6 +16,7 @@ class Environment:
         self.vehicle = traci.vehicle
         self.poi = traci.poi
         self.gui = traci.gui
+        self.simulation = traci.simulation
 
     def get_polygons(self):
         all_polygon_ = self.polygon.getIDList()
@@ -104,20 +105,30 @@ class Environment:
         self.get_all_outlets()
         self.prepare_route()
 
-    def set_current_vehicles(self):
-        ids_vehicles = self.vehicle.getIDList()
-        if not env_variables.vehicles:
-            env_variables.vehicles = list(map(lambda veh: Car(veh), ids_vehicles))
+    def remove_vehicles_arrived(self):
+        """
+        Remove vehicles which removed from the road network ((have reached their destination) in this time step
+        the add to env_variables.vehicles (dictionary)
+        """
+        ids_arrived = self.simulation.getArrivedIDList()
+        for id_ in ids_arrived:
+            del env_variables.vehicles[id_]
 
-        else:
-            def veh_is_running(veh):
-                return True if veh.get_id() in self.vehicle.getIDList() else False
+    def add_new_vehicles(self):
+        """
+        Add vehicles which inserted into the road network in this time step.
+        the add to env_variables.vehicles (dictionary)
+        """
+        ids_new_vehicles = self.simulation.getDepartedIDList()
+        for id_ in ids_new_vehicles:
+            env_variables.vehicles[id_] = Car(id_)
 
-            # current_vehs = list(map(lambda veh: veh, filter(lambda veh: veh_isruning(veh), env_variables.vehicles)))
-            current_vehs = list(filter(lambda veh: veh_is_running(veh), env_variables.vehicles))
-            print("the count of veh", len(current_vehs))
-
-            env_variables.vehicles = current_vehs
+    def get_current_vehicles(self):
+        """
+        :return: vehicles that running in road network in this time step
+        """
+        self.remove_vehicles_arrived()
+        self.add_new_vehicles()
         return env_variables.vehicles
 
     def run(self):
@@ -127,12 +138,12 @@ class Environment:
         observer = ConcreteObserver(outlets_pos)
         while step < env_variables.TIME:
             traci.simulationStep()
-            self.set_current_vehicles()
+            self.get_current_vehicles()
+            print('============================================================')
             print('the vehicles in sumo: {}'.format(traci.vehicle.getIDCount()))
             print('the vehicles in env: {}'.format(len(env_variables.vehicles)))
             print('the arrived in env: {}'.format(len(traci.simulation.getArrivedIDList())))
-            print('the loaded in env: {}'.format(len(traci.simulation.getLoadedIDList())))
-            print('the loaded in env: {}'.format(len(traci.simulation.getLoadedIDList())))
+            print('the derpated in env: {}'.format(len(traci.simulation.getDepartedIDList())))
 
             # if step % 200 == 0:
             #     self.generate_vehicles(150)
@@ -143,6 +154,13 @@ class Environment:
                 self.generate_vehicles(150)
                 self.select_outlets_to_show_in_gui()
 
+            def print_position(car):
+                pass
+                # print("{} position ( {} ,{} )".format(car.get_id(), car.get_x(), car.get_y()))
+
+            list(map(lambda veh: print_position(veh), env_variables.vehicles.values()))
+            # for car in env_variables.vehicles.values():
+            #     print("{} position ( {} ,{} )".format(car.get_id(),car.get_x(),car.get_y()))
             # for index, i in enumerate(traci.vehicle.getIDList()):
             #     veh_position = traci.vehicle.getPosition(i)
             #     print("car ..... id ", index)
