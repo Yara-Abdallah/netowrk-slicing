@@ -6,6 +6,8 @@ from typing import List, Dict
 from Vehicle.IVehicle import Vehicle
 from Service.IService import Service
 from Outlet.IOutlet import Outlet
+
+
 class SingletonMeta(type):
     """
     Metaclass that ensures only one instance of a class is created.
@@ -46,6 +48,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
             )
         else:
             self._power_costs.extend(value)
+
 
 ccc = PerformanceLogger()
 ccc.power_costs.append(0)

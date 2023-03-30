@@ -7,7 +7,7 @@ import traci
 
 class Vehicle(ABC):
     # TODO: replace int with road object in annotation
-    def __init__(self, id_, **kwargs):
+    def __init__(self, id_,x,y, **kwargs):
         """
         Parameters
         ----------
@@ -27,8 +27,8 @@ class Vehicle(ABC):
         self.services = []
         self.outlets_serve = []
         self.observers = []
-        self.x = 0
-        self.y = 0
+        self.x = x
+        self.y = y
 
 
     def check_position(self):

@@ -53,9 +53,9 @@ class Car(Vehicle):
         self.notify()
 
 
-car = Car(1)
-observer = ConcreteObserver([[10, 10], [0, 1]])
-car.attach(observer)
-car.set_state(1, 1)
-print(car.car_requests())
-# print(car.send_request())
+# car = Car(1)
+# observer = ConcreteObserver([[10, 10], [0, 1]])
+# car.attach(observer)
+# car.set_state(1, 1)
+# print(car.car_requests())
+# # print(car.send_request())
