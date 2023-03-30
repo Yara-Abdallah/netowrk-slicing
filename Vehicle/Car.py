@@ -11,14 +11,14 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 
 
 class Car(Vehicle):
-
     def __str__(self):
-        return f"car id : {self.id}  ,  outlets list which can serve the requests from this vehicle " \
-               f": {self.outlets_serve}  , the requestes sent by this vehicle : {self.car_requests()} "
+        return (
+            f"car id : {self.id}  ,  outlets list which can serve the requests from this vehicle "
+            f": {self.outlets_serve}  , the requestes sent by this vehicle : {self.car_requests()} "
+        )
 
     def car_requests(self):
-
-        service_mapping_car=[]
+        service_mapping_car = []
         types = ["ENTERTAINMENT", "SAFETY", "AUTONOMOUS"]
 
 
