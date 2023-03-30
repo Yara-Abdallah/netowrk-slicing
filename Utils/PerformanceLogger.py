@@ -3,16 +3,27 @@ import warnings
 from dataclasses import dataclass, field
 from typing import List, Dict
 
-from Outlet.IOutlet import Outlet
+from Vehicle.IVehicle import Vehicle
 from Service.IService import Service
-from Vehicle.Car import Car
+from Outlet.IOutlet import Outlet
+class SingletonMeta(type):
+    """
+    Metaclass that ensures only one instance of a class is created.
+    """
+
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 
 @dataclass
-class PerformanceLogger:
-    service_requested: Dict[Car, Service] = field(default_factory=dict)
-    services_requested: List[Dict[Car, Service]] = field(default_factory=list)
-    services_handled: Dict[Outlet, Dict[Car, Service]] = field(default_factory=dict)
+class PerformanceLogger(metaclass=SingletonMeta):
+    service_requested: Dict[Vehicle, Service] = field(default_factory=dict)
+    services_requested: List[Dict[Vehicle, Service]] = field(default_factory=list)
+    services_handled: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
     request_costs: List[int] = field(default_factory=list)
     _power_costs: List[float] = field(default_factory=list)
     served_ratio: List[float] = field(default_factory=list)
@@ -36,7 +47,9 @@ class PerformanceLogger:
         else:
             self._power_costs.extend(value)
 
-
-
-
-
+ccc = PerformanceLogger()
+ccc.power_costs.append(0)
+print(ccc.power_costs)
+ggg = PerformanceLogger()
+ggg.power_costs.append(0)
+print(ggg.power_costs)

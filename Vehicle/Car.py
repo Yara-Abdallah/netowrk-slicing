@@ -9,25 +9,26 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 
 
 class Car(Vehicle):
-
     def __str__(self):
-        return f"car id : {self.id}  ,  outlets list which can serve the requests from this vehicle " \
-               f": {self.outlets_serve}  , the requestes sent by this vehicle : {self.car_requests()} "
+        return (
+            f"car id : {self.id}  ,  outlets list which can serve the requests from this vehicle "
+            f": {self.outlets_serve}  , the requestes sent by this vehicle : {self.car_requests()} "
+        )
 
     def car_requests(self):
-
-        service_mapping_car=[]
+        service_mapping_car = []
         types = ["ENTERTAINMENT", "SAFETY", "AUTONOMOUS"]
-
 
         for i in range(10):
             type_ = random.choice(types)
-            factory = FactoryService(SERVICES_TYPES[type_]["REALTIME"],
-                                     SERVICES_TYPES[type_]["BANDWIDTH"],
-                                     SERVICES_TYPES[type_]["CRITICAL"])
+            factory = FactoryService(
+                SERVICES_TYPES[type_]["REALTIME"],
+                SERVICES_TYPES[type_]["BANDWIDTH"],
+                SERVICES_TYPES[type_]["CRITICAL"],
+            )
             self.services.append(factory.produce_services(type_))
-        for id,serv in enumerate(self.services) :
-            service_mapping_car.append([self.__class__,serv])
+        for id, serv in enumerate(self.services):
+            service_mapping_car.append([self.__class__, serv])
         return service_mapping_car
 
     # def send_request(self):
@@ -57,4 +58,4 @@ observer = ConcreteObserver([[10, 10], [0, 1]])
 car.attach(observer)
 car.set_state(1, 1)
 print(car.car_requests())
-#print(car.send_request())
+# print(car.send_request())
