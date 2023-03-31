@@ -61,10 +61,10 @@ class TowerCost(Cost):
         return f'Request Fee: {self.cost}'
 
 
-band = Bandwidth(2, 3)
-cost_ = Cost(band, 3)
-cost_.cost_setter(9)
-
+# band = Bandwidth(2, 3)
+# tow=TowerCost(band, 3)
+# tow.cost_setter(9)
+# print(tow.cost)
 # property_name = Cost.cost.fget
 # property_name = property_name.__wrapped__.__name__
 # value = cost_.cost

@@ -31,7 +31,7 @@ class Cellular(Outlet):
         self.agent = agent
         self.coms = coms
         self.supported_services = supported_services
-        self.services = kwargs.get('services_list', [])
+        self.services = []
         self.vehicles = kwargs.get('vehicles_list', [])
         self._supported_services_distinct = []
 
