@@ -4,9 +4,13 @@ import xml.etree.ElementTree as ET
 import random
 from uuid import uuid4
 from Outlet.Cellular.ThreeG import ThreeG
+from Utils.Bandwidth import Bandwidth
+from Utils.Cost import TowerCost, RequestCost
+from Utils.PerformanceLogger import PerformanceLogger
 from Vehicle.Car import Car
 from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Vehicle.VehicleOutletObserver import ConcreteObserver
+from Utils.FileLoggingInfo import Logger
 
 
 class Environment:
@@ -76,13 +80,7 @@ class Environment:
         outlets = self.get_all_outlets()
         for out in outlets:
             positions_of_outlets.append(out.position)
-        return positions_of_outlets
-
-    def get_positions_of_outlets(self):
-        positions_of_outlets = []
-        for key in env_variables.outlets.keys():
-            positions_of_outlets.extend(list(map(lambda id_: id_[1], env_variables.outlets[key])))
-        return positions_of_outlets
+        return positions_of_outlets, outlets
 
     def generate_vehicles(self, number_vehicles):
         """
@@ -121,7 +119,23 @@ class Environment:
         """
         ids_new_vehicles = self.simulation.getDepartedIDList()
         for id_ in ids_new_vehicles:
-            env_variables.vehicles[id_] = Car(id_)
+            env_variables.vehicles[id_] = Car(id_, 0, 0)
+
+    def outlets_logging(self, outlet_num, outlet ,cars):
+        return f"Outlet {outlet_num} : -> {outlet}   -  Number Of Cars Which Send Request To It -> {len(cars)} \n "
+
+    def car_services_logging(self, car_num, car, service):
+        return f"  The Car {car_num} Which Send To It -> : {car} \n" \
+               f"     And Its Services Is  ->  : {service} \n"
+
+    def logging_the_final_results(self, performance_logger):
+        service_handled = performance_logger.service_handled
+        for i, outer_key in enumerate(service_handled):
+            num = 0
+            print(self.outlets_logging(i, outer_key,service_handled[outer_key]))
+            for key, value in performance_logger.service_handled[outer_key].items():
+                num += 1
+                print(self.car_services_logging(num, key, value))
 
     def get_current_vehicles(self):
         """
@@ -131,19 +145,38 @@ class Environment:
         self.add_new_vehicles()
         return env_variables.vehicles
 
+    def car_interact(self, car, observer, performance_logger):
+        car.attach(observer)
+        car.set_state(car.get_x(), car.get_y())
+        info = car.send_request()
+        car = info[1][1]
+        service = info[1][2]
+        outlet = info[0]
+        performance_logger.service_requested = {car: service}
+        performance_logger.set_service_handled(outlet, car, service)
+        request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
+        request_cost = RequestCost(request_bandwidth, service.realtime)
+        request_cost.cost_setter(service.realtime)
+        print(f"request cost from car {car.get_id()} : ->  {request_cost._cost} \n ")
+        performance_logger.power_costs.append(request_cost.cost)
+
+        # print(f"performance logger service_requested >>>>>>>>>>> : {len(performance_logger.service_requested)} \n ")
+        # print(f"performance logger services_handled  >>>>>>>>>>> : {((performance_logger.service_handled[outlet]))} \n ")
+
     def run(self):
+
         self.starting()
         step = 0
-        outlets_pos = self.get_positions_of_outlets()
-        observer = ConcreteObserver(outlets_pos)
+        print("\n")
 
-        # car = Car(1)
-        # observer = ConcreteObserver([[10, 10], [0, 1]])
-        # car.attach(observer)
-        # car.set_state(1, 1)
-        # car.send_request()
+        outlets_pos, outlets = self.get_positions_of_outlets()
+        observer = ConcreteObserver(outlets_pos, outlets)
+        performance_logger = PerformanceLogger()
+        logger = Logger()
+
         while step < env_variables.TIME:
             traci.simulationStep()
+            print("step is ....................................... ", step)
             self.get_current_vehicles()
 
             # print('============================================================')
@@ -152,33 +185,16 @@ class Environment:
             # print('the arrived in env: {}'.format(len(traci.simulation.getArrivedIDList())))
             # print('the derpated in env: {}'.format(len(traci.simulation.getDepartedIDList())))
 
-            # if step % 200 == 0:
-            #     self.generate_vehicles(150)
-            #     print(self.vehicle.getIDCount())
-            #     print(len(self.get_current_vehicles()))
-
             if step == 0:
                 self.generate_vehicles(150)
                 self.select_outlets_to_show_in_gui()
 
-            def print_position(car):
+            list(map(lambda veh: self.car_interact(veh, observer, performance_logger), env_variables.vehicles.values()))
 
-                car.attach(observer)
-                car.set_state(car.get_x(), car.get_y())
-                car.send_request()
-
-                # print("{} position ( {} ,{} )".format(car.get_id(), car.get_x(), car.get_y()))
-
-            list(map(lambda veh: print_position(veh), env_variables.vehicles.values()))
-            # for car in env_variables.vehicles.values():
-            #     print("{} position ( {} ,{} )".format(car.get_id(),car.get_x(),car.get_y()))
-            # for index, i in enumerate(traci.vehicle.getIDList()):
-            #     veh_position = traci.vehicle.getPosition(i)
-            #     print("car ..... id ", index)
-            #     # print("in time step .... ", step)
-            #     car1 = Car(index, veh_position[0], veh_position[1])
-            #     car1.attach(observer)
-            #     car1.set_state(veh_position[0], veh_position[1])
             step += 1
+            if step == 10:
+                print("........... ", len(performance_logger.power_costs))
+                self.logging_the_final_results(performance_logger)
+                break
 
         traci.close()
