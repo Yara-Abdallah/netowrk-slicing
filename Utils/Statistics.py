@@ -7,23 +7,23 @@ class Statistics:
 
     @staticmethod
     def mean(data):
-        return np.mean(data,axis=0)
+        return np.mean(data, axis=0)
 
     @staticmethod
     def std(data):
-        return np.std(data,axis=0)
+        return np.std(data, axis=0)
 
     @staticmethod
     def percentile(data, p):
-        return np.percentile(data, p ,axis=0)
+        return np.percentile(data, p, axis=0)
 
     @staticmethod
     def min(data):
-        return np.min(data,axis=0)
+        return np.min(data, axis=0)
 
     @staticmethod
     def max(data):
-        return np.max(data,axis=0)
+        return np.max(data, axis=0)
 
     @staticmethod
     def range(data):

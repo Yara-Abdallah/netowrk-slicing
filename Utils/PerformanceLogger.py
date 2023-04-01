@@ -76,15 +76,3 @@ class PerformanceLogger(metaclass=SingletonMeta):
         else:
             self._power_costs.extend(value)
 
-# car = Car(1, 0, 0)
-# serv = FactoryEntertainment(1, 2, 3)
-# factory = FactoryCellular(1, 1, [1, 1, 0], [0,1], 10000, [10, 20, 30],
-#                                           [10, 10, 10])
-# outlet = factory.produce_cellular_outlet('5G')
-# ccc = PerformanceLogger()
-# ccc.power_costs.append(0)
-#
-# ccc.service_requested = {car: serv}
-# ccc.services_handled = [outlet,car ,serv]
-# print(ccc.service_requested)
-# print(ccc.services_handled)
