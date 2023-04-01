@@ -10,7 +10,7 @@ from Utils.PerformanceLogger import PerformanceLogger
 from Vehicle.Car import Car
 from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Vehicle.VehicleOutletObserver import ConcreteObserver
-from Utils.FileLoggingInfo import Logger
+#from Utils.FileLoggingInfo import Logger
 
 
 class Environment:
@@ -156,9 +156,10 @@ class Environment:
         performance_logger.set_service_handled(outlet, car, service)
         request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
         request_cost = RequestCost(request_bandwidth, service.realtime)
-        request_cost.cost_setter(service.realtime)
-        print(f"request cost from car {car.get_id()} : ->  {request_cost._cost} \n ")
-        performance_logger.power_costs.append(request_cost.cost)
+        #request_cost.cost_setter(service.realtime)
+        cost = request_cost.cost
+        print(f"request cost from car {car.get_id()} : ->  {cost} \n ")
+        performance_logger.power_costs.append(cost)
 
         # print(f"performance logger service_requested >>>>>>>>>>> : {len(performance_logger.service_requested)} \n ")
         # print(f"performance logger services_handled  >>>>>>>>>>> : {((performance_logger.service_handled[outlet]))} \n ")
@@ -172,7 +173,7 @@ class Environment:
         outlets_pos, outlets = self.get_positions_of_outlets()
         observer = ConcreteObserver(outlets_pos, outlets)
         performance_logger = PerformanceLogger()
-        logger = Logger()
+
 
         while step < env_variables.TIME:
             traci.simulationStep()
