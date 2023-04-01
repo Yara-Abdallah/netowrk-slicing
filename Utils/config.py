@@ -1,6 +1,6 @@
 import numpy as np
 
-from Outlet.Cellular.FactoryCellular import FactoryCellular
+# from Outlet.Cellular.FactoryCellular import FactoryCellular
 
 SERVICES_TYPES = {
 
@@ -74,18 +74,18 @@ def calculate_max_power(
 ):
     spectral_efficiency = modulation_order * coding_rate  # bits/symbol
 
-    capacity_per_antenna = (
-                                   channel_bandwidth
-                                   * 1e6
-                                   * spectral_efficiency
-                                   * average_symbol_per_slot
-                                   * num_slots_per_frame
-                                   * num_frames_per_second
-                           ) / 1e6  # Mbps
-    total_capacity = capacity_per_antenna * num_antennas
-    real_total_capacity = total_capacity // 8 / 10
-    print(f"capacity is: {real_total_capacity} MBps")
-    return real_total_capacity
+    # capacity_per_antenna = (
+    #                                channel_bandwidth
+    #                                * 1e6
+    #                                * spectral_efficiency
+    #                                * average_symbol_per_slot
+    #                                * num_slots_per_frame
+    #                                * num_frames_per_second
+    #                        ) / 1e6  # Mbps
+    # total_capacity = capacity_per_antenna * num_antennas
+    # real_total_capacity = total_capacity // 8 / 10
+    # print(f"capacity is: {real_total_capacity} MBps")
+    # return real_total_capacity
 
 
 def relation_between_criticality_and_bandwidth(criticality, total_bandwidth):
@@ -95,10 +95,6 @@ def relation_between_criticality_and_bandwidth(criticality, total_bandwidth):
     total_bandwidth = total_bandwidth + change_in_bandwidth
     print(f"new bandwidth (capacity) is : {total_bandwidth} MBps")
     return total_bandwidth
-
-
-
-
 
 
 real_total_capacity = calculate_max_power(
@@ -111,15 +107,13 @@ real_total_capacity = calculate_max_power(
     outlet["NUM_FRAMES_PER_SECOND"],
 )
 
-relation_between_criticality_and_bandwidth(
-    SERVICES_TYPES["ENTERTAINMENT"]["CRITICAL"],
-    real_total_capacity
-)
+# relation_between_criticality_and_bandwidth(
+#     SERVICES_TYPES["ENTERTAINMENT"]["CRITICAL"],
+#     real_total_capacity
+# )
 
-
-
-factory = FactoryCellular(1, 1, [1, 1, 0], [10, 15], 10000, real_total_capacity,
-                          [10, 10, 10])
-
-outlet = factory.produce_cellular_outlet("5G")
-print("outlet object total power : ", outlet.power)
+# factory = FactoryCellular(1, 1, [1, 1, 0], [10, 15], 10000, real_total_capacity,
+#                           [10, 10, 10])
+#
+# outlet = factory.produce_cellular_outlet("5G")
+# print("outlet object total power : ", outlet.power)

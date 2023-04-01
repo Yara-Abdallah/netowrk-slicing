@@ -8,9 +8,10 @@ class Observer:
 
 
 class ConcreteObserver(Observer):
-    def __init__(self, outlet_pos):
+    def __init__(self, outlet_pos ,outlets):
         self.outlet_raduis = outlet_radius
         self.outlet_pos = outlet_pos
+        self.outlets = outlets
 
     def check(self, subject):
 
@@ -19,12 +20,12 @@ class ConcreteObserver(Observer):
                     subject.y >= (o[1] - self.outlet_raduis[i]) and subject.y <= (o[1] + self.outlet_raduis[i])):
 
 
-                #print(self.outlet_pos)
-                factory = FactoryCellular(1, 1, [1, 1, 0], [o[0], o[1]], 10000, [10, 20, 30],
-                                          [10, 10, 10])
-
-                outlet = factory.produce_cellular_outlet("5G")
-                subject.outlets_serve.append(outlet)
+                # print(self.outlet_pos)
+                # factory = FactoryCellular(1, 1, [1, 1, 0], [o[0], o[1]], 10000, [10, 20, 30],
+                #                           [10, 10, 10])
+                #
+                # outlet = factory.produce_cellular_outlet("5G")
+                subject.outlets_serve.append(self.outlets[i])
             else:
                 pass
 

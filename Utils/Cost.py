@@ -16,8 +16,8 @@ class Cost:
         self._cost: float = 0.0
         # self.logger = logger
 
-    @property
     @log_method
+    @property
     def cost(self):
         return self._cost
 
@@ -38,6 +38,7 @@ class Cost:
 
 
 class RequestCost(Cost):
+
     @log_method
     @property
     def cost(self):
@@ -45,26 +46,26 @@ class RequestCost(Cost):
         # self.logger.log(f"RequestCost: {cost}")
         return cost
 
-    def __str__(self):
-        fee = self._cost * float(os.getenv("MB_COST"))
-        return f'Request Fee: {fee}'
+    # def __str__(self):
+    #     fee = self._cost * float(os.getenv("MB_COST"))
+    #     return f'Request Fee: {fee}'
 
 
 class TowerCost(Cost):
-    @property
     @log_method
+    @property
     def cost(self):
         cost = self._cost * float(os.getenv('KW_COST'))
         return cost
 
-    def __str__(self):
-        return f'Request Fee: {self.cost}'
+    # def __str__(self):
+    #     return f'Request Fee: {self.cost}'
 
-
-band = Bandwidth(2, 3)
-cost_ = Cost(band, 3)
-cost_.cost_setter(9)
-
+#
+# band = Bandwidth(2, 3)
+# tow=TowerCost(band, 3)
+# tow.cost_setter(9)
+# print(type(tow.cost))
 # property_name = Cost.cost.fget
 # property_name = property_name.__wrapped__.__name__
 # value = cost_.cost

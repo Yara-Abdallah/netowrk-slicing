@@ -3,6 +3,9 @@ import warnings
 from dataclasses import dataclass, field
 from typing import List, Dict
 
+from Outlet.Cellular.FactoryCellular import FactoryCellular
+from Service.Entertainment.Entertainment import FactoryEntertainment
+from Vehicle.Car import Car
 from Vehicle.IVehicle import Vehicle
 from Service.IService import Service
 from Outlet.IOutlet import Outlet
@@ -23,12 +26,36 @@ class SingletonMeta(type):
 
 @dataclass
 class PerformanceLogger(metaclass=SingletonMeta):
-    service_requested: Dict[Vehicle, Service] = field(default_factory=dict)
-    services_requested: List[Dict[Vehicle, Service]] = field(default_factory=list)
-    services_handled: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
-    request_costs: List[int] = field(default_factory=list)
+    requested_services: List[Dict[Vehicle, Service]] = field(default_factory=list)
+    handled_services: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
+    _request_costs: List[int] = field(default_factory=list)
     _power_costs: List[float] = field(default_factory=list)
     served_ratio: List[float] = field(default_factory=list)
+
+    @property
+    def service_requested(self):
+        return self.requested_services
+
+    @service_requested.setter
+    def service_requested(self, value):
+        self.requested_services.append(value)
+
+    @property
+    def service_handled(self):
+        return self.handled_services
+
+    def set_service_handled(self, outlet, car, service):
+        if outlet not in self.handled_services:
+            self.handled_services[outlet] = {}
+        self.handled_services[outlet][car] = service
+
+    @property
+    def request_costs(self):
+        return self._request_costs
+
+    @request_costs.setter
+    def request_costs(self, value):
+        self._request_costs.append(value)
 
     @property
     def power_costs(self) -> List[float]:
@@ -41,7 +68,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
             current_frame = inspect.currentframe()
             lineno = current_frame.f_back.f_lineno
             warnings.warn_explicit(
-                "power cost should be a appended and not set",
+                "power cost should be appended and not set",
                 category=UserWarning,
                 filename=__file__,
                 lineno=lineno,
@@ -49,10 +76,15 @@ class PerformanceLogger(metaclass=SingletonMeta):
         else:
             self._power_costs.extend(value)
 
-
-ccc = PerformanceLogger()
-ccc.power_costs.append(0)
-print(ccc.power_costs)
-ggg = PerformanceLogger()
-ggg.power_costs.append(0)
-print(ggg.power_costs)
+# car = Car(1, 0, 0)
+# serv = FactoryEntertainment(1, 2, 3)
+# factory = FactoryCellular(1, 1, [1, 1, 0], [0,1], 10000, [10, 20, 30],
+#                                           [10, 10, 10])
+# outlet = factory.produce_cellular_outlet('5G')
+# ccc = PerformanceLogger()
+# ccc.power_costs.append(0)
+#
+# ccc.service_requested = {car: serv}
+# ccc.services_handled = [outlet,car ,serv]
+# print(ccc.service_requested)
+# print(ccc.services_handled)

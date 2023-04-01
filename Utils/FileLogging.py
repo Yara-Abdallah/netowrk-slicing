@@ -6,7 +6,9 @@ def log_method(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         class_name = args[0].__class__.__name__
+        print("class name is ",class_name)
         method_name = func.__name__
+        print("method name is ", method_name)
         logger = logging.getLogger(class_name)
         result = func(*args, **kwargs)
         logger.info(f"{class_name}'s {method_name} is: {result:.2g} ")

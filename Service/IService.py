@@ -24,9 +24,9 @@ class Service(ABC):
         self.bandwidth = bandwidth
         self.criticality = criticality
         self.realtime = realtime
-    def __str__(self):
-        return f"service criticality : {self.criticality} ,  service bandwidth : {self.bandwidth} , " \
-               f"service real time : {self.realtime}"
+    # def __str__(self):
+    #     return f"service criticality : {self.criticality} ,  service bandwidth : {self.bandwidth} , " \
+    #            f"service real time : {self.realtime}"
 
     @abstractmethod
     def calculate_arrival_rate(self):
