@@ -1,6 +1,10 @@
 import logging
 import functools
-
+"""
+==================================================
+            THIS FILE IS DEPRECATED!
+==================================================
+"""
 # Define a decorator function to add logging to a method
 def log_method(func):
     @functools.wraps(func)

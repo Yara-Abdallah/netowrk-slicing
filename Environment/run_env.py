@@ -159,12 +159,15 @@ class Environment:
         request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
         request_cost = RequestCost(request_bandwidth, service.realtime)
         request_cost.cost_setter(service.realtime)
-        cost = request_cost.cost
         print(f"request cost from car {car.get_id()} : ->  {service.__class__.__name__,service.bandwidth,cost} \n ")
-        performance_logger.power_costs.append(cost)
-        tower_cost=TowerCost(request_bandwidth, service.realtime)
-        tower_cost.cost_setter(service.realtime)
-        cost2 =   tower_cost.cost
+        performance_logger.request_costs.append(request_cost.cost)
+        tower_cost = TowerCost(request_bandwidth, service.realtime)
+        tower_cost.cost = service.realtime
+        performance_logger.power_costs.append(tower_cost.cost)
+        print(f"bandwidth_demand is:{request_bandwidth.allocated:.2f} "  )
+
+        cost2 = outlet.max_capacity - request_bandwidth.allocated
+        print(f"capacity is: { outlet.max_capacity} MBps outlet type : {outlet.__class__.__name__}"  )
         print(f"tower cost after send request from  {car.get_id()} : ->  {cost2} \n ")
 
         # print(f"performance logger service_requested >>>>>>>>>>> : {len(performance_logger.service_requested)} \n ")

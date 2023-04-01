@@ -67,7 +67,7 @@ class Cellular(Outlet):
             ) / 1e6  # Mbps
             total_capacity = capacity_per_antenna * num_antennas
             real_total_capacity = total_capacity // 8 / 10
-            print(f"capacity is: {real_total_capacity} MBps")
+            #print(f"capacity is: {real_total_capacity} MBps")
             return real_total_capacity
 
         def randomized_tower_based_max_capacity(self, tower_type: dict):
