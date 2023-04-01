@@ -7,6 +7,7 @@ from Outlet.Cellular.ThreeG import ThreeG
 from Utils.Bandwidth import Bandwidth
 from Utils.Cost import TowerCost, RequestCost
 from Utils.PerformanceLogger import PerformanceLogger
+from Utils.config import outlet_types
 from Vehicle.Car import Car
 from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Vehicle.VehicleOutletObserver import ConcreteObserver
@@ -61,7 +62,8 @@ class Environment:
             if type_poi in env_variables.types_outlets:
                 position_ = traci.poi.getPosition(id_)
                 env_variables.outlets[type_poi].append((id_, position_))
-                factory = FactoryCellular(1, 1, [1, 1, 0], [position_[0], position_[1]], 10000, [10, 20, 30],
+                print()
+                factory = FactoryCellular(outlet_types[str(type_poi)],1, 1, [1, 1, 0], [position_[0], position_[1]], 10000, [10, 20, 30],
                                           [10, 10, 10])
                 outlet = factory.produce_cellular_outlet(str(type_poi))
                 outlets.append(outlet)
@@ -160,10 +162,10 @@ class Environment:
         cost = request_cost.cost
         print(f"request cost from car {car.get_id()} : ->  {service.__class__.__name__,service.bandwidth,cost} \n ")
         performance_logger.power_costs.append(cost)
-        # tower_cost=TowerCost(request_bandwidth, service.realtime)
-        # tower_cost.cost_setter(service.realtime)
-        # cost2 =   tower_cost.cost
-        # print(f"tower cost after send request from  {car.get_id()} : ->  {cost2} \n ")
+        tower_cost=TowerCost(request_bandwidth, service.realtime)
+        tower_cost.cost_setter(service.realtime)
+        cost2 =   tower_cost.cost
+        print(f"tower cost after send request from  {car.get_id()} : ->  {cost2} \n ")
 
         # print(f"performance logger service_requested >>>>>>>>>>> : {len(performance_logger.service_requested)} \n ")
         # print(f"performance logger services_handled  >>>>>>>>>>> : {((performance_logger.service_handled[outlet]))} \n ")
