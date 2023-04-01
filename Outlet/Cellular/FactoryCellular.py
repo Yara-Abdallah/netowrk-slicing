@@ -1,3 +1,4 @@
+from Utils.config import outlet_types
 from .FiveG import FiveG
 from .FourG import FourG
 from .SubSixG import SubSixG

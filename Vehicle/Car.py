@@ -16,20 +16,20 @@ class Car(Vehicle):
     #         f"car id : {self.id}  ,  outlets list which can serve the requests from this vehicle "
     #         f": {self.outlets_serve}  , the requestes sent by this vehicle : {self.car_requests()} "
     #     )
-
     def car_requests(self):
-        self.services=[]
+        self.services = []
         service_mapping_car = []
-        types = ["ENTERTAINMENT", "SAFETY", "AUTONOMOUS"]
+        types = [*SERVICES_TYPES.keys()]
 
         # for i in range(10):
+
         type_ = random.choice(types)
-        factory = FactoryService(SERVICES_TYPES[type_]["REALTIME"],
-                                 SERVICES_TYPES[type_]["BANDWIDTH"],
-                                 SERVICES_TYPES[type_]["CRITICAL"])
+        factory = FactoryService(random.choice(SERVICES_TYPES[type_]["REALTIME"]),
+                                 random.choice(SERVICES_TYPES[type_]["BANDWIDTH"]),
+                                 random.choice(SERVICES_TYPES[type_]["CRITICAL"]))
         self.services.append(factory.produce_services(type_))
         for id, serv in enumerate(self.services):
-            #print("service ...... ",serv)
+            # print("service ...... ",serv)
             service_mapping_car.append([self.get_id(), self, serv])
         return service_mapping_car
 
@@ -63,7 +63,7 @@ class Car(Vehicle):
     def send_request(self):
         outlet = self.greedy()
         outlet.services = []
-        outlet.services.extend([outlet,self.car_requests()[0]])
+        outlet.services.extend([outlet, self.car_requests()[0]])
         return outlet.services
 
 #
