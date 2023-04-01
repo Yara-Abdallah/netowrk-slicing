@@ -4,15 +4,15 @@ import numpy as np
 
 SERVICES_TYPES = {
 
-    "ENTERTAINMENT": {"REALTIME": np.random.randint(low=5, high=9),
-                      "BANDWIDTH": np.random.randint(low=8, high=10),
-                      "CRITICAL": np.random.randint(low=1, high=2)},
-    "SAFETY": {"REALTIME": np.random.randint(low=9, high=10),
-               "BANDWIDTH": np.random.randint(low=1, high=3),
-               "CRITICAL": np.random.randint(low=9, high=10)},
-    "AUTONOMOUS": {"REALTIME": np.random.randint(low=9, high=10),
-                   "BANDWIDTH": np.random.randint(low=7, high=8),
-                   "CRITICAL": np.random.randint(low=8, high=10)}
+    "ENTERTAINMENT": {"REALTIME": np.arange(start=5, stop=9+1),
+                      "BANDWIDTH": np.arange(start=8, stop=10+1),
+                      "CRITICAL": np.arange(start=1, stop=2+1)},
+    "SAFETY": {"REALTIME": np.arange(start=9, stop=10+1),
+               "BANDWIDTH": np.arange(start=1, stop=3+1),
+               "CRITICAL": np.arange(start=9, stop=10+1)},
+    "AUTONOMOUS": {"REALTIME": np.arange(start=9, stop=10+1),
+                   "BANDWIDTH": np.arange(start=7, stop=8+1),
+                   "CRITICAL": np.arange(start=8, stop=10+1)}
 }
 
 REALTIME_BANDWIDTH = {
@@ -60,7 +60,7 @@ outlet = {}
 for k in THREE_G:
     outlet[k] = np.random.choice(THREE_G[k])
 
-print(*outlet)
+print("....  ",*outlet)
 
 
 def calculate_max_power(
@@ -74,18 +74,18 @@ def calculate_max_power(
 ):
     spectral_efficiency = modulation_order * coding_rate  # bits/symbol
 
-    # capacity_per_antenna = (
-    #                                channel_bandwidth
-    #                                * 1e6
-    #                                * spectral_efficiency
-    #                                * average_symbol_per_slot
-    #                                * num_slots_per_frame
-    #                                * num_frames_per_second
-    #                        ) / 1e6  # Mbps
-    # total_capacity = capacity_per_antenna * num_antennas
-    # real_total_capacity = total_capacity // 8 / 10
-    # print(f"capacity is: {real_total_capacity} MBps")
-    # return real_total_capacity
+    capacity_per_antenna = (
+                                   channel_bandwidth
+                                   * 1e6
+                                   * spectral_efficiency
+                                   * average_symbol_per_slot
+                                   * num_slots_per_frame
+                                   * num_frames_per_second
+                           ) / 1e6  # Mbps
+    total_capacity = capacity_per_antenna * num_antennas
+    real_total_capacity = total_capacity // 8 / 10
+    print(f"capacity is: {real_total_capacity} MBps")
+    return real_total_capacity
 
 
 def relation_between_criticality_and_bandwidth(criticality, total_bandwidth):

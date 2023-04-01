@@ -16,7 +16,7 @@ class Cost:
         self._cost: float = 0.0
         # self.logger = logger
 
-    @log_method
+    # @log_method
     @property
     def cost(self):
         return self._cost
@@ -39,12 +39,12 @@ class Cost:
 
 class RequestCost(Cost):
 
-    @log_method
+    # @log_method
     @property
     def cost(self):
         cost = self._cost * float(os.getenv('MB_COST'))
         # self.logger.log(f"RequestCost: {cost}")
-        return cost
+        return f'{cost:.2f}'
 
     # def __str__(self):
     #     fee = self._cost * float(os.getenv("MB_COST"))
@@ -52,7 +52,7 @@ class RequestCost(Cost):
 
 
 class TowerCost(Cost):
-    @log_method
+    # @log_method
     @property
     def cost(self):
         cost = self._cost * float(os.getenv('KW_COST'))

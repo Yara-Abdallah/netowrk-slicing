@@ -156,10 +156,14 @@ class Environment:
         performance_logger.set_service_handled(outlet, car, service)
         request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
         request_cost = RequestCost(request_bandwidth, service.realtime)
-        #request_cost.cost_setter(service.realtime)
+        request_cost.cost_setter(service.realtime)
         cost = request_cost.cost
-        print(f"request cost from car {car.get_id()} : ->  {cost} \n ")
+        print(f"request cost from car {car.get_id()} : ->  {service.__class__.__name__,service.bandwidth,cost} \n ")
         performance_logger.power_costs.append(cost)
+        # tower_cost=TowerCost(request_bandwidth, service.realtime)
+        # tower_cost.cost_setter(service.realtime)
+        # cost2 =   tower_cost.cost
+        # print(f"tower cost after send request from  {car.get_id()} : ->  {cost2} \n ")
 
         # print(f"performance logger service_requested >>>>>>>>>>> : {len(performance_logger.service_requested)} \n ")
         # print(f"performance logger services_handled  >>>>>>>>>>> : {((performance_logger.service_handled[outlet]))} \n ")
@@ -194,7 +198,7 @@ class Environment:
 
             step += 1
             if step == 10:
-                print("........... ", len(performance_logger.power_costs))
+                #print("........... ", (performance_logger.power_costs))
                 self.logging_the_final_results(performance_logger)
                 break
 
