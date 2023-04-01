@@ -1,8 +1,4 @@
-from enum import Enum
-
 import numpy as np
-
-# from Outlet.Cellular.FactoryCellular import FactoryCellular
 
 SERVICES_TYPES = {
     "ENTERTAINMENT": {
@@ -43,7 +39,7 @@ outlet_types = {
         "NUM_FRAMES_PER_SECOND": [10],
     },
     "4G": {
-        "NUM_ANTENNAS": [5,6],
+        "NUM_ANTENNAS": [5, 6],
         "CHANNEL_BANDWIDTH": np.arange(15, 20, 0.5),
         "CODING_RATE": [1 / 2, 2 / 3, 3 / 4],
         "MODULATION_ORDER": [4, 6, 8],
@@ -61,27 +57,3 @@ outlet_types = {
         "NUM_FRAMES_PER_SECOND": [60],
     },
 }
-
-
-
-# print(BuildMaxCapacity(outlet_types['FOUR_G']).max_capacity)
-def relation_between_criticality_and_bandwidth(criticality, total_bandwidth):
-    total_bandwidth = total_bandwidth * 10
-    change_in_bandwidth = criticality * total_bandwidth * 0.03
-    print(f"change amount in bandwidth (capacity) is : {change_in_bandwidth} MBps")
-    total_bandwidth = total_bandwidth + change_in_bandwidth
-    print(f"new bandwidth (capacity) is : {total_bandwidth} MBps")
-    return total_bandwidth
-
-
-
-# relation_between_criticality_and_bandwidth(
-#     SERVICES_TYPES["ENTERTAINMENT"]["CRITICAL"],
-#     real_total_capacity
-# )
-
-# factory = FactoryCellular(1, 1, [1, 1, 0], [10, 15], 10000, real_total_capacity,
-#                           [10, 10, 10])
-#
-# outlet = factory.produce_cellular_outlet("5G")
-# print("outlet object total power : ", outlet.power)

@@ -1,41 +1,28 @@
 import random
 import math
-
-from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Service.FactoryService import FactoryService
 from Vehicle.IVehicle import Vehicle
 from Utils.config import SERVICES_TYPES
-import numpy as np
-
-from Vehicle.VehicleOutletObserver import ConcreteObserver
 
 
 class Car(Vehicle):
-    # def __str__(self):
-    #     return (
-    #         f"car id : {self.id}  ,  outlets list which can serve the requests from this vehicle "
-    #         f": {self.outlets_serve}  , the requestes sent by this vehicle : {self.car_requests()} "
-    #     )
     def car_requests(self):
         self.services = []
-        service_mapping_car = []
+        car_services = []
         types = [*SERVICES_TYPES.keys()]
 
         # for i in range(10):
 
         type_ = random.choice(types)
-        factory = FactoryService(random.choice(SERVICES_TYPES[type_]["REALTIME"]),
-                                 random.choice(SERVICES_TYPES[type_]["BANDWIDTH"]),
-                                 random.choice(SERVICES_TYPES[type_]["CRITICAL"]))
+        factory = FactoryService(
+            random.choice(SERVICES_TYPES[type_]["REALTIME"]),
+            random.choice(SERVICES_TYPES[type_]["BANDWIDTH"]),
+            random.choice(SERVICES_TYPES[type_]["CRITICAL"]),
+        )
         self.services.append(factory.produce_services(type_))
-        for id, serv in enumerate(self.services):
-            # print("service ...... ",serv)
-            service_mapping_car.append([self.get_id(), self, serv])
-        return service_mapping_car
+        car_services = list(map(lambda x: [self.get_id(), self, x], self.services))
+        return car_services
 
-    # def send_request(self):
-    #     mapping  = dict(map(lambda x: (random.choice(self.services), x), self.outlets_serve))
-    #     return mapping
     def get_id(self):
         return self.id
 
@@ -55,9 +42,14 @@ class Car(Vehicle):
         self.notify()
 
     def greedy(self):
-        distance = []
-        for i, outlet in enumerate(self.outlets_serve):
-            distance.append(math.sqrt((outlet.position[0] - self.x) ** 2 + (outlet.position[1] - self.y) ** 2))
+        def euclidian_distance(outlet):
+            print(outlet.position)
+            result = math.sqrt(
+                (outlet.position[0] - self.x) ** 2 + (outlet.position[1] - self.y) ** 2
+            )
+            return result
+
+        distance = list(map(lambda x: euclidian_distance(x), self.outlets_serve))
         return self.outlets_serve[distance.index(min(distance))]
 
     def send_request(self):
@@ -66,9 +58,9 @@ class Car(Vehicle):
         outlet.services.extend([outlet, self.car_requests()[0]])
         return outlet.services
 
-#
+
 # car = Car(1, 1, 1)
-# observer = ConcreteObserver([[10, 10], [0, 1]])
+# observer = ConcreteObserver([[10, 10], [0, 1]], [ThreeG(outlet_types.get("3G"), 2, 3, 4, [5,3], 6, 7, 8),ThreeG(outlet_types.get("3G"), 2, 3, 4, [30,90], 6, 7, 8)])
 # car.attach(observer)
 # car.set_state(1, 1)
 # print(car.send_request())
