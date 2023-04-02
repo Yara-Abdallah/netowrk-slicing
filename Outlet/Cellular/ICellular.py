@@ -74,6 +74,7 @@ class Cellular(Outlet):
             outlet = {}
             outlet_vals = []
             for k in tower_type:
+
                 outlet[k] = np.random.choice(tower_type[k])
                 outlet_vals = [*outlet.values()]
             real_total_capacity = self.calculate_max_capacity(*outlet_vals)

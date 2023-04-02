@@ -11,7 +11,7 @@ class RLMeta(type):
         # call the parent class's __new__ method to create the class
 
         # make sure the new class has agent and env attributes
-        if not hasattr(class_, 'agents') or not hasattr(class_, 'env'):
+        if not hasattr(class_, 'agents') or not hasattr(class_, 'environment'):
             raise NotImplementedError("Classes with RLMeta as metaclass must have 'agents' and 'env' attributes")
 
         return class_
@@ -22,9 +22,9 @@ class RLMeta(type):
         print('n',cls.agent)
 
     def get_env_observation(cls):
-        if cls.env is None:
+        if cls.environment is None:
             raise ValueError("Env is not initialized")
-        return cls.env.observe()
+        return cls.environment.observe()
 
 
 def rlabc(cls):

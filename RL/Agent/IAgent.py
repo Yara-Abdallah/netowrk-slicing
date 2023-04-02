@@ -1,7 +1,6 @@
 from abc import abstractmethod
 from collections import deque
 from typing import runtime_checkable, Protocol
-
 from RL.RLEnvironment.Action.Action import Action
 
 
@@ -14,12 +13,12 @@ class AgentProtocol(Protocol):
 
 
 class AbstractAgent():
-    def __init__(self, action_type, epsilon=0.95, gamma=0.95, epsilon_decay=0.09, min_epsilon=0.01,
+    def __init__(self, epsilon=0.95, gamma=0.95, epsilon_decay=0.09, min_epsilon=0.01,
                  episodes=7,
                  cumulative_reward=0,
                  step=60 * 60 * 24):
         self._action = None
-        self.action_type = Action(action_type)
+        self.action_type = Action()
         self.epsilon = epsilon
         self.gamma = gamma
         self.epsilon_decay = epsilon_decay

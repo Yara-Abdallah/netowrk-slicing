@@ -40,12 +40,13 @@ class CentralizedReward(Reward):
     def calculate_reward(self):
         percentage_array = self.services_ensured / self.services_requested
         self.reward_value = sum(percentage_array) / self.num_services
+        return self.reward_value
 
 
-cr = CentralizedReward()
-cr.services_requested = np.array([30, 40, 10])
-cr.services_ensured = np.array([5, 10, 3])
-cr.services_ensured = np.array([3, 2, 1])
-cr.calculate_reward()
-print(cr())
+# cr = CentralizedReward()
+# cr.services_requested = np.array([30, 40, 10])
+# cr.services_ensured = np.array([5, 10, 3])
+# cr.services_ensured = np.array([3, 2, 1])
+# cr.calculate_reward()
+# print(cr())
 

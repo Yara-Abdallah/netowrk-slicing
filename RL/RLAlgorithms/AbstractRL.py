@@ -6,24 +6,25 @@ from RL.RLMeta import RLMeta, rlabc
 @rlabc
 class AbstractRL(metaclass=RLMeta):
     _agents = []
-    _env = None
+    _environment = None
 
-    def __init__(self, agents, env):
-        self._agents = agents
-        self._env = env
+    def __init__(self,model):
+        self._agents = None
+        self._environment = None
+        self.model = model
 
     def len_(self):
         return len(self._agents)
 
     @property
     @abstractmethod
-    def env(self):
+    def environment(self):
         # return self._env
         pass
 
-    @env.setter
+    @environment.setter
     @abstractmethod
-    def env(self, env):
+    def environment(self, env):
         # self._env = env
         pass
 

@@ -30,6 +30,7 @@ class CentralizedState(State):
 
     @property
     def allocated_power(self):
+
         return self._allocated_power
 
     @property

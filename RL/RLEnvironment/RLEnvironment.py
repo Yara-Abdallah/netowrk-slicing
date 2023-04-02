@@ -10,9 +10,9 @@ class RLProtocol(Protocol):
 
 
 class RLEnvironment():
-    def __init__(self, state: State, reward: Reward):
-        self._state = state
-        self._reward = reward
+    def __init__(self):
+        self._state = None
+        self._reward = None
 
     @property
     def state(self):
