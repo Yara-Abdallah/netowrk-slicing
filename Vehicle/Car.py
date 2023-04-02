@@ -43,7 +43,7 @@ class Car(Vehicle):
 
     def greedy(self):
         def euclidian_distance(outlet):
-            print(outlet.position)
+            #print('sh', outlet)
             result = math.sqrt(
                 (outlet.position[0] - self.x) ** 2 + (outlet.position[1] - self.y) ** 2
             )

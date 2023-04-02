@@ -11,7 +11,9 @@ from Utils.config import outlet_types
 from Vehicle.Car import Car
 from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Vehicle.VehicleOutletObserver import ConcreteObserver
-#from Utils.FileLoggingInfo import Logger
+
+
+# from Utils.FileLoggingInfo import Logger
 
 
 class Environment:
@@ -63,7 +65,8 @@ class Environment:
                 position_ = traci.poi.getPosition(id_)
                 env_variables.outlets[type_poi].append((id_, position_))
                 print()
-                factory = FactoryCellular(outlet_types[str(type_poi)],1, 1, [1, 1, 0], [position_[0], position_[1]], 10000, [10, 20, 30],
+                factory = FactoryCellular(outlet_types[str(type_poi)], 1, 1, [1, 1, 0], [position_[0], position_[1]],
+                                          10000, [10, 20, 30],
                                           [10, 10, 10])
                 outlet = factory.produce_cellular_outlet(str(type_poi))
                 outlets.append(outlet)
@@ -123,7 +126,7 @@ class Environment:
         for id_ in ids_new_vehicles:
             env_variables.vehicles[id_] = Car(id_, 0, 0)
 
-    def outlets_logging(self, outlet_num, outlet ,cars):
+    def outlets_logging(self, outlet_num, outlet, cars):
         return f"Outlet {outlet_num} : -> {outlet}   -  Number Of Cars Which Send Request To It -> {len(cars)} \n "
 
     def car_services_logging(self, car_num, car, service):
@@ -134,7 +137,7 @@ class Environment:
         service_handled = performance_logger.service_handled
         for i, outer_key in enumerate(service_handled):
             num = 0
-            print(self.outlets_logging(i, outer_key,service_handled[outer_key]))
+            print(self.outlets_logging(i, outer_key, service_handled[outer_key]))
             for key, value in performance_logger.service_handled[outer_key].items():
                 num += 1
                 print(self.car_services_logging(num, key, value))
@@ -159,15 +162,15 @@ class Environment:
         request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
         request_cost = RequestCost(request_bandwidth, service.realtime)
         request_cost.cost_setter(service.realtime)
-        print(f"request cost from car {car.get_id()} : ->  {service.__class__.__name__,service.bandwidth,cost} \n ")
+        print(f"request cost from car {car.get_id()} : ->  {service.__class__.__name__, service.bandwidth, request_cost.cost} \n ")
         performance_logger.request_costs.append(request_cost.cost)
         tower_cost = TowerCost(request_bandwidth, service.realtime)
         tower_cost.cost = service.realtime
         performance_logger.power_costs.append(tower_cost.cost)
-        print(f"bandwidth_demand is:{request_bandwidth.allocated:.2f} "  )
+        print(f"bandwidth_demand is:{request_bandwidth.allocated:.2f} ")
 
         cost2 = outlet.max_capacity - request_bandwidth.allocated
-        print(f"capacity is: { outlet.max_capacity} MBps outlet type : {outlet.__class__.__name__}"  )
+        print(f"capacity is: {outlet.max_capacity} MBps outlet type : {outlet.__class__.__name__}")
         print(f"tower cost after send request from  {car.get_id()} : ->  {cost2} \n ")
 
         # print(f"performance logger service_requested >>>>>>>>>>> : {len(performance_logger.service_requested)} \n ")
@@ -182,7 +185,6 @@ class Environment:
         outlets_pos, outlets = self.get_positions_of_outlets()
         observer = ConcreteObserver(outlets_pos, outlets)
         performance_logger = PerformanceLogger()
-
 
         while step < env_variables.TIME:
             traci.simulationStep()
@@ -203,7 +205,7 @@ class Environment:
 
             step += 1
             if step == 10:
-                #print("........... ", (performance_logger.power_costs))
+                # print("........... ", (performance_logger.power_costs))
                 self.logging_the_final_results(performance_logger)
                 break
 
