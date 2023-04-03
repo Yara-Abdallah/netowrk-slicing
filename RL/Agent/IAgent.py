@@ -18,7 +18,7 @@ class AbstractAgent():
                  cumulative_reward=0,
                  step=60 * 60 * 24):
         self._action = None
-        self.action_type = ActionController()
+        # self.action_type = ActionController()
         self.epsilon = epsilon
         self.gamma = gamma
         self.epsilon_decay = epsilon_decay

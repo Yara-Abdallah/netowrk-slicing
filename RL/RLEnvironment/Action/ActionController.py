@@ -1,8 +1,9 @@
 from RL.RLEnvironment.Action.Action import Action
+from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
 
 
 class ActionController:
-    _command: Action = None
+    _command: ActionAssignment
 
     # print("comm ",self._command)
 
@@ -15,12 +16,12 @@ class ActionController:
         self._command = comm
 
     def execute(self, state, action_decision, request_buffer):
-        next_state = self._command.execute(state, action_decision, request_buffer)
+        next_state = self.command.execute(state, action_decision, request_buffer)
         return next_state
 
     def explore(self):
-        print("command  : ", self._command)
-        return self._command.explore()
+        print("command  : ", self.command)
+        return self.command.explore()
 
     def exploit(self, model, state):
-        return self._command.exploit(model, state)
+        return self.command.exploit(model, state)
