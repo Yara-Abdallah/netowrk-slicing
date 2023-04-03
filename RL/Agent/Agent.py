@@ -18,7 +18,7 @@ class Agent(AbstractAgent):
         "A chain with a default first successor"
         test = np.random.rand()
         "Setting the first successor that will modify the payload"
-        action = self.action_type
+        action = self.action
         print("inside chain ,,, ", action)
         handler = Exploit(action, model, state, Explore(action, FallbackHandler(action)))
         # = np.where(handler.handle(test, epsilon) > 0.5, 1, 0)

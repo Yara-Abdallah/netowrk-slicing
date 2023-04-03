@@ -88,10 +88,19 @@ class ModelBuilder(RLBuilder):
         return self
 
 
+# build = RLBuilder()
+# builder = build.agent.build_agent().environment.build_env().model_.build_model().build()
+
+# print(builder.agents)
+# print(builder.environment)
+# print(builder.model)
+# print(builder)
+
+
 build = RLBuilder()
 builder = build.agent.build_agent().environment.build_env().model_.build_model().build()
-
-print(builder.agents)
-print(builder.environment)
-print(builder.model)
-print(builder)
+state = builder.environment.state
+print("comm  ", builder.agents.action.command)
+action, action_value = builder.agents.chain(builder.model,state,0.1)
+print(action)
+print(action_value)
