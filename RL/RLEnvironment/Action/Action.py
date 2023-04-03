@@ -1,34 +1,12 @@
-from abc import abstractmethod, ABC
-
-from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
-from RL.RLEnvironment.Action.ActionResponse import ActionResponse
-from RL.RLEnvironment.State.State import State
-
-import numpy as np
-
-from typing import Union
+from typing import Protocol
 
 
-class Action():
-    _command: ActionResponse | ActionAssignment = None
-
-    # print("comm ",self._command)
-
-    @property
-    def command(self):
-        return self._command
-
-    @command.setter
-    def command(self, comm):
-        self._command = comm
-
-    def execute(self, state, action_decision, request_buffer):
-        next_state = self._command.execute(state, action_decision, request_buffer)
-        return next_state
+class Action(Protocol):
+    def execute(self, state, action, **kwargs):
+        ...
 
     def explore(self):
-        print("command  : ", self._command)
-        return self._command.explore()
+        ...
 
     def exploit(self, model, state):
-        return self._command.exploit(model, state)
+        ...

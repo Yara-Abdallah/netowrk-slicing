@@ -1,8 +1,13 @@
 import numpy as np
-from RL.RLEnvironment.Action.IAction import Action
+from RL.RLEnvironment.Action.Action import Action
 
 
-class ActionAssignment(Action):
+class ActionAssignment:
+    def __init__(self):
+        self.grid_cell = 2
+        self.num_services = 3
+        self.num_communication_requirement = 3
+        self.num_statistical_information = 5
 
     def explore(self):
         print("assignment explor ",np.random.randint(2, size=(self.num_services, self.grid_cell)))

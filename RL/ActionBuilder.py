@@ -1,11 +1,11 @@
-from RL.RLEnvironment.Action.Action import Action
+from RL.RLEnvironment.Action.ActionController import ActionController
 from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
 
 
 class ActionBuilder_:
     def __init__(self, action=None):
         if action is None:
-            self.action = Action()
+            self.action = ActionController()
         else:
             self.action = action
 
@@ -28,12 +28,12 @@ class CommandBuilder(ActionBuilder_):
         return self
 
 
-# action_comm = ActionAssignment()
-# ab = ActionBuilder_()
-# ab = ab \
-#     .command() \
-#     .build_command()
-# print(ab)
-# print(ab.build())
+action_comm = ActionAssignment()
+ab = ActionBuilder_()
+ab = ab \
+    .command() \
+    .build_command()
+print(ab)
+print(ab.build())
 
 

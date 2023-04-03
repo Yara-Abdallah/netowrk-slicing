@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
-from RL.RLEnvironment.Action.ActionResponse import ActionResponse
+from RL.RLEnvironment.Action.Action import Action
 
 
 class IHandler(ABC):
-    def __init__(self, action: ActionResponse | ActionAssignment, successor: Optional["IHandler"] = None):
+    def __init__(self, action: Action, successor: Optional["IHandler"] = None):
         self.successor = successor
         self.action = action
 
