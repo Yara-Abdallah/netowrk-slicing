@@ -7,7 +7,7 @@ class ActionBuilder_:
         if action is None:
             self.action = ActionController()
         else:
-            self.action = action
+            self.action = ActionController()
 
     def build(self):
         return self.action
@@ -28,12 +28,12 @@ class CommandBuilder(ActionBuilder_):
         return self
 
 
-action_comm = ActionAssignment()
-ab = ActionBuilder_()
-ab = ab \
-    .command() \
-    .build_command()
-print(ab)
-print(ab.build())
+# action_comm = ActionController()
+# ab = ActionBuilder_()
+# ab = ab \
+#     .command() \
+#     .build_command()
+# print(ab)
+# print(ab.build())
 
 

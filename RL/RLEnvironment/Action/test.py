@@ -5,4 +5,4 @@ class yara:
     def gg(self):
         return self._gg
 
-yara
+yara()
