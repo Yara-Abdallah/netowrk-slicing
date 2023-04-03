@@ -1,12 +1,12 @@
 from abc import abstractmethod
 from collections import deque
 from typing import runtime_checkable, Protocol
-from RL.RLEnvironment.Action.Action import Action
+from RL.RLEnvironment.Action.ActionController import ActionController
 
 
 @runtime_checkable
 class AgentProtocol(Protocol):
-    action: Action
+    action: ActionController
 
     def q(self):
         pass
@@ -18,7 +18,7 @@ class AbstractAgent():
                  cumulative_reward=0,
                  step=60 * 60 * 24):
         self._action = None
-        self.action_type = Action()
+        self.action_type = ActionController()
         self.epsilon = epsilon
         self.gamma = gamma
         self.epsilon_decay = epsilon_decay
