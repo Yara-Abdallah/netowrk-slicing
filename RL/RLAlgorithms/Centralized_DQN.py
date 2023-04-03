@@ -2,6 +2,8 @@ from keras import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 from RL.RLAlgorithms.AbstractRL import AbstractRL
+
+
 # from RL.RLAlgorithms.Model import Model
 # from RL.Agent.Agent import Agent
 # from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
@@ -13,12 +15,22 @@ from RL.RLAlgorithms.AbstractRL import AbstractRL
 #
 
 class DQN(AbstractRL):
-    def init(self, model,*args):
+    def init(self, *args):
         super().init(*args)
-        self.model = model
 
-    #def create_model(self) -> Sequential:
+    # def create_model(self) -> Sequential:
     #    return self.model.build_model()
+
+    def __str__(self):
+        return f"evironment :  {self._environment} , agents : {self._agents} , model : {self._model}"
+
+    @property
+    def model(self):
+        return self._model
+
+    @model.setter
+    def model(self, m):
+        self._model = m
 
     def load(self, filename):
         self.model.load(filename)
@@ -45,7 +57,6 @@ class DQN(AbstractRL):
     def create_model(self):
         print("1")
 
-
 # comm = ComsThreeG(0, 0, 0, 0, 0)
 # outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22],[10,20,30])
 # outlet2 = ThreeG(0, comm, [0, 0, 1], 1, 1, [10, 15, 28],[10,20,30])
@@ -64,7 +75,7 @@ class DQN(AbstractRL):
 # action, action_value = agent.chain(model,state,0.1)
 # print(action.execute(c, action_value))
 
-#d= DeCentralizedState()
+# d= DeCentralizedState()
 # # env = RLEnvironment()
 # env = ''
 # """a = DQN(model, agent, env)

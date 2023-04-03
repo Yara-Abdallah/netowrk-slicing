@@ -7,11 +7,12 @@ from RL.RLMeta import RLMeta, rlabc
 class AbstractRL(metaclass=RLMeta):
     _agents = []
     _environment = None
+    _model = None
 
-    def __init__(self,model):
+    def __init__(self):
         self._agents = None
         self._environment = None
-        self.model = model
+        self._model = None
 
     def len_(self):
         return len(self._agents)
@@ -34,6 +35,17 @@ class AbstractRL(metaclass=RLMeta):
         # return self.agents
         pass
 
+    @property
+    @abstractmethod
+    def model(self):
+        # return self.agents
+        pass
+
+    @model.setter
+    @abstractmethod
+    def model(self, m):
+        # self.agents.append(agent)
+        pass
     @agents.setter
     @abstractmethod
     def agents(self, agent):
