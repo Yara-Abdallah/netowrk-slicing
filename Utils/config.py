@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 SERVICES_TYPES = {
@@ -17,6 +19,14 @@ SERVICES_TYPES = {
         "CRITICAL": np.arange(start=8, stop=10 + 1),
     },
 }
+
+Grids={
+    "grid1":[],
+    "grid2":[],
+    "grid3":[],
+    "grid4":[],
+}
+
 
 REALTIME_BANDWIDTH = {
     "WIFI": list(range(1, 3)),
@@ -57,3 +67,5 @@ outlet_types = {
         "NUM_FRAMES_PER_SECOND": [60],
     },
 }
+
+

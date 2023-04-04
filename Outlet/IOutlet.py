@@ -2,6 +2,12 @@ from abc import ABC, abstractmethod
 from typing import Tuple
 from collections import deque
 
+from RL.RLBuilder import RLBuilder
+from RL.RLEnvironment.Action.ActionResponse import ActionResponse
+from RL.RLEnvironment.State.DecentralizedState import DeCentralizedState
+from RL.RLEnvironment.Reward.DecentralizedReward import DeCentralizedReward
+
+
 class Outlet(ABC):
     """
         Definition of coverage towers
@@ -10,7 +16,7 @@ class Outlet(ABC):
 
     __id = -1
 
-    def __init__(self, position: Tuple[float], radius: float, power: [float],requests_allocated_power:[float]):
+    def __init__(self, position: Tuple[float], radius: float, power: [float], requests_allocated_power: [float]):
         """
             Parameters
             ----------
@@ -22,14 +28,23 @@ class Outlet(ABC):
                 The power or the outlet.
 
             """
+        self.dqn = RLBuilder().agent.build_agent(ActionResponse()).environment.build_env(DeCentralizedReward(),DeCentralizedState()).model_.build_model().build()
         self.__class__.__id += 1
         self._distinct = self.__class__.__id
         self.position = position
         self.radius = radius
-        self.power = power # bit rate
-        self.requests_allocated_power=requests_allocated_power
+        self._power = power  # bit rate
+        self.requests_allocated_power = requests_allocated_power
         self._power_distinct = []
         self.request_buffer = []
+
+    @property
+    def power(self):
+        return self._power
+
+    @power.setter
+    def power(self, value):
+        self._power = value
 
     @property
     def distinct(self):
@@ -53,4 +68,4 @@ class Outlet(ABC):
 
     @property
     def power_distinct(self):
-        return [self.power,self._distinct]
+        return [self._power, self._distinct]

@@ -65,15 +65,4 @@ print(">>>>>>  ",action_value)
 state,_ = action.execute(d, action_value, outlet.request_buffer)
 print(state)
 
-#
-# model = Model(3, 6, 'relu', 'mse', Adam, 0.5, 'sigmoid').build_model()
-# agent = Agent(ActionAssignment())
-# action, action_value = agent.chain(model, state, 0.9)
-# print(action.execute(c, action_value))
-# # env = RLEnvironment()
-# env = ''
-# """a = DQN(model, agent, env)
-# print(a.agents)
-# a.env = env
-# a.agents = agent"""
-# print(model.summary())
+

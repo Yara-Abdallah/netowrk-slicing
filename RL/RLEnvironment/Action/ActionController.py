@@ -15,12 +15,11 @@ class ActionController:
     def command(self, comm):
         self._command = comm
 
-    def execute(self, state, action_decision, request_buffer):
-        next_state = self.command.execute(state, action_decision, request_buffer)
+    def execute(self, state, action_decision):
+        next_state = self.command.execute(state, action_decision)
         return next_state
 
     def explore(self):
-        print("command  : ", self.command)
         return self.command.explore()
 
     def exploit(self, model, state):

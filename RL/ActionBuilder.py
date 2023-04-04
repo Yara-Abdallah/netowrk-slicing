@@ -23,8 +23,9 @@ class CommandBuilder(ActionBuilder_):
     def __init__(self, action):
         super().__init__(action)
 
-    def build_command(self):
-        self.action.command = ActionAssignment()
+    def build_command(self,action_type):
+        self.action.command = action_type
+        #ActionAssignment()
         return self
 
 
