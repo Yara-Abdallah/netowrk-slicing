@@ -23,7 +23,7 @@ class Model():
         model_.add(Dense(24, input_dim=self.state_size, activation=self.activation_function))
         model_.add(Dense(24, activation=self.activation_function))
         model_.add(Dense(self.action_size, activation=self.output_activation))
-        model_.add(Reshape((3, 2)))
+        model_.add(Reshape((3, 3)))
         model_.compile(loss=self.loss_function,
                        optimizer=self.optimization_algorithm(learning_rate=self.learning_rate))
         return model_

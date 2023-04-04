@@ -5,6 +5,15 @@ from RL.RLEnvironment.Action.ActionChain import Exploit, Explore, FallbackHandle
 
 
 class Agent(AbstractAgent):
+    _grid_outlets = []
+
+    @property
+    def grid_outlets(self):
+        return self._grid_outlets
+
+    @grid_outlets.setter
+    def grid_outlets(self, list_):
+        self._grid_outlets = list_
 
     @property
     def action(self):
@@ -14,6 +23,9 @@ class Agent(AbstractAgent):
     def action(self, a):
         self._action = a
 
+    def remember(self, state, action, reward, next_state):
+        self.memory.append((state, action, reward, next_state))
+
     def chain(self, model, state, epsilon):
         "A chain with a default first successor"
         test = np.random.rand()
@@ -22,4 +34,5 @@ class Agent(AbstractAgent):
         print("inside chain ,,, ", action)
         handler = Exploit(action, model, state, Explore(action, FallbackHandler(action)))
         # = np.where(handler.handle(test, epsilon) > 0.5, 1, 0)
-        return action, handler.handle(test, epsilon)
+        # handler.handle(test, epsilon)
+        return action, np.where(handler.handle(test, epsilon) > 0.5, 1, 0)

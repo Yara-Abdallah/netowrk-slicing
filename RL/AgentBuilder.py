@@ -15,6 +15,7 @@ class AgentBuilder_:
     def action(self):
         return ActionBuilder(self.agent)
 
+
     def build(self):
         return self.agent
 
@@ -23,16 +24,18 @@ class ActionBuilder(AgentBuilder_):
     def __init__(self, agent):
         super().__init__(agent)
 
-    def build_action(self):
-        self.agent.action = ActionBuilder_().command().build_command().build()
+    def build_action(self,action_type):
+        self.agent.action = ActionBuilder_().command().build_command(action_type).build()
         return self
 
 
 
-# act = AgentBuilder()
+# act = AgentBuilder_()
 # act = act \
 #     .action() \
-#     .build_action()
+#     .build_action()\
+#     .grid_outlet()\
+#     .build_grid_outlets("grid1")
 #
 # print(act)
 # print(act.build())

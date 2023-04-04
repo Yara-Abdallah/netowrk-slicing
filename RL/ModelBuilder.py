@@ -6,7 +6,7 @@ from RL.RLAlgorithms.Model import Model
 class ModelBuilder_:
     def __init__(self, model=None):
         if model is None:
-            self.model = Model(3, 6, "relu", "mse", Adam, 0.5, "sigmoid").build_model()
+            self.model = Model(3, 9, "relu", "mse", Adam, 0.5, "sigmoid").build_model()
         else:
             self.model = model
 

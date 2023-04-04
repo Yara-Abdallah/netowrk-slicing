@@ -9,7 +9,7 @@ class CentralizedReward(Reward):
 
     def __init__(self):
         super().__init__()
-        self.grid_cell = 2
+        self.grid_cell = 3
         self.num_services = 3
         self.state_shape = CentralizedReward.state_shape(self.num_services, self.grid_cell)
         self._services_ensured = np.zeros(self.num_services)
@@ -38,6 +38,7 @@ class CentralizedReward(Reward):
         self._services_ensured += np.array(value)
 
     def calculate_reward(self):
+        self.services_ensured =[1,1,1]
         percentage_array = self.services_ensured / self.services_requested
         self.reward_value = sum(percentage_array) / self.num_services
         return self.reward_value

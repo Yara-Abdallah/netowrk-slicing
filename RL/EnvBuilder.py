@@ -1,8 +1,5 @@
-from Outlet.Cellular.ThreeG import ThreeG
 from RL.RLEnvironment.RLEnvironment import RLEnvironment
-import numpy as np
 
-from Utils.config import outlet_types
 
 
 class EnvironmentBuilder:
@@ -29,33 +26,27 @@ class StateBuilder(EnvironmentBuilder):
     def __init__(self, env):
         super().__init__(env)
 
-    def build_state(self, c ):
-        outlet = ThreeG(outlet_types.get("3G"), 0, 1, [1, 1, 1], 1, 1, [10, 15, 22], [10, 20, 30])
-        outlet2 = ThreeG(outlet_types.get("3G"), 0, 1, [1, 1, 1], 1, 1, [10, 5, 12], [10, 10, 40])
-
-        c.allocated_power = outlet.power_distinct
-        c.supported_services = outlet.supported_services_distinct
-        c.allocated_power = outlet2.power_distinct
-        c.supported_services = outlet2.supported_services_distinct
-        c.filtered_powers = c.allocated_power
-
-        state = c.calculate_state(c.supported_services[0])
-        self.env.state = state
-        print("state is : ", state)
+    def build_state(self,state_type):
+        self.env.state = state_type
+        #CentralizedState()
         return self
+
+
 
 
 class RewardBuilder(EnvironmentBuilder):
     def __init__(self, env):
         super().__init__(env)
 
-    def build_reward(self, cr):
-        cr.services_requested = np.array([30, 40, 10])
-        cr.services_ensured = np.array([5, 10, 3])
-        cr.services_ensured = np.array([3, 2, 1])
-        reward = cr.calculate_reward()
-        self.env.reward = reward
-        print("reward is : ", reward)
+    def build_reward(self,reward_type):
+        self.env.reward = reward_type
+        #CentralizedReward()
+        # cr.services_requested = np.array([30, 40, 10])
+        # cr.services_ensured = np.array([5, 10, 3])
+        # cr.services_ensured = np.array([3, 2, 1])
+        # reward = cr.calculate_reward()
+        # self.env.reward = reward
+        # print("reward is : ", reward)
         return self
 
 # en = EnvironmentBuilder()

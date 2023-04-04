@@ -1,13 +1,18 @@
+import numpy
 import traci
 from Environment import env_variables
 import xml.etree.ElementTree as ET
 import random
 from uuid import uuid4
 from Outlet.Cellular.ThreeG import ThreeG
+from RL.RLBuilder import RLBuilder
+from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
+from RL.RLEnvironment.Reward.CentralizedReward import CentralizedReward
+from RL.RLEnvironment.State.CentralizedState import CentralizedState
 from Utils.Bandwidth import Bandwidth
 from Utils.Cost import TowerCost, RequestCost
 from Utils.PerformanceLogger import PerformanceLogger
-from Utils.config import outlet_types
+from Utils.config import outlet_types, Grids
 from Vehicle.Car import Car
 from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Vehicle.VehicleOutletObserver import ConcreteObserver
@@ -17,6 +22,8 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 
 
 class Environment:
+    Grids = {}
+
     def __init__(self):
         self.polygon = traci.polygon
         self.route = traci.route
@@ -66,11 +73,27 @@ class Environment:
                 env_variables.outlets[type_poi].append((id_, position_))
                 print()
                 factory = FactoryCellular(outlet_types[str(type_poi)], 1, 1, [1, 1, 0], [position_[0], position_[1]],
-                                          10000, [10, 20, 30],
+                                          10000, [],
                                           [10, 10, 10])
                 outlet = factory.produce_cellular_outlet(str(type_poi))
                 outlets.append(outlet)
         return outlets
+
+    @staticmethod
+    def fill_grids(outlets):
+        Grids = {
+            "grid1": [],
+            "grid2": [],
+            "grid3": [],
+            "grid4": [],
+        }
+        grids = [outlets[i:i + 3] for i in range(0, len(outlets), 3)]
+        num = 1
+        for i, grid in enumerate(grids):
+            name = "grid" + str(num)
+            Grids[name] = grid
+            num = num + 1
+        return Grids
 
     def select_outlets_to_show_in_gui(self):
         """
@@ -80,12 +103,12 @@ class Environment:
             for id_, _ in env_variables.outlets[key]:
                 self.gui.toggleSelection(id_, 'poi')
 
-    def get_positions_of_outlets(self):
+    def get_positions_of_outlets(self, outlets):
         positions_of_outlets = []
-        outlets = self.get_all_outlets()
+
         for out in outlets:
             positions_of_outlets.append(out.position)
-        return positions_of_outlets, outlets
+        return positions_of_outlets
 
     def generate_vehicles(self, number_vehicles):
         """
@@ -105,7 +128,7 @@ class Environment:
         """
         sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
         traci.start(sumo_cmd)
-        self.get_all_outlets()
+
         self.prepare_route()
 
     def remove_vehicles_arrived(self):
@@ -150,7 +173,32 @@ class Environment:
         self.add_new_vehicles()
         return env_variables.vehicles
 
-    def car_interact(self, car, observer, performance_logger):
+    def services_aggregation(self, performance_logger, outlet, service_type, request_cost):
+        if outlet not in performance_logger._outlet_services_power_allocation:
+            performance_logger.set_outlet_services_power_allocation(outlet, [0.0, 0.0, 0.0])
+        if outlet not in performance_logger._outlet_services_requested_number:
+            performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
+        if str(service_type) == "FactorySafety":
+            x = performance_logger.outlet_services_power_allocation[outlet][0]
+            num = performance_logger.outlet_services_requested_number[outlet][0]
+            performance_logger.outlet_services_power_allocation[outlet][0] = float(x) + float(
+                request_cost)
+            performance_logger.outlet_services_requested_number[outlet][0] = int(num) + 1
+        elif str(service_type) == "FactoryEntertainment":
+            x = performance_logger.outlet_services_power_allocation[outlet][1]
+            num = performance_logger.outlet_services_requested_number[outlet][1]
+            performance_logger.outlet_services_power_allocation[outlet][1] = float(x) + float(
+                request_cost)
+            performance_logger.outlet_services_requested_number[outlet][1] = int(num) + 1
+
+        elif str(service_type) == "FactoryAutonomous":
+            x = performance_logger.outlet_services_power_allocation[outlet][2]
+            num = performance_logger.outlet_services_requested_number[outlet][2]
+            performance_logger.outlet_services_power_allocation[outlet][2] = float(x) + float(
+                request_cost)
+            performance_logger.outlet_services_requested_number[outlet][2] = int(num) + 1
+
+    def car_interact(self, car, observer, performance_logger, grid_outlets, builder):
         car.attach(observer)
         car.set_state(car.get_x(), car.get_y())
         info = car.send_request()
@@ -162,50 +210,80 @@ class Environment:
         request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
         request_cost = RequestCost(request_bandwidth, service.realtime)
         request_cost.cost_setter(service.realtime)
-        print(f"request cost from car {car.get_id()} : ->  {service.__class__.__name__, service.bandwidth, request_cost.cost} \n ")
+        print(
+            f"request cost from car {car.get_id()} : ->  {service.__class__.__name__, service.bandwidth, request_cost.cost} \n ")
         performance_logger.request_costs.append(request_cost.cost)
+        self.services_aggregation(performance_logger, outlet, service.__class__.__name__, request_cost.cost)
+        outlet.power = performance_logger.outlet_services_power_allocation[outlet]
+        print("outlet power is ........................ :  ", outlet.power)
         tower_cost = TowerCost(request_bandwidth, service.realtime)
         tower_cost.cost = service.realtime
         performance_logger.power_costs.append(tower_cost.cost)
         print(f"bandwidth_demand is:{request_bandwidth.allocated:.2f} ")
-
         cost2 = outlet.max_capacity - request_bandwidth.allocated
         print(f"capacity is: {outlet.max_capacity} MBps outlet type : {outlet.__class__.__name__}")
         print(f"tower cost after send request from  {car.get_id()} : ->  {cost2} \n ")
 
-        # print(f"performance logger service_requested >>>>>>>>>>> : {len(performance_logger.service_requested)} \n ")
-        # print(f"performance logger services_handled  >>>>>>>>>>> : {((performance_logger.service_handled[outlet]))} \n ")
+        for outlet in grid_outlets:
+            if len(outlet.power_distinct[0]) == 0:
+                outlet.power = [0.0, 0.0, 0.0]
+                performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
+            builder.environment.state.allocated_power = outlet.power_distinct
+            builder.environment.state.supported_services = outlet.supported_services_distinct
+            builder.environment.state.filtered_powers = builder.environment.state.allocated_power
+
+            builder.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
+        state_value = builder.environment.state.calculate_state(builder.environment.state.supported_services)
+        print("state_value  ", state_value)
+
+        #print("services requested :................... ", builder.environment.reward.services_requested)
+        # print("services ensured : ", builder.environment.reward.services_ensured)
+        reward_value = builder.environment.reward.calculate_reward()
+        print("reward value : ", reward_value)
+
+        action, action_value = builder.agents.chain(builder.model, state_value, 0.1)
+        print("action_value  ", action_value)
+        next_state = action.execute(builder.environment.state, action_value)
+        print("next state  ", next_state)
+        builder.agents.remember(state_value, action_value, reward_value, next_state)
 
     def run(self):
-
         self.starting()
+        outlets = self.get_all_outlets()
+        self.Grids = self.fill_grids(outlets)
         step = 0
         print("\n")
-
-        outlets_pos, outlets = self.get_positions_of_outlets()
+        outlets_pos = self.get_positions_of_outlets(outlets)
         observer = ConcreteObserver(outlets_pos, outlets)
         performance_logger = PerformanceLogger()
+
+        build = RLBuilder()
+        builder = build.agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
+                                                                                    CentralizedState()).model_.build_model().build()
+        # builder1 = build.agent.build_agent().environment.build_env().model_.build_model().build()
+        # builder2 = build.agent.build_agent().environment.build_env().model_.build_model().build()
+        # builder3 = build.agent.build_agent().environment.build_env().model_.build_model().build()
+        builder.agents.grid_outlets = self.Grids.get("grid1")
+        # builder1.agents.grid_outlets = self.Grids.get("grid2")
+        # builder2.agents.grid_outlets = self.Grids.get("grid3")
+        # builder3.agents.grid_outlets = self.Grids.get("grid4")
+        print("grid1 ", builder.agents.grid_outlets)
+        # print("grid2 ", builder.agents.grid_outlets)
+        # print("grid3 ", builder.agents.grid_outlets)
+        # print("grid4 ", builder.agents.grid_outlets)
 
         while step < env_variables.TIME:
             traci.simulationStep()
             print("step is ....................................... ", step)
             self.get_current_vehicles()
-
-            # print('============================================================')
-            # print('the vehicles in sumo: {}'.format(traci.vehicle.getIDCount()))
-            # print('the vehicles in env: {}'.format(len(env_variables.vehicles)))
-            # print('the arrived in env: {}'.format(len(traci.simulation.getArrivedIDList())))
-            # print('the derpated in env: {}'.format(len(traci.simulation.getDepartedIDList())))
-
             if step == 0:
                 self.generate_vehicles(150)
                 self.select_outlets_to_show_in_gui()
-
-            list(map(lambda veh: self.car_interact(veh, observer, performance_logger), env_variables.vehicles.values()))
+            list(map(lambda veh: self.car_interact(veh, observer, performance_logger, builder.agents.grid_outlets,
+                                                   builder), env_variables.vehicles.values()))
 
             step += 1
             if step == 10:
-                # print("........... ", (performance_logger.power_costs))
                 self.logging_the_final_results(performance_logger)
                 break
 

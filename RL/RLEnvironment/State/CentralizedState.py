@@ -1,11 +1,9 @@
 import copy
 
+import numpy
 import numpy as np
 import rx
 import rx.operators as ops
-
-from Communications.BridgeCommunications.ComsThreeG import ComsThreeG
-from Outlet.Cellular.ThreeG import ThreeG
 from RL.RLEnvironment.State.State import State
 
 
@@ -18,7 +16,7 @@ class CentralizedState(State):
 
     def __init__(self):
         super().__init__()
-        self.grid_cell = 2
+        self.grid_cell = 3
         self.num_services = 3
         self.state_shape = CentralizedState.state_shape(self.num_services, self.grid_cell)
         self._allocated_power = np.zeros(self.state_shape)
@@ -54,25 +52,21 @@ class CentralizedState(State):
         return x
 
     def calculate_state(self, binary):
-        self.accumulated_powers = []
-        xs = rx.from_(binary)
-        disposable = xs.pipe(
-            ops.map_indexed(
-                lambda x, i: (i, np.where(np.array(x) == 1.0))),
-            ops.map(lambda x: [x[0], x[1][0]]),
-            ops.map(self.filter_power))
-        disposable.subscribe(self.observer_sum)
-        return self.accumulated_powers
-
-# comm = ComsThreeG(0, 0, 0, 0, 0)
-# outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22])
-# outlet2 = ThreeG(0, comm, [0, 0, 1], 1, 1, [10, 15, 28])
-#
-# c = CentralizedState()
-# # print(c.calculate_state(4, 3))
-# c.allocated_power = outlet.power_distinct
-# c.supported_services = outlet.supported_services_distinct
-# c.allocated_power = outlet2.power_distinct
-# c.supported_services = outlet2.supported_services_distinct
-# c.filtered_powers = c.allocated_power
-# print(c.calculate_state(c.supported_services))
+        temp = list(numpy.concatenate(binary).flat)
+        countzero = np.all(temp)
+        # print("temp : >>>>>>>>>>>>>>>>>>>>>>>>",temp)
+        # print("bool : >>>>>>>>>>>>>>>>>>>>>>>>",countzero)
+        # print("binary : >>>>>>>>>>>>>>>>>>>>>>",binary)
+        if countzero == False:
+            self.accumulated_powers = []
+            xs = rx.from_(binary)
+            disposable = xs.pipe(
+                ops.map_indexed(
+                    lambda x, i: (i, np.where(np.array(x) == 1.0))),
+                ops.map(lambda x: [x[0], x[1][0]]),
+                ops.map(self.filter_power))
+            disposable.subscribe(self.observer_sum)
+            # print("self.accumulated_powers : >>>>>>>>>>>> ",self.accumulated_powers)
+            return self.accumulated_powers
+        else:
+            return [0.0, 0.0, 0.0]
