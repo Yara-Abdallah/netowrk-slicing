@@ -16,7 +16,7 @@ from Utils.config import outlet_types, Grids
 from Vehicle.Car import Car
 from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Vehicle.VehicleOutletObserver import ConcreteObserver
-
+import numpy as np
 
 # from Utils.FileLoggingInfo import Logger
 
@@ -231,21 +231,21 @@ class Environment:
             builder.environment.state.allocated_power = outlet.power_distinct
             builder.environment.state.supported_services = outlet.supported_services_distinct
             builder.environment.state.filtered_powers = builder.environment.state.allocated_power
-
+            builder.environment.state.services_requested = performance_logger.outlet_services_requested_number[outlet]
             builder.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
-        state_value = builder.environment.state.calculate_state(builder.environment.state.supported_services)
-        print("state_value  ", state_value)
 
-        #print("services requested :................... ", builder.environment.reward.services_requested)
-        # print("services ensured : ", builder.environment.reward.services_ensured)
-        reward_value = builder.environment.reward.calculate_reward()
-        print("reward value : ", reward_value)
-
-        action, action_value = builder.agents.chain(builder.model, state_value, 0.1)
-        print("action_value  ", action_value)
-        next_state = action.execute(builder.environment.state, action_value)
-        print("next state  ", next_state)
-        builder.agents.remember(state_value, action_value, reward_value, next_state)
+        builder.agents.train(builder)
+        # state_value = builder.environment.state.calculate_state(builder.environment.state.supported_services)
+        # print("state_value  ", state_value)
+        #
+        # reward_value = builder.environment.reward.calculate_reward()
+        # print("reward value : ", reward_value)
+        #
+        # action, action_value = builder.agents.chain(builder.model, state_value, 0.1)
+        # print("action_value  ", action_value)
+        # next_state = action.execute(builder.environment.state, action_value)
+        # print("next state  ", next_state)
+        # builder.agents.remember(state_value, action_value, reward_value, next_state)
 
     def run(self):
         self.starting()
@@ -282,9 +282,9 @@ class Environment:
             list(map(lambda veh: self.car_interact(veh, observer, performance_logger, builder.agents.grid_outlets,
                                                    builder), env_variables.vehicles.values()))
 
+
             step += 1
             if step == 10:
                 self.logging_the_final_results(performance_logger)
                 break
-
         traci.close()

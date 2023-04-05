@@ -13,6 +13,7 @@ class ActionAssignment:
         return np.random.randint(2, size=(self.num_services, self.grid_cell))
 
     def exploit(self, model, state):
+        #ValueError: cannot reshape array of size 6 into shape (1,2)
         state = np.array(state).reshape([1, np.array(state).shape[0]])
         return np.array(model.predict(state)).reshape(self.num_services, self.grid_cell)
 

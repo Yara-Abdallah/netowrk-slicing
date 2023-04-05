@@ -66,7 +66,7 @@ class ModelBuilder(RLBuilder):
         self.rl.model = (
             ModelBuilder_()
             .state_size()
-            .build_state_size(3)
+            .build_state_size(6)
             .action_size()
             .build_action_size(9)
             .loss_func()

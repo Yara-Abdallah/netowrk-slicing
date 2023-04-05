@@ -57,29 +57,3 @@ class DQN(AbstractRL):
     def create_model(self):
         print("1")
 
-# comm = ComsThreeG(0, 0, 0, 0, 0)
-# outlet = ThreeG(0, comm, [1, 1, 1], 1, 1, [10, 15, 22],[10,20,30])
-# outlet2 = ThreeG(0, comm, [0, 0, 1], 1, 1, [10, 15, 28],[10,20,30])
-# c = CentralizedState()
-#
-# c.allocated_power = outlet.power_distinct
-# c.supported_services = outlet.supported_services_distinct
-# c.allocated_power = outlet2.power_distinct
-# c.supported_services = outlet2.supported_services_distinct
-# c.filtered_powers = c.allocated_power
-# state = c.calculate_state(c.supported_services)
-# print(state)
-# model = Model(3, 6, 'relu', 'mse', Adam, 0.5, 'sigmoid').build_model()
-#
-# agent = Agent(ActionAssignment())
-# action, action_value = agent.chain(model,state,0.1)
-# print(action.execute(c, action_value))
-
-# d= DeCentralizedState()
-# # env = RLEnvironment()
-# env = ''
-# """a = DQN(model, agent, env)
-# print(a.agents)
-# a.env = env
-# a.agents = agent"""
-# print(model.summary())
