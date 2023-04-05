@@ -13,6 +13,8 @@ class CentralizedState(State):
     indices = []
     accumulated_powers = []
     filtered_powers = []
+    _services_ensured: np.ndarray
+    _services_requested: np.ndarray
 
     def __init__(self):
         super().__init__()
@@ -21,10 +23,27 @@ class CentralizedState(State):
         self.state_shape = CentralizedState.state_shape(self.num_services, self.grid_cell)
         self._allocated_power = np.zeros(self.state_shape)
         self._supported_services = copy.deepcopy(self.allocated_power)
+        self._services_ensured = np.zeros(self.num_services)
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
+    @property
+    def services_requested(self):
+        return self._services_requested
+
+    @services_requested.setter
+    def services_requested(self, value):
+        self._services_requested = value
+
+    @property
+    def services_ensured(self):
+        return self._services_ensured
+
+    @services_ensured.setter
+    def services_ensured(self, value: np.ndarray):
+        self._services_ensured += np.array(value)
 
     @property
     def allocated_power(self):
@@ -51,14 +70,20 @@ class CentralizedState(State):
         x = list(map(self.filtered_powers[x[0]].__getitem__, x[1]))
         return x
 
+    def resetstate(self):
+        return [0.0, 0.0, 0.0]
+
+    def calculate_utility(self):
+        self.services_ensured = [1, 1, 1]
+        percentage_array = self.services_ensured / self.services_requested
+        return percentage_array
+
     def calculate_state(self, binary):
         temp = list(numpy.concatenate(binary).flat)
         countzero = np.all(temp)
-        # print("temp : >>>>>>>>>>>>>>>>>>>>>>>>",temp)
-        # print("bool : >>>>>>>>>>>>>>>>>>>>>>>>",countzero)
-        # print("binary : >>>>>>>>>>>>>>>>>>>>>>",binary)
         if countzero == False:
             self.accumulated_powers = []
+            final_state = []
             xs = rx.from_(binary)
             disposable = xs.pipe(
                 ops.map_indexed(
@@ -66,7 +91,8 @@ class CentralizedState(State):
                 ops.map(lambda x: [x[0], x[1][0]]),
                 ops.map(self.filter_power))
             disposable.subscribe(self.observer_sum)
-            # print("self.accumulated_powers : >>>>>>>>>>>> ",self.accumulated_powers)
-            return self.accumulated_powers
+            final_state.extend(self.accumulated_powers)
+            final_state.extend(self.calculate_utility())
+            return final_state
         else:
-            return [0.0, 0.0, 0.0]
+            return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]

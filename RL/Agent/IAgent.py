@@ -27,6 +27,7 @@ class AbstractAgent():
         self.cumulative_reward = cumulative_reward
         self.step = step
         self.memory = deque(maxlen=4000)
+        self.batch_size = 32
         # model state action reward
 
     @property
@@ -39,14 +40,16 @@ class AbstractAgent():
     def action(self, a):
         pass
 
-    def replay_buffer(self):
+    @abstractmethod
+    def replay_buffer(self, batch_size, model):
         pass
-
 
     @abstractmethod
     def remember(self, state, action, reward, next_state):
         pass
-    def train(self, model, stop_at_convergence=False, **kwargs):
+
+    @abstractmethod
+    def train(self, builder, **kwargs):
         """ Train model. """
         pass
 
