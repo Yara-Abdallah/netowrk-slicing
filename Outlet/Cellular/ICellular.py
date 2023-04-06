@@ -8,7 +8,6 @@ from Utils.config import outlet_types
 
 # noinspection PyAbstractClass
 class Cellular(Outlet):
-
     """
     outlet from type cellular is the abstract class for different types ground towers
     """
@@ -16,7 +15,7 @@ class Cellular(Outlet):
     _max_capacity: float
 
     def __init__(
-        self, tower, agent, coms: Communications, supported_services, *args, **kwargs
+            self, tower, agent, coms: Communications, supported_services, *args, **kwargs
     ):
         """
         Parameters
@@ -46,35 +45,34 @@ class Cellular(Outlet):
 
     class BuildMaxCapacity:
         def calculate_max_capacity(
-            self,
-            num_antennas,
-            channel_bandwidth,
-            coding_rate,
-            modulation_order,
-            average_symbol_per_slot,
-            num_slots_per_frame,
-            num_frames_per_second,
+                self,
+                num_antennas,
+                channel_bandwidth,
+                coding_rate,
+                modulation_order,
+                average_symbol_per_slot,
+                num_slots_per_frame,
+                num_frames_per_second,
         ):
             spectral_efficiency = modulation_order * coding_rate  # bits/symbol
 
             capacity_per_antenna = (
-                channel_bandwidth
-                * 1e6
-                * spectral_efficiency
-                * average_symbol_per_slot
-                * num_slots_per_frame
-                * num_frames_per_second
-            ) / 1e6  # Mbps
+                                           channel_bandwidth
+                                           * 1e6
+                                           * spectral_efficiency
+                                           * average_symbol_per_slot
+                                           * num_slots_per_frame
+                                           * num_frames_per_second
+                                   ) / 1e6  # Mbps
             total_capacity = capacity_per_antenna * num_antennas
             real_total_capacity = total_capacity // 8 / 10
-            #print(f"capacity is: {real_total_capacity} MBps")
+            # print(f"capacity is: {real_total_capacity} MBps")
             return real_total_capacity
 
         def randomized_tower_based_max_capacity(self, tower_type: dict):
             outlet = {}
             outlet_vals = []
             for k in tower_type:
-
                 outlet[k] = np.random.choice(tower_type[k])
                 outlet_vals = [*outlet.values()]
             real_total_capacity = self.calculate_max_capacity(*outlet_vals)
@@ -101,3 +99,9 @@ class Cellular(Outlet):
         self._max_capacity = (
             self.BuildMaxCapacity().randomized_tower_based_max_capacity(value)
         )
+
+    # def get_state_reward_information(self, performance_logger, new_capacity):
+    #     self.dqn.environment.state.allocated_power = self.power_distinct
+    #     self.dqn.environment.state.tower_capacity = new_capacity
+    #     self.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[self]
+    #     self.dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[self]

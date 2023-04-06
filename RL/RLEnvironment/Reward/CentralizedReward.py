@@ -13,6 +13,7 @@ class CentralizedReward(Reward):
         self.num_services = 3
         self.state_shape = CentralizedReward.state_shape(self.num_services, self.grid_cell)
         self._services_ensured = np.zeros(self.num_services)
+        self._services_requested = np.zeros(self.num_services)
 
     @staticmethod
     def state_shape(num_services, grid_cell):
@@ -27,7 +28,7 @@ class CentralizedReward(Reward):
 
     @services_requested.setter
     def services_requested(self, value):
-        self._services_requested = value
+        self._services_requested += np.array(value)
 
     @property
     def services_ensured(self):
@@ -44,10 +45,5 @@ class CentralizedReward(Reward):
         return self.reward_value
 
 
-# cr = CentralizedReward()
-# cr.services_requested = np.array([30, 40, 10])
-# cr.services_ensured = np.array([5, 10, 3])
-# cr.services_ensured = np.array([3, 2, 1])
-# cr.calculate_reward()
-# print(cr())
+
 

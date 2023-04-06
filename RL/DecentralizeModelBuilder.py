@@ -1,12 +1,15 @@
 from keras.optimizers import Adam
 
-from RL.RLAlgorithms.Model import Model
+from RL.RLAlgorithms.DecentralizeModel import Model
 
 
-class ModelBuilder_:
+class ModelBuilder_Decentralize:
+
     def __init__(self, model=None):
         if model is None:
-            self.model = Model(6, 9, "relu", "mse", Adam, 0.5, "sigmoid").build_model()
+            self.model = Model(state_size=7, action_size=1,
+                               activation_function="relu", loss_function="mse", optimization_algorithm=Adam,
+                               learning_rate=0.5, output_activation="sigmoid").build_model()
         else:
             self.model = model
 
@@ -35,7 +38,7 @@ class ModelBuilder_:
         return LearningRateBuilder(self.model)
 
 
-class StateSizeBuilder(ModelBuilder_):
+class StateSizeBuilder(ModelBuilder_Decentralize):
     def __init__(self, model):
         super().__init__(model)
 
@@ -44,7 +47,7 @@ class StateSizeBuilder(ModelBuilder_):
         return self
 
 
-class ActionSizeBuilder(ModelBuilder_):
+class ActionSizeBuilder(ModelBuilder_Decentralize):
     def __init__(self, model):
         super().__init__(model)
 
@@ -53,7 +56,7 @@ class ActionSizeBuilder(ModelBuilder_):
         return self
 
 
-class LossFuncBuilder(ModelBuilder_):
+class LossFuncBuilder(ModelBuilder_Decentralize):
     def __init__(self, model):
         super().__init__(model)
 
@@ -62,7 +65,7 @@ class LossFuncBuilder(ModelBuilder_):
         return self
 
 
-class OptimizerBuilder(ModelBuilder_):
+class OptimizerBuilder(ModelBuilder_Decentralize):
     def __init__(self, model):
         super().__init__(model)
 
@@ -71,7 +74,7 @@ class OptimizerBuilder(ModelBuilder_):
         return self
 
 
-class ActivationFuncOutputBuilder(ModelBuilder_):
+class ActivationFuncOutputBuilder(ModelBuilder_Decentralize):
     def __init__(self, model):
         super().__init__(model)
 
@@ -80,7 +83,7 @@ class ActivationFuncOutputBuilder(ModelBuilder_):
         return self
 
 
-class ActivationFuncBuilder(ModelBuilder_):
+class ActivationFuncBuilder(ModelBuilder_Decentralize):
     def __init__(self, model):
         super().__init__(model)
 
@@ -89,23 +92,10 @@ class ActivationFuncBuilder(ModelBuilder_):
         return self
 
 
-class LearningRateBuilder(ModelBuilder_):
+class LearningRateBuilder(ModelBuilder_Decentralize):
     def __init__(self, model):
         super().__init__(model)
 
     def build_Learning_rate(self, learning):
         self.model.learning_rate = learning
         return self
-
-
-# mo = ModelBuilder_()
-# m = mo \
-#     .state_size().build_state_size(3) \
-#     .action_size().build_action_size(4) \
-#     .loss_func().build_loss_func("mse") \
-#     .optimizer().build_optimizer(Adam) \
-#     .activation_func().build_Activation("relu") \
-#     .activation_func_output_layer().build_activation_output("sigmoid") \
-#     .learning_rate().build_Learning_rate(0.5)\
-#     .builder()
-# print(m)

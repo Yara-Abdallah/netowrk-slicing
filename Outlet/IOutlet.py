@@ -28,8 +28,10 @@ class Outlet(ABC):
                 The power or the outlet.
 
             """
-        self.dqn = RLBuilder().agent.build_agent(ActionResponse()).environment.build_env(DeCentralizedReward(),DeCentralizedState()).model_.build_model().build()
         self.__class__.__id += 1
+        self.dqn = RLBuilder().agent.build_agent(ActionResponse()).environment.build_env(DeCentralizedReward(),
+                                                                                         DeCentralizedState()).model_.build_model(
+            "decentralized", 7, 1).build()
         self._distinct = self.__class__.__id
         self.position = position
         self.radius = radius

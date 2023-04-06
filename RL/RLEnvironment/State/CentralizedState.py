@@ -15,6 +15,7 @@ class CentralizedState(State):
     filtered_powers = []
     _services_ensured: np.ndarray
     _services_requested: np.ndarray
+    _tower_capacity: float
 
     def __init__(self):
         super().__init__()
@@ -24,10 +25,20 @@ class CentralizedState(State):
         self._allocated_power = np.zeros(self.state_shape)
         self._supported_services = copy.deepcopy(self.allocated_power)
         self._services_ensured = np.zeros(self.num_services)
+        self._services_requested = np.zeros(self.num_services)
+        self._tower_capacity = 0.0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
+    @property
+    def tower_capacity(self):
+        return self._tower_capacity
+
+    @tower_capacity.setter
+    def tower_capacity(self, value):
+        self._tower_capacity = value
 
     @property
     def services_requested(self):
@@ -35,7 +46,7 @@ class CentralizedState(State):
 
     @services_requested.setter
     def services_requested(self, value):
-        self._services_requested = value
+        self._services_requested += np.array(value)
 
     @property
     def services_ensured(self):
@@ -70,18 +81,16 @@ class CentralizedState(State):
         x = list(map(self.filtered_powers[x[0]].__getitem__, x[1]))
         return x
 
-    def resetstate(self):
-        return [0.0, 0.0, 0.0]
-
     def calculate_utility(self):
-        self.services_ensured = [1, 1, 1]
         percentage_array = self.services_ensured / self.services_requested
         return percentage_array
 
+
+
     def calculate_state(self, binary):
         temp = list(numpy.concatenate(binary).flat)
-        countzero = np.all(temp)
-        if countzero == False:
+        count_zero = np.all(temp)
+        if count_zero == False:
             self.accumulated_powers = []
             final_state = []
             xs = rx.from_(binary)
@@ -91,6 +100,7 @@ class CentralizedState(State):
                 ops.map(lambda x: [x[0], x[1][0]]),
                 ops.map(self.filter_power))
             disposable.subscribe(self.observer_sum)
+            # final_state.append(self.tower_capacity)
             final_state.extend(self.accumulated_powers)
             final_state.extend(self.calculate_utility())
             return final_state

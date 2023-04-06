@@ -35,29 +35,29 @@ class Agent(AbstractAgent):
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
 
-    def train(self,builder, **kwargs):
+    def train(self,gridcell_dqn, **kwargs):
         ep_rewards = []
         for e in range(self.episodes):
             episode_reward = 0
-            #state = builder.environment.state.resetState()
-            state_value = builder.environment.state.calculate_state(builder.environment.state.supported_services)
+            #state = gridcell_dqn.environment.state.resetState()
+            state_value = gridcell_dqn.environment.state.calculate_state(gridcell_dqn.environment.state.supported_services)
             print("state value : ",state_value)
             print("state shape : ", np.array(state_value).shape[0])
             #state_value = np.array(state_value).reshape([1, np.array(state_value).shape[0]])
             for time in range(self.step):
-                action, action_value = builder.agents.chain(builder.model, state_value, 0.1)
+                action, action_value = gridcell_dqn.agents.chain(gridcell_dqn.model, state_value, 0.1)
                 print("action value : ", action_value)
-                next_state = action.execute(builder.environment.state, action_value)
+                next_state = action.execute(gridcell_dqn.environment.state, action_value)
                 print("next_state value : ", next_state)
-                reward_value = builder.environment.reward.calculate_reward()
+                reward_value = gridcell_dqn.environment.reward.calculate_reward()
                 print("reward value : ",reward_value)
                 episode_reward += reward_value
                 #next_state = np.reshape(next_state, [1, np.array(next_state).shape[1]])
-                builder.agents.remember(state_value, action_value, reward_value, next_state)
+                gridcell_dqn.agents.remember(state_value, action_value, reward_value, next_state)
                 state_value = next_state
             ep_rewards.append(episode_reward)
-            if len(builder.agents.memory) > self.batch_size:
-                builder.agents.replay_buffer(self.batch_size, builder.model)
+            if len(gridcell_dqn.agents.memory) > self.batch_size:
+                gridcell_dqn.agents.replay_buffer(self.batch_size, gridcell_dqn.model)
 
     def remember(self, state, action, reward, next_state):
         self.memory.append((state, action, reward, next_state))

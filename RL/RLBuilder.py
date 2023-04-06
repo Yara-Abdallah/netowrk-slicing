@@ -1,8 +1,9 @@
 from RL.AgentBuilder import ActionBuilder, AgentBuilder_
+from RL.DecentralizeModelBuilder import ModelBuilder_Decentralize
 from RL.EnvBuilder import EnvironmentBuilder
-from RL.ModelBuilder import ModelBuilder_
+from RL.CentralizeModelBuilder import  ModelBuilder_Centralize
 from RL.RLAlgorithms.Centralized_DQN import DQN
-from RL.RLAlgorithms.Model import Model
+from RL.RLAlgorithms.CentralizeModel import Model
 from keras.optimizers import Adam
 import  random
 from RL.RLEnvironment.Reward.CentralizedReward import CentralizedReward
@@ -19,6 +20,7 @@ class RLBuilder:
 
     @property
     def model_(self):
+
         return ModelBuilder(self.rl)
 
     @property
@@ -62,25 +64,45 @@ class ModelBuilder(RLBuilder):
     def __init__(self, rl):
         super().__init__(rl)
 
-    def build_model(self):
-        self.rl.model = (
-            ModelBuilder_()
-            .state_size()
-            .build_state_size(6)
-            .action_size()
-            .build_action_size(9)
-            .loss_func()
-            .build_loss_func("mse")
-            .optimizer()
-            .build_optimizer(Adam)
-            .activation_func()
-            .build_Activation("relu")
-            .activation_func_output_layer()
-            .build_activation_output("sigmoid")
-            .learning_rate()
-            .build_Learning_rate(0.5)
-            .builder()
-        )
+    def build_model(self,model_type,state_input_size,action_output_size):
+        if model_type == "centralized":
+            self.rl.model = (
+                ModelBuilder_Centralize()
+                .state_size()
+                .build_state_size(state_input_size)
+                .action_size()
+                .build_action_size(action_output_size)
+                .loss_func()
+                .build_loss_func("mse")
+                .optimizer()
+                .build_optimizer(Adam)
+                .activation_func()
+                .build_Activation("relu")
+                .activation_func_output_layer()
+                .build_activation_output("sigmoid")
+                .learning_rate()
+                .build_Learning_rate(0.5)
+                .builder()
+            )
+        elif model_type == "decentralized":
+            self.rl.model = (
+                ModelBuilder_Decentralize()
+                .state_size()
+                .build_state_size(state_input_size)
+                .action_size()
+                .build_action_size(action_output_size)
+                .loss_func()
+                .build_loss_func("mse")
+                .optimizer()
+                .build_optimizer(Adam)
+                .activation_func()
+                .build_Activation("relu")
+                .activation_func_output_layer()
+                .build_activation_output("sigmoid")
+                .learning_rate()
+                .build_Learning_rate(0.5)
+                .builder()
+            )
 
         return self
 

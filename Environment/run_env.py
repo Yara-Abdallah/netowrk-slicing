@@ -18,6 +18,7 @@ from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Vehicle.VehicleOutletObserver import ConcreteObserver
 import numpy as np
 
+
 # from Utils.FileLoggingInfo import Logger
 
 
@@ -173,17 +174,38 @@ class Environment:
         self.add_new_vehicles()
         return env_variables.vehicles
 
+    def ensured_service_aggrigation(self, performance_logger, outlet, service_type, action_value):
+        if outlet not in performance_logger._outlet_services_ensured_number:
+            performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
+
+        if str(service_type) == "FactorySafety":
+            service_ensured_value = performance_logger.outlet_services_ensured_number[outlet][0]
+            if action_value == 1:
+                performance_logger.outlet_services_ensured_number[outlet][0] = int(service_ensured_value) + 1
+
+        elif str(service_type) == "FactoryEntertainment":
+            service_ensured_value = performance_logger.outlet_services_ensured_number[outlet][1]
+            if action_value == 1:
+                performance_logger.outlet_services_ensured_number[outlet][1] = int(service_ensured_value) + 1
+
+        elif str(service_type) == "FactoryAutonomous":
+            service_ensured_value = performance_logger.outlet_services_ensured_number[outlet][2]
+            if action_value == 1:
+                performance_logger.outlet_services_ensured_number[outlet][2] = int(service_ensured_value) + 1
+
     def services_aggregation(self, performance_logger, outlet, service_type, request_cost):
         if outlet not in performance_logger._outlet_services_power_allocation:
             performance_logger.set_outlet_services_power_allocation(outlet, [0.0, 0.0, 0.0])
         if outlet not in performance_logger._outlet_services_requested_number:
             performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
+
         if str(service_type) == "FactorySafety":
             x = performance_logger.outlet_services_power_allocation[outlet][0]
             num = performance_logger.outlet_services_requested_number[outlet][0]
             performance_logger.outlet_services_power_allocation[outlet][0] = float(x) + float(
                 request_cost)
             performance_logger.outlet_services_requested_number[outlet][0] = int(num) + 1
+
         elif str(service_type) == "FactoryEntertainment":
             x = performance_logger.outlet_services_power_allocation[outlet][1]
             num = performance_logger.outlet_services_requested_number[outlet][1]
@@ -198,7 +220,9 @@ class Environment:
                 request_cost)
             performance_logger.outlet_services_requested_number[outlet][2] = int(num) + 1
 
-    def car_interact(self, car, observer, performance_logger, grid_outlets, builder):
+
+
+    def car_interact(self, car, observer, performance_logger, grid_outlets, gridcell_dqn):
         car.attach(observer)
         car.set_state(car.get_x(), car.get_y())
         info = car.send_request()
@@ -217,35 +241,67 @@ class Environment:
         outlet.power = performance_logger.outlet_services_power_allocation[outlet]
         print("outlet power is ........................ :  ", outlet.power)
         tower_cost = TowerCost(request_bandwidth, service.realtime)
-        tower_cost.cost = service.realtime
+        tower_cost.cost_setter(service.realtime)
         performance_logger.power_costs.append(tower_cost.cost)
         print(f"bandwidth_demand is:{request_bandwidth.allocated:.2f} ")
         cost2 = outlet.max_capacity - request_bandwidth.allocated
         print(f"capacity is: {outlet.max_capacity} MBps outlet type : {outlet.__class__.__name__}")
-        print(f"tower cost after send request from  {car.get_id()} : ->  {cost2} \n ")
+        print(f"tower capacity after send request from  {car.get_id()} : ->  {cost2} \n ")
+        tower_cost.cost = cost2
+
+        if len(outlet.power_distinct[0]) == 0:
+            outlet.power = [0.0, 0.0, 0.0]
+            performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
+            performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
+        print("outlet.power_distinct : ", outlet.power)
+        outlet.dqn.environment.state.allocated_power = outlet.power
+        outlet.dqn.environment.state.tower_capacity = cost2
+        outlet.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[outlet]
+        outlet.dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
+        state_value = outlet.dqn.environment.state.calculate_state()
+        print("state_value for Decentralized agent   ", state_value)
+        reward_value = outlet.dqn.environment.reward.calculate_reward()
+        print("reward value for Decentralized agent    ", reward_value)
+        action, action_value = outlet.dqn.agents.chain(outlet.dqn.model, state_value, 0.1)
+        print("action_value for Decentralized agent   ", action_value)
+        self.ensured_service_aggrigation(performance_logger, outlet, service.__class__.__name__, action_value)
+        outlet.dqn.environment.state.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
+        outlet.dqn.environment.reward.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
+        next_state = action.execute(outlet.dqn.environment.state, action_value)
+
+        print("services requested become : ..............  ", outlet.dqn.environment.state.services_requested)
+        print("request ensured become : ..............  ", outlet.dqn.environment.state.services_ensured)
+        print("next state for Decentralized agent  ", next_state)
 
         for outlet in grid_outlets:
             if len(outlet.power_distinct[0]) == 0:
                 outlet.power = [0.0, 0.0, 0.0]
                 performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
-            builder.environment.state.allocated_power = outlet.power_distinct
-            builder.environment.state.supported_services = outlet.supported_services_distinct
-            builder.environment.state.filtered_powers = builder.environment.state.allocated_power
-            builder.environment.state.services_requested = performance_logger.outlet_services_requested_number[outlet]
-            builder.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
+                performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
 
-        builder.agents.train(builder)
-        # state_value = builder.environment.state.calculate_state(builder.environment.state.supported_services)
-        # print("state_value  ", state_value)
-        #
-        # reward_value = builder.environment.reward.calculate_reward()
-        # print("reward value : ", reward_value)
-        #
-        # action, action_value = builder.agents.chain(builder.model, state_value, 0.1)
-        # print("action_value  ", action_value)
-        # next_state = action.execute(builder.environment.state, action_value)
-        # print("next state  ", next_state)
-        # builder.agents.remember(state_value, action_value, reward_value, next_state)
+            gridcell_dqn.environment.state.allocated_power = outlet.power_distinct
+            gridcell_dqn.environment.state.tower_capacity = cost2
+            gridcell_dqn.environment.state.supported_services = outlet.supported_services_distinct
+            gridcell_dqn.environment.state.filtered_powers = gridcell_dqn.environment.state.allocated_power
+            gridcell_dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[outlet]
+            gridcell_dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
+            gridcell_dqn.environment.state.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
+            gridcell_dqn.environment.reward.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
+        print(" services_ensured in grid cell >>>>>>>>>>>>> ",gridcell_dqn.environment.state.services_ensured)
+        print(" services_requested in grid cell >>>>>>>>>>>>> ",gridcell_dqn.environment.state.services_requested)
+
+        #gridcell_dqn.agents.train(gridcell_dqn)
+        state_value = gridcell_dqn.environment.state.calculate_state(gridcell_dqn.environment.state.supported_services)
+        print("state_value for centralized agent   ", state_value)
+
+        reward_value = gridcell_dqn.environment.reward.calculate_reward()
+        print("reward value for centralized agent   ", reward_value)
+
+        action, action_value = gridcell_dqn.agents.chain(gridcell_dqn.model, state_value, 0.1)
+        print("action_value for centralized agent   ", action_value)
+        next_state = action.execute(gridcell_dqn.environment.state, action_value)
+        print("next state for centralized agent  ", next_state)
+        # gridcell_dqn.agents.remember(state_value, action_value, reward_value, next_state)
 
     def run(self):
         self.starting()
@@ -258,19 +314,20 @@ class Environment:
         performance_logger = PerformanceLogger()
 
         build = RLBuilder()
-        builder = build.agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
-                                                                                    CentralizedState()).model_.build_model().build()
-        # builder1 = build.agent.build_agent().environment.build_env().model_.build_model().build()
-        # builder2 = build.agent.build_agent().environment.build_env().model_.build_model().build()
-        # builder3 = build.agent.build_agent().environment.build_env().model_.build_model().build()
-        builder.agents.grid_outlets = self.Grids.get("grid1")
-        # builder1.agents.grid_outlets = self.Grids.get("grid2")
-        # builder2.agents.grid_outlets = self.Grids.get("grid3")
-        # builder3.agents.grid_outlets = self.Grids.get("grid4")
-        print("grid1 ", builder.agents.grid_outlets)
-        # print("grid2 ", builder.agents.grid_outlets)
-        # print("grid3 ", builder.agents.grid_outlets)
-        # print("grid4 ", builder.agents.grid_outlets)
+        gridcell_dqn = build.agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
+                                                                                         CentralizedState()).model_.build_model(
+            "centralized", 6, 9).build()
+        # gridcell_dqn1 = build.agent.build_agent().environment.build_env().model_.build_model().build()
+        # gridcell_dqn2 = build.agent.build_agent().environment.build_env().model_.build_model().build()
+        # gridcell_dqn3 = build.agent.build_agent().environment.build_env().model_.build_model().build()
+        gridcell_dqn.agents.grid_outlets = self.Grids.get("grid1")
+        # gridcell_dqn1.agents.grid_outlets = self.Grids.get("grid2")
+        # gridcell_dqn2.agents.grid_outlets = self.Grids.get("grid3")
+        # gridcell_dqn3.agents.grid_outlets = self.Grids.get("grid4")
+        print("grid1 ", gridcell_dqn.agents.grid_outlets)
+        # print("grid2 ", gridcell_dqn.agents.grid_outlets)
+        # print("grid3 ", gridcell_dqn.agents.grid_outlets)
+        # print("grid4 ", gridcell_dqn.agents.grid_outlets)
 
         while step < env_variables.TIME:
             traci.simulationStep()
@@ -279,9 +336,8 @@ class Environment:
             if step == 0:
                 self.generate_vehicles(150)
                 self.select_outlets_to_show_in_gui()
-            list(map(lambda veh: self.car_interact(veh, observer, performance_logger, builder.agents.grid_outlets,
-                                                   builder), env_variables.vehicles.values()))
-
+            list(map(lambda veh: self.car_interact(veh, observer, performance_logger, gridcell_dqn.agents.grid_outlets,
+                                                   gridcell_dqn), env_variables.vehicles.values()))
 
             step += 1
             if step == 10:

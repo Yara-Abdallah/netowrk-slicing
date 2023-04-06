@@ -2,7 +2,7 @@ from typing import Protocol
 
 
 class Action(Protocol):
-    def execute(self, state, action, **kwargs):
+    def execute(self, state, **kwargs):
         ...
 
     def explore(self):
