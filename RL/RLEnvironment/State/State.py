@@ -9,5 +9,5 @@ class State(ABC):
         pass
 
     @abstractmethod
-    def calculate_state(self, supported_services):
+    def calculate_state(self, **kwargs):
         pass

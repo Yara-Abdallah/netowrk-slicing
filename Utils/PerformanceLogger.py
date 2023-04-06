@@ -31,6 +31,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
     handled_services: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
     _outlet_services_power_allocation: Dict[Outlet, List[float]] = field(default_factory=dict)
     _outlet_services_requested_number: Dict[Outlet, List[int]] = field(default_factory=dict)
+    _outlet_services_ensured_number: Dict[Outlet, List[int]] = field(default_factory=dict)
     _request_costs: List[int] = field(default_factory=list)
     _power_costs: List[float] = field(default_factory=list)
     served_ratio: List[float] = field(default_factory=list)
@@ -43,6 +44,14 @@ class PerformanceLogger(metaclass=SingletonMeta):
     def services_type(self, value):
         self._services_type = value
 
+    @property
+    def outlet_services_ensured_number(self):
+        return self._outlet_services_ensured_number
+
+    def set_outlet_services_ensured_number(self, outlet, num):
+        if outlet not in self._outlet_services_ensured_number:
+            self._outlet_services_ensured_number[outlet] = {}
+        self._outlet_services_ensured_number[outlet] = num
     @property
     def outlet_services_requested_number(self):
         return self._outlet_services_requested_number
