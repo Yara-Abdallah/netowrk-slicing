@@ -46,7 +46,7 @@ class CentralizedState(State):
 
     @services_requested.setter
     def services_requested(self, value):
-        self._services_requested += np.array(value)
+        self._services_requested = np.array(value)
 
     @property
     def services_ensured(self):
@@ -54,7 +54,7 @@ class CentralizedState(State):
 
     @services_ensured.setter
     def services_ensured(self, value: np.ndarray):
-        self._services_ensured += np.array(value)
+        self._services_ensured = np.array(value)
 
     @property
     def allocated_power(self):
@@ -86,6 +86,10 @@ class CentralizedState(State):
         return percentage_array
 
 
+    def resetsate(self):
+
+        self._services_ensured = np.zeros(self.num_services)
+        self._services_requested = np.zeros(self.num_services)
 
     def calculate_state(self, binary):
         temp = list(numpy.concatenate(binary).flat)

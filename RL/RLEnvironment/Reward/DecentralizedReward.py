@@ -11,13 +11,12 @@ class DeCentralizedReward(Reward):
         self.num_services = 3
         self.state_shape = DeCentralizedReward.state_shape(self.num_services, self.grid_cell)
         self._services_ensured = np.zeros(self.num_services)
+        self._services_requested = np.zeros(self.num_services)
+        self.reward_value = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
-
-    def __call__(self):
-        return self.reward_value
 
     @property
     def services_requested(self):
@@ -35,11 +34,19 @@ class DeCentralizedReward(Reward):
     def services_ensured(self, value: np.ndarray):
         self._services_ensured = np.array(value)
 
+    @property
+    def reward_value(self):
+        return self._reward_value
+
+    @reward_value.setter
+    def reward_value(self, r):
+        self._reward_value = r
 
 
     def calculate_reward(self):
         percentage_array = self.services_ensured / self.services_requested
-        self.reward_value = sum(percentage_array) / self.num_services
-        return self.reward_value
+        #self.reward_value = sum(percentage_array) / self.num_services
+        #self.reward_value
+        return percentage_array
 
 

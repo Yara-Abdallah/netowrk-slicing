@@ -36,7 +36,7 @@ class Outlet(ABC):
         self.__class__.__id += 1
         self.dqn = RLBuilder().agent.build_agent(ActionResponse()).environment.build_env(DeCentralizedReward(),
                                                                                          DeCentralizedState()).model_.build_model(
-            "decentralized", 7, 1).build()
+            "decentralized", 7, 2).build()
         self._distinct = self.__class__.__id
         self.position = position
         self._radius = radius

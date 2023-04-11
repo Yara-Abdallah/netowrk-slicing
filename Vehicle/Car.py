@@ -1,6 +1,7 @@
 import random
 import math
 from Service.FactoryService import FactoryService
+from Utils import config
 from Vehicle.IVehicle import Vehicle
 from Utils.config import SERVICES_TYPES
 
@@ -43,7 +44,7 @@ class Car(Vehicle):
 
     def greedy(self):
         def euclidian_distance(outlet):
-            #print('sh', outlet)
+            # print('sh', outlet)
             result = math.sqrt(
                 (outlet.position[0] - self.x) ** 2 + (outlet.position[1] - self.y) ** 2
             )
@@ -52,16 +53,23 @@ class Car(Vehicle):
         distance = list(map(lambda x: euclidian_distance(x), self.outlets_serve))
         return self.outlets_serve[distance.index(min(distance))]
 
+    def check_outlet_types(self, outlet, type):
+        if outlet.__class__.__name__ == type:
+            return True
+        else:
+            return False
+
     def send_request(self):
+
         outlet = self.greedy()
         outlet.services = []
         outlet.services.extend([outlet, self.car_requests()[0]])
+
+        filtered_realtime = dict(filter(lambda item: int(min(item[1])) >= int(self.car_requests()[0][2].realtime),
+                                        config.REALTIME_BANDWIDTH.items()))
+        my_list = list(filter(lambda item: outlet.__class__.__name__ not in item[0] and max(item[1]) > min(
+            filtered_realtime[item[0]]), filtered_realtime.items()))
+        if not len(my_list):
+            my_list = [('SATELLITE', [9])]
+        self.car_requests()[0][2].realtime = list(map(lambda x: x[1][0], my_list))[0]
         return outlet.services
-
-
-# car = Car(1, 1, 1)
-# observer = ConcreteObserver([[10, 10], [0, 1]], [ThreeG(outlet_types.get("3G"), 2, 3, 4, [5,3], 6, 7, 8),ThreeG(outlet_types.get("3G"), 2, 3, 4, [30,90], 6, 7, 8)])
-# car.attach(observer)
-# car.set_state(1, 1)
-# print(car.send_request())
-# print(car.send_request())

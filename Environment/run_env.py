@@ -67,7 +67,8 @@ class Environment:
         """
         outlets = []
         poi_ids = traci.poi.getIDList()
-        for id_ in poi_ids:
+
+        def append_outlets(id_):
             type_poi = traci.poi.getType(id_)
             if type_poi in env_variables.types_outlets:
                 position_ = traci.poi.getPosition(id_)
@@ -78,6 +79,8 @@ class Environment:
                                           [10, 10, 10])
                 outlet = factory.produce_cellular_outlet(str(type_poi))
                 outlets.append(outlet)
+
+        list(map(lambda x: append_outlets(x), poi_ids))
         return outlets
 
     @staticmethod
@@ -89,26 +92,27 @@ class Environment:
             "grid4": [],
         }
         grids = [outlets[i:i + 3] for i in range(0, len(outlets), 3)]
-        num = 1
-        for i, grid in enumerate(grids):
-            name = "grid" + str(num)
+
+        def grid_namer(i, grid):
+            name = "grid" + str(i + 1)
             Grids[name] = grid
-            num = num + 1
+
+        list(map(lambda x: grid_namer(x[0], x[1]), enumerate(grids)))
+
         return Grids
 
     def select_outlets_to_show_in_gui(self):
         """
         select outlets in network to display type of each outlet
         """
-        for key in env_variables.outlets.keys():
-            for id_, _ in env_variables.outlets[key]:
-                self.gui.toggleSelection(id_, 'poi')
+        from itertools import chain
+        array = list(map(lambda x: x, chain(*list(map(lambda x: x[1], env_variables.outlets.items())))))
+        list(map(lambda x: self.gui.toggleSelection(x[0], 'poi'), map(lambda x: x, array)))
 
     def get_positions_of_outlets(self, outlets):
         positions_of_outlets = []
 
-        for out in outlets:
-            positions_of_outlets.append(out.position)
+        list(map(lambda x: positions_of_outlets.append(x.position), outlets))
         return positions_of_outlets
 
     def generate_vehicles(self, number_vehicles):
@@ -117,10 +121,19 @@ class Environment:
         and get random route for each vehicle from routes in env_variables.py
         :param number_vehicles: number of vehicles to be generated
         """
-        for i in range(number_vehicles):
-            id_route_ = random.choice(env_variables.all_routes)
+
+        all_routes = env_variables.all_routes
+
+        def add_vehicle(id_route_):
             uid = str(uuid4())
             self.vehicle.add(vehID=uid, routeID=id_route_)
+
+        list(map(add_vehicle, random.choices(all_routes, k=number_vehicles)))
+
+        # for i in range(number_vehicles):
+        #     id_route_ = random.choice(env_variables.all_routes)
+        #     uid = str(uuid4())
+        #     self.vehicle.add(vehID=uid, routeID=id_route_)
 
     def starting(self):
         """
@@ -138,8 +151,11 @@ class Environment:
         the add to env_variables.vehicles (dictionary)
         """
         ids_arrived = self.simulation.getArrivedIDList()
-        for id_ in ids_arrived:
+
+        def remove_vehicle(id_):
             del env_variables.vehicles[id_]
+
+        list(map(remove_vehicle, ids_arrived))
 
     def add_new_vehicles(self):
         """
@@ -147,8 +163,11 @@ class Environment:
         the add to env_variables.vehicles (dictionary)
         """
         ids_new_vehicles = self.simulation.getDepartedIDList()
-        for id_ in ids_new_vehicles:
+
+        def create_vehicle(id_):
             env_variables.vehicles[id_] = Car(id_, 0, 0)
+
+        list(map(create_vehicle, ids_new_vehicles))
 
     def outlets_logging(self, outlet_num, outlet, cars):
         return f"Outlet {outlet_num} : -> {outlet}   -  Number Of Cars Which Send Request To It -> {len(cars)} \n "
@@ -159,6 +178,7 @@ class Environment:
 
     def logging_the_final_results(self, performance_logger):
         service_handled = performance_logger.service_handled
+
         for i, outer_key in enumerate(service_handled):
             num = 0
             print(self.outlets_logging(i, outer_key, service_handled[outer_key]))
@@ -175,6 +195,7 @@ class Environment:
         return env_variables.vehicles
 
     def ensured_service_aggrigation(self, performance_logger, outlet, service_type, action_value):
+
         if outlet not in performance_logger._outlet_services_ensured_number:
             performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
 
@@ -220,8 +241,6 @@ class Environment:
                 request_cost)
             performance_logger.outlet_services_requested_number[outlet][2] = int(num) + 1
 
-
-
     def car_interact(self, car, observer, performance_logger, grid_outlets, gridcell_dqn):
         car.attach(observer)
         car.set_state(car.get_x(), car.get_y())
@@ -255,53 +274,101 @@ class Environment:
             performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
         print("outlet.power_distinct : ", outlet.power)
         outlet.dqn.environment.state.allocated_power = outlet.power
+        print("outlet.dqn.environment.state.allocated_power>>>>>>>>>>>>>>>>> ",
+              outlet.dqn.environment.state.allocated_power)
         outlet.dqn.environment.state.tower_capacity = cost2
         outlet.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[outlet]
         outlet.dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
-        state_value = outlet.dqn.environment.state.calculate_state()
-        print("state_value for Decentralized agent   ", state_value)
-        reward_value = outlet.dqn.environment.reward.calculate_reward()
-        print("reward value for Decentralized agent    ", reward_value)
-        action, action_value = outlet.dqn.agents.chain(outlet.dqn.model, state_value, 0.1)
-        print("action_value for Decentralized agent   ", action_value)
-        self.ensured_service_aggrigation(performance_logger, outlet, service.__class__.__name__, action_value)
+
+        self.ensured_service_aggrigation(performance_logger, outlet, service.__class__.__name__,
+                                         outlet.dqn.agents.action_value)
+
         outlet.dqn.environment.state.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
         outlet.dqn.environment.reward.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
-        next_state = action.execute(outlet.dqn.environment.state, action_value)
+        #
+        state_value_decentralize = outlet.dqn.environment.state.calculate_state()
+        print("state value for decentralize : ", state_value_decentralize)
 
-        print("services requested become : ..............  ", outlet.dqn.environment.state.services_requested)
+        action_decentralize, action_value_decentralize = outlet.dqn.agents.chain(outlet.dqn.model,
+                                                                                 state_value_decentralize, 0.1)
+
+        print("action_value for Decentralized agent   ", action_value_decentralize)
+        outlet.dqn.agents.action_value = action_value_decentralize
+        next_state_decentralize = action_decentralize.execute(outlet.dqn.environment.state,
+                                                              action_value_decentralize)
+        print(f"services requested become : ..............  ", outlet.dqn.environment.state.services_requested)
         print("request ensured become : ..............  ", outlet.dqn.environment.state.services_ensured)
-        print("next state for Decentralized agent  ", next_state)
+        print("next state for Decentralized agent  ", next_state_decentralize)
+        reward_value_decentralize = outlet.dqn.environment.reward.calculate_reward()
+        print("reward value for Decentralized agent    ", reward_value_decentralize)
+        # next_state_decentralize = np.reshape(next_state_decentralize, [1, np.array(next_state_decentralize).shape[0]])
 
-        for outlet in grid_outlets:
+
+
+        gridcell_dqn.environment.state.resetsate()
+        gridcell_dqn.environment.reward.resetreward()
+        sum_of_utility_of_all_outlets=[0,0,0]
+        ratio_of_utility = 0
+        sum_ = 0
+        for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
             if len(outlet.power_distinct[0]) == 0:
                 outlet.power = [0.0, 0.0, 0.0]
                 performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
                 performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
+            print(
+                f"services requested  for outlet  {i} become ,{outlet.dqn.environment.state.services_requested}, ........")
+
+            print(f"outlet.dqn.environment.reward.calculate_reward() for outlet .....  {i} is {outlet.dqn.environment.reward.calculate_reward()}")
 
             gridcell_dqn.environment.state.allocated_power = outlet.power_distinct
             gridcell_dqn.environment.state.tower_capacity = cost2
             gridcell_dqn.environment.state.supported_services = outlet.supported_services_distinct
             gridcell_dqn.environment.state.filtered_powers = gridcell_dqn.environment.state.allocated_power
-            gridcell_dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[outlet]
-            gridcell_dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
-            gridcell_dqn.environment.state.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
-            gridcell_dqn.environment.reward.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
-        print(" services_ensured in grid cell >>>>>>>>>>>>> ",gridcell_dqn.environment.state.services_ensured)
-        print(" services_requested in grid cell >>>>>>>>>>>>> ",gridcell_dqn.environment.state.services_requested)
 
-        #gridcell_dqn.agents.train(gridcell_dqn)
-        state_value = gridcell_dqn.environment.state.calculate_state(gridcell_dqn.environment.state.supported_services)
-        print("state_value for centralized agent   ", state_value)
 
-        reward_value = gridcell_dqn.environment.reward.calculate_reward()
-        print("reward value for centralized agent   ", reward_value)
 
-        action, action_value = gridcell_dqn.agents.chain(gridcell_dqn.model, state_value, 0.1)
-        print("action_value for centralized agent   ", action_value)
-        next_state = action.execute(gridcell_dqn.environment.state, action_value)
-        print("next state for centralized agent  ", next_state)
-        # gridcell_dqn.agents.remember(state_value, action_value, reward_value, next_state)
+            gridcell_dqn.environment.state.services_requested += outlet.dqn.environment.state.services_requested
+            gridcell_dqn.environment.reward.services_requested += outlet.dqn.environment.reward.services_requested
+            gridcell_dqn.environment.state.services_ensured += outlet.dqn.environment.state.services_ensured
+            gridcell_dqn.environment.reward.services_ensured += outlet.dqn.environment.reward.services_ensured
+            sum_of_utility_of_all_outlets = sum_of_utility_of_all_outlets + outlet.dqn.environment.reward.calculate_reward()
+
+
+
+
+
+        state_value_centralize = gridcell_dqn.environment.state.calculate_state(
+            gridcell_dqn.environment.state.supported_services)
+        action_centralize, action_value_centralize = gridcell_dqn.agents.chain(gridcell_dqn.model,
+                                                                               state_value_centralize, 0.1)
+        print("action value _centralize: ", action_value_centralize)
+        next_state_centralize = action_centralize.execute(gridcell_dqn.environment.state, action_value_centralize)
+        print("next_state value _centralize: ", next_state_centralize)
+        reward_value_centralize = gridcell_dqn.environment.reward.calculate_reward()
+        print("reward value _centralize : ", reward_value_centralize)
+        print("ratio >>> ", sum_of_utility_of_all_outlets)
+        ratio_of_utility = reward_value_centralize/sum_of_utility_of_all_outlets
+        print("reward_value_centralize/sum_of_utility_of_all_outlets ....................  ",ratio_of_utility)
+
+        for outlet in gridcell_dqn.agents.grid_outlets:
+            outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward()*ratio_of_utility
+            print("decentralize reward >>> ... ", outlet.dqn.environment.reward.reward_value)
+
+            outlet.dqn.agents.remember(state_value_decentralize, action_value_decentralize,
+                                       outlet.dqn.environment.reward.reward_value, next_state_decentralize)
+            state_value_decentralize = next_state_decentralize
+
+
+
+
+
+        print("gridcell_dqn.environment.reward.services_requested   ... ",gridcell_dqn.environment.reward.services_requested)
+        print("gridcell_dqn.environment.reward.services_ensured     ...",gridcell_dqn.environment.reward.services_ensured)
+
+        gridcell_dqn.agents.remember(state_value_centralize, action_value_centralize, reward_value_centralize,next_state_centralize)
+
+        state_value_centralize = next_state_centralize
+
 
     def run(self):
         self.starting()
@@ -314,22 +381,20 @@ class Environment:
         performance_logger = PerformanceLogger()
 
         build = RLBuilder()
+
         gridcell_dqn = build.agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
                                                                                          CentralizedState()).model_.build_model(
             "centralized", 6, 9).build()
-        # gridcell_dqn1 = build.agent.build_agent().environment.build_env().model_.build_model().build()
-        # gridcell_dqn2 = build.agent.build_agent().environment.build_env().model_.build_model().build()
-        # gridcell_dqn3 = build.agent.build_agent().environment.build_env().model_.build_model().build()
-        gridcell_dqn.agents.grid_outlets = self.Grids.get("grid1")
-        # gridcell_dqn1.agents.grid_outlets = self.Grids.get("grid2")
-        # gridcell_dqn2.agents.grid_outlets = self.Grids.get("grid3")
-        # gridcell_dqn3.agents.grid_outlets = self.Grids.get("grid4")
-        print("grid1 ", gridcell_dqn.agents.grid_outlets)
-        # print("grid2 ", gridcell_dqn.agents.grid_outlets)
-        # print("grid3 ", gridcell_dqn.agents.grid_outlets)
-        # print("grid4 ", gridcell_dqn.agents.grid_outlets)
 
+        gridcell_dqn.agents.grid_outlets = self.Grids.get("grid1")
+        print("grid1 ", gridcell_dqn.agents.grid_outlets)
+
+        steps = 0
+
+        # Initialize previous_steps variable
+        previous_steps = 0
         while step < env_variables.TIME:
+            steps += 1
             traci.simulationStep()
             print("step is ....................................... ", step)
             self.get_current_vehicles()
@@ -339,8 +404,25 @@ class Environment:
             list(map(lambda veh: self.car_interact(veh, observer, performance_logger, gridcell_dqn.agents.grid_outlets,
                                                    gridcell_dqn), env_variables.vehicles.values()))
 
+            if steps - previous_steps >= 30:
+                # Update previous_steps to current value of steps
+                previous_steps = steps
+                # train centralize
+                gridcell_dqn.environment.state.resetsate()
+                state_value_centralize = gridcell_dqn.environment.state.calculate_state(
+                    gridcell_dqn.environment.state.supported_services)
+                print("state value for centralize : ", state_value_centralize)
+                if len(gridcell_dqn.agents.memory) > gridcell_dqn.agents.batch_size:
+                    # print("replay buffer of centralize >>>>>>>")
+                    gridcell_dqn.agents.replay_buffer_centralize(gridcell_dqn.agents.batch_size, gridcell_dqn.model)
+                for outlet in gridcell_dqn.agents.grid_outlets:
+                    outlet.dqn.environment.state.resetsate(outlet.max_capacity)
+                    if len(outlet.dqn.agents.memory) > outlet.dqn.agents.batch_size:
+                        # print("replay buffer of Decentralize >>>>>>>")
+                        outlet.dqn.agents.replay_buffer_decentralize(outlet.dqn.agents.batch_size, outlet.dqn.model)
+
             step += 1
-            if step == 10:
+            if step == 60 * 24:
                 self.logging_the_final_results(performance_logger)
                 break
         traci.close()
