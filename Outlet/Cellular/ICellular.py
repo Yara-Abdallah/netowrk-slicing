@@ -105,3 +105,6 @@ class Cellular(Outlet):
     #     self.dqn.environment.state.tower_capacity = new_capacity
     #     self.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[self]
     #     self.dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[self]
+
+
+
