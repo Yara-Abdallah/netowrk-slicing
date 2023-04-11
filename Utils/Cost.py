@@ -29,11 +29,11 @@ class Cost:
         cost = self.bit_rate
         if realtime_value in cf.REALTIME_BANDWIDTH.get("WIFI"):
             cost = self.bit_rate
-        elif realtime_value in cf.REALTIME_BANDWIDTH.get("3G"):
+        elif realtime_value in cf.REALTIME_BANDWIDTH.get("ThreeG"):
             cost = self.bit_rate * 1.1
-        elif realtime_value in cf.REALTIME_BANDWIDTH.get("4G"):
+        elif realtime_value in cf.REALTIME_BANDWIDTH.get("FourG"):
             cost = self.bit_rate * 1.3
-        elif realtime_value in cf.REALTIME_BANDWIDTH.get("5G"):
+        elif realtime_value in cf.REALTIME_BANDWIDTH.get("FiveG"):
             cost = self.bit_rate * 1.5
         elif realtime_value in cf.REALTIME_BANDWIDTH.get("SATELLITE"):
             cost = self.bit_rate * 2

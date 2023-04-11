@@ -6,6 +6,7 @@ from RL.RLEnvironment.Action.ActionChain import Exploit, Explore, FallbackHandle
 
 class Agent(AbstractAgent):
     _grid_outlets = []
+    _action_value = 0
 
     @property
     def grid_outlets(self):
@@ -23,41 +24,44 @@ class Agent(AbstractAgent):
     def action(self, a):
         self._action = a
 
-    def replay_buffer(self, batch_size, model):
+    @property
+    def action_value(self):
+        return self._action_value
+
+    @action_value.setter
+    def action_value(self, a):
+        self._action_value = a
+
+    def replay_buffer_decentralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
         for state, action, reward, next_state in minibatch:
             target = reward
             if next_state is not None:
-                target = reward + self.gamma * np.max(model.predict(next_state, verbose=0)[0])
-            target_f = model.predict(state, verbose=0)
+                next_state=np.array(next_state).reshape([1,np.array(next_state).shape[0]])
+                target = reward + self.gamma * np.argmax(model.predict(next_state, verbose=0)[0])
+            state = np.array(state).reshape([1, np.array(state).shape[0]])
+            target_f = np.round(model.predict(state, verbose=0))
+            print("the best action that maximize the q value ", target)
             target_f[0][action] = target
+            print("target action ",target_f)
+            print("replay buffer >>>> ")
             model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
 
-    def train(self,gridcell_dqn, **kwargs):
-        ep_rewards = []
-        for e in range(self.episodes):
-            episode_reward = 0
-            #state = gridcell_dqn.environment.state.resetState()
-            state_value = gridcell_dqn.environment.state.calculate_state(gridcell_dqn.environment.state.supported_services)
-            print("state value : ",state_value)
-            print("state shape : ", np.array(state_value).shape[0])
-            #state_value = np.array(state_value).reshape([1, np.array(state_value).shape[0]])
-            for time in range(self.step):
-                action, action_value = gridcell_dqn.agents.chain(gridcell_dqn.model, state_value, 0.1)
-                print("action value : ", action_value)
-                next_state = action.execute(gridcell_dqn.environment.state, action_value)
-                print("next_state value : ", next_state)
-                reward_value = gridcell_dqn.environment.reward.calculate_reward()
-                print("reward value : ",reward_value)
-                episode_reward += reward_value
-                #next_state = np.reshape(next_state, [1, np.array(next_state).shape[1]])
-                gridcell_dqn.agents.remember(state_value, action_value, reward_value, next_state)
-                state_value = next_state
-            ep_rewards.append(episode_reward)
-            if len(gridcell_dqn.agents.memory) > self.batch_size:
-                gridcell_dqn.agents.replay_buffer(self.batch_size, gridcell_dqn.model)
+    def replay_buffer_centralize(self, batch_size, model):
+        minibatch = random.sample(self.memory, batch_size)
+        for state, action, reward, next_state in minibatch:
+            target = reward
+            if next_state is not None:
+                next_state=np.array(next_state).reshape([1,np.array(next_state).shape[0]])
+                target = reward + self.gamma * (model.predict(next_state, verbose=0)[0])
+            state = np.array(state).reshape([1, np.array(state).shape[0]])
+            target = np.array(target).reshape([1,9])
+            model.fit(state, target, epochs=1, verbose=0)
+        if self.epsilon > self.min_epsilon:
+            self.epsilon *= self.epsilon_decay
+
 
     def remember(self, state, action, reward, next_state):
         self.memory.append((state, action, reward, next_state))
@@ -67,8 +71,5 @@ class Agent(AbstractAgent):
         test = np.random.rand()
         "Setting the first successor that will modify the payload"
         action = self.action
-        print("inside chain ,,, ", action)
         handler = Exploit(action, model, state, Explore(action, FallbackHandler(action)))
-        # = np.where(handler.handle(test, epsilon) > 0.5, 1, 0)
-        # handler.handle(test, epsilon)
         return action, np.where(handler.handle(test, epsilon) > 0.5, 1, 0)

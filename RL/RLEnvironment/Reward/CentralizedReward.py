@@ -14,21 +14,25 @@ class CentralizedReward(Reward):
         self.state_shape = CentralizedReward.state_shape(self.num_services, self.grid_cell)
         self._services_ensured = np.zeros(self.num_services)
         self._services_requested = np.zeros(self.num_services)
+        self._reward_value = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
 
-    def __call__(self):
-        return self.reward_value
-
+    @property
+    def reward_value(self):
+        return self._reward_value
+    @reward_value.setter
+    def reward_value(self,r):
+        self._reward_value = r
     @property
     def services_requested(self):
         return self._services_requested
 
     @services_requested.setter
     def services_requested(self, value):
-        self._services_requested += np.array(value)
+        self._services_requested = np.array(value)
 
     @property
     def services_ensured(self):
@@ -36,13 +40,17 @@ class CentralizedReward(Reward):
 
     @services_ensured.setter
     def services_ensured(self, value: np.ndarray):
-        self._services_ensured += np.array(value)
+        self._services_ensured = np.array(value)
+    def resetreward(self):
+
+        self._services_ensured = np.zeros(self.num_services)
+        self._services_requested = np.zeros(self.num_services)
 
     def calculate_reward(self):
-        self.services_ensured =[1,1,1]
         percentage_array = self.services_ensured / self.services_requested
-        self.reward_value = sum(percentage_array) / self.num_services
-        return self.reward_value
+        #self.reward_value = sum(percentage_array) / self.num_services
+        #self.reward_value
+        return percentage_array
 
 
 

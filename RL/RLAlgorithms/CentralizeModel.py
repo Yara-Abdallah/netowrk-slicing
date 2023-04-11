@@ -9,8 +9,9 @@ from RL.RLMeta import RLMeta, rlabc
 
 
 class Model():
-    def __init__(self, state_size = 6, action_size = 9, activation_function = "relu", loss_function = "mse", optimization_algorithm = Adam,
-                 learning_rate = 0.5, output_activation = "sigmoid", **kwargs):
+    def __init__(self, state_size=6, action_size=9, activation_function="relu", loss_function="mse",
+                 optimization_algorithm=Adam,
+                 learning_rate=0.5, output_activation="sigmoid", **kwargs):
         self.state_size = state_size
         self.action_size = action_size
         self.activation_function = activation_function
@@ -24,7 +25,7 @@ class Model():
         model_.add(Dense(24, input_dim=self.state_size, activation=self.activation_function))
         model_.add(Dense(24, activation=self.activation_function))
         model_.add(Dense(self.action_size, activation=self.output_activation))
-        model_.add(Reshape((3, 3)))
+        # model_.add(Reshape((3, 3)))
         model_.compile(loss=self.loss_function,
                        optimizer=self.optimization_algorithm(learning_rate=self.learning_rate))
         return model_

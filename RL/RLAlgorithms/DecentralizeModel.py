@@ -4,7 +4,7 @@ from keras.optimizers import Adam
 
 
 class Model():
-    def __init__(self, state_size = 7, action_size = 1, activation_function = "relu", loss_function = "mse", optimization_algorithm = Adam,
+    def __init__(self, state_size = 7, action_size = 2, activation_function = "relu", loss_function = "mse", optimization_algorithm = Adam,
                  learning_rate = 0.5, output_activation = "sigmoid", **kwargs):
         self.state_size = state_size
         self.action_size = action_size
@@ -18,8 +18,8 @@ class Model():
         model_ = Sequential()
         model_.add(Dense(24, input_dim=self.state_size, activation=self.activation_function))
         model_.add(Dense(24, activation=self.activation_function))
-        model_.add(Dense(self.action_size, activation=self.output_activation))
-        model_.add(Reshape((1,1)))
+        model_.add(Dense(2 , activation=self.output_activation))
+        # model_.add(Reshape((2,1)))
         model_.compile(loss=self.loss_function,
                        optimizer=self.optimization_algorithm(learning_rate=self.learning_rate))
         return model_

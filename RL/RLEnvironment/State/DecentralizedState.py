@@ -16,9 +16,10 @@ class DeCentralizedState(State):
         self.grid_cell = 3
         self.num_services = 3
         self.state_shape = DeCentralizedState.state_shape(self.num_services, self.grid_cell)
-        self._allocated_power = np.zeros(self.state_shape)
+        self._allocated_power = np.zeros(3)
         self._supported_services = copy.deepcopy(self.allocated_power)
         self._services_ensured = np.zeros(self.num_services)
+        self._services_requested=np.zeros(self.num_services)
         self._tower_capacity = 0.0
 
     @staticmethod
@@ -59,6 +60,7 @@ class DeCentralizedState(State):
 
     @allocated_power.setter
     def allocated_power(self, power_array):
+        print("power array : ..................... ",power_array)
         self._allocated_power = power_array
 
     @supported_services.setter
@@ -69,10 +71,14 @@ class DeCentralizedState(State):
         percentage_array = self.services_ensured / self.services_requested
         return percentage_array
 
+    def resetsate(self, tower_capacity):
+        self._services_ensured = np.zeros(self.num_services)
+        self.services_requested = np.zeros(self.num_services)
+        self._tower_capacity = tower_capacity
+
     def calculate_state(self):
         final_state = []
         final_state.append(self._tower_capacity)
         final_state.extend(self.allocated_power)
         final_state.extend(self.calculate_utility())
         return final_state
-

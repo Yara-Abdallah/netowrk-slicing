@@ -30,13 +30,15 @@ Grids={
 
 REALTIME_BANDWIDTH = {
     "WIFI": list(range(1, 3)),
-    "3G": list(range(3, 5)),
-    "4G": list(range(5, 7)),
-    "5G": list(range(7, 9)),
+    "ThreeG": list(range(3, 5)),
+    "FourG": list(range(5, 7)),
+    "FiveG": list(range(7, 9)),
     "SATELLITE": list(range(9, 10)),
 }
 
-CRITICAL_BANDWIDTH = {}
+CRITICAL_BANDWIDTH = {
+
+}
 
 outlet_types = {
     "3G": {
