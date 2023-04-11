@@ -51,3 +51,4 @@ Thumbs.db
 *.wmv
 .coverage
 .pytest_cache/
+*.docx#
