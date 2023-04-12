@@ -301,15 +301,13 @@ class Environment:
         print("next state for Decentralized agent  ", next_state_decentralize)
         reward_value_decentralize = outlet.dqn.environment.reward.calculate_reward()
         print("reward value for Decentralized agent    ", reward_value_decentralize)
-        # next_state_decentralize = np.reshape(next_state_decentralize, [1, np.array(next_state_decentralize).shape[0]])
-
-
 
         gridcell_dqn.environment.state.resetsate()
         gridcell_dqn.environment.reward.resetreward()
-        sum_of_utility_of_all_outlets=[0,0,0]
+        sum_of_utility_of_all_outlets = [0, 0, 0]
         ratio_of_utility = 0
         sum_ = 0
+
         for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
             if len(outlet.power_distinct[0]) == 0:
                 outlet.power = [0.0, 0.0, 0.0]
@@ -318,24 +316,19 @@ class Environment:
             print(
                 f"services requested  for outlet  {i} become ,{outlet.dqn.environment.state.services_requested}, ........")
 
-            print(f"outlet.dqn.environment.reward.calculate_reward() for outlet .....  {i} is {outlet.dqn.environment.reward.calculate_reward()}")
+            print(
+                f"outlet.dqn.environment.reward.calculate_reward() for outlet .....  {i} is {outlet.dqn.environment.reward.calculate_reward()}")
 
             gridcell_dqn.environment.state.allocated_power = outlet.power_distinct
             gridcell_dqn.environment.state.tower_capacity = cost2
             gridcell_dqn.environment.state.supported_services = outlet.supported_services_distinct
             gridcell_dqn.environment.state.filtered_powers = gridcell_dqn.environment.state.allocated_power
 
-
-
             gridcell_dqn.environment.state.services_requested += outlet.dqn.environment.state.services_requested
             gridcell_dqn.environment.reward.services_requested += outlet.dqn.environment.reward.services_requested
             gridcell_dqn.environment.state.services_ensured += outlet.dqn.environment.state.services_ensured
             gridcell_dqn.environment.reward.services_ensured += outlet.dqn.environment.reward.services_ensured
             sum_of_utility_of_all_outlets = sum_of_utility_of_all_outlets + outlet.dqn.environment.reward.calculate_reward()
-
-
-
-
 
         state_value_centralize = gridcell_dqn.environment.state.calculate_state(
             gridcell_dqn.environment.state.supported_services)
@@ -347,28 +340,25 @@ class Environment:
         reward_value_centralize = gridcell_dqn.environment.reward.calculate_reward()
         print("reward value _centralize : ", reward_value_centralize)
         print("ratio >>> ", sum_of_utility_of_all_outlets)
-        ratio_of_utility = reward_value_centralize/sum_of_utility_of_all_outlets
-        print("reward_value_centralize/sum_of_utility_of_all_outlets ....................  ",ratio_of_utility)
+        ratio_of_utility = reward_value_centralize / sum_of_utility_of_all_outlets
+        print("reward_value_centralize/sum_of_utility_of_all_outlets ....................  ", ratio_of_utility)
 
         for outlet in gridcell_dqn.agents.grid_outlets:
-            outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward()*ratio_of_utility
+            outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward() * ratio_of_utility
             print("decentralize reward >>> ... ", outlet.dqn.environment.reward.reward_value)
-
             outlet.dqn.agents.remember(state_value_decentralize, action_value_decentralize,
                                        outlet.dqn.environment.reward.reward_value, next_state_decentralize)
             state_value_decentralize = next_state_decentralize
 
+        print("gridcell_dqn.environment.reward.services_requested   ... ",
+              gridcell_dqn.environment.reward.services_requested)
+        print("gridcell_dqn.environment.reward.services_ensured     ...",
+              gridcell_dqn.environment.reward.services_ensured)
 
-
-
-
-        print("gridcell_dqn.environment.reward.services_requested   ... ",gridcell_dqn.environment.reward.services_requested)
-        print("gridcell_dqn.environment.reward.services_ensured     ...",gridcell_dqn.environment.reward.services_ensured)
-
-        gridcell_dqn.agents.remember(state_value_centralize, action_value_centralize, reward_value_centralize,next_state_centralize)
+        gridcell_dqn.agents.remember(state_value_centralize, action_value_centralize, reward_value_centralize,
+                                     next_state_centralize)
 
         state_value_centralize = next_state_centralize
-
 
     def run(self):
         self.starting()
@@ -405,7 +395,6 @@ class Environment:
                                                    gridcell_dqn), env_variables.vehicles.values()))
 
             if steps - previous_steps >= 30:
-                # Update previous_steps to current value of steps
                 previous_steps = steps
                 # train centralize
                 gridcell_dqn.environment.state.resetsate()
