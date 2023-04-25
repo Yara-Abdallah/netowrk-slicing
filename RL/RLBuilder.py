@@ -1,11 +1,11 @@
 from RL.AgentBuilder import ActionBuilder, AgentBuilder_
 from RL.DecentralizeModelBuilder import ModelBuilder_Decentralize
 from RL.EnvBuilder import EnvironmentBuilder
-from RL.CentralizeModelBuilder import  ModelBuilder_Centralize
+from RL.CentralizeModelBuilder import ModelBuilder_Centralize
 from RL.RLAlgorithms.Centralized_DQN import DQN
 from RL.RLAlgorithms.CentralizeModel import Model
 from keras.optimizers import Adam
-import  random
+import random
 from RL.RLEnvironment.Reward.CentralizedReward import CentralizedReward
 from RL.RLEnvironment.State.CentralizedState import CentralizedState
 from Utils.config import outlet_types
@@ -39,7 +39,7 @@ class EnvBuilder(RLBuilder):
     def __init__(self, rl):
         super().__init__(rl)
 
-    def build_env(self,reward_type,state_type):
+    def build_env(self, reward_type, state_type):
         self.rl.environment = (
             EnvironmentBuilder()
             .state()
@@ -55,7 +55,7 @@ class AgentBuilder(RLBuilder):
     def __init__(self, rl):
         super().__init__(rl)
 
-    def build_agent(self,action_type):
+    def build_agent(self, action_type):
         self.rl.agents = AgentBuilder_().action().build_action(action_type).build()
         return self
 
@@ -64,7 +64,7 @@ class ModelBuilder(RLBuilder):
     def __init__(self, rl):
         super().__init__(rl)
 
-    def build_model(self,model_type,state_input_size,action_output_size):
+    def build_model(self, model_type, state_input_size, action_output_size):
         if model_type == "centralized":
             self.rl.model = (
                 ModelBuilder_Centralize()
@@ -105,7 +105,6 @@ class ModelBuilder(RLBuilder):
             )
 
         return self
-
 
 # build = RLBuilder()
 # builder = build.agent.build_agent().environment.build_env().model_.build_model().build()

@@ -60,7 +60,6 @@ class DeCentralizedState(State):
 
     @allocated_power.setter
     def allocated_power(self, power_array):
-        print("power array : ..................... ",power_array)
         self._allocated_power = power_array
 
     @supported_services.setter
@@ -68,12 +67,18 @@ class DeCentralizedState(State):
         self._supported_services = supported_array
 
     def calculate_utility(self):
-        percentage_array = self.services_ensured / self.services_requested
+        percentage_array = np.zeros(self.num_services)
+        for i, j in enumerate(self.services_requested):
+            if j == 0:
+                percentage_array[i] = 0
+            else:
+                percentage_array[i] = self.services_ensured[i] / self.services_requested[i]
         return percentage_array
 
     def resetsate(self, tower_capacity):
-        self._services_ensured = np.zeros(self.num_services)
-        self.services_requested = np.zeros(self.num_services)
+        # self._services_ensured = np.zeros(self.num_services)
+        # self.services_requested = np.zeros(self.num_services)
+        self._allocated_power = np.zeros(self.num_services)
         self._tower_capacity = tower_capacity
 
     def calculate_state(self):

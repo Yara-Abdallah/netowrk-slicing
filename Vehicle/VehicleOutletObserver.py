@@ -12,6 +12,8 @@ class ConcreteObserver(Observer):
         self.outlet_pos = outlet_pos
         self.outlets = outlets
 
+
+
     def check(self, subject):
         def check_radius(i, outlet):
             if (outlet[0] - self.outlet_radius[i]) <= subject.x <= (
@@ -23,6 +25,7 @@ class ConcreteObserver(Observer):
 
         subject.outlets_serve = list(map(lambda outlet: check_radius(outlet[0], outlet[1]), enumerate(self.outlet_pos)))
         subject.outlets_serve = list(filter(lambda x: x is not None, subject.outlets_serve))
+
 
     def update(self, subject):
         self.check(subject)

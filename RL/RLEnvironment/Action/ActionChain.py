@@ -23,9 +23,10 @@ class IHandler(ABC):
 class Explore(IHandler):
     "A Concrete Handler"
     def check_epsilon(self, test, epsilon):
-        if 0 < epsilon < test < 1:
+
+        if 1 > epsilon >= test > 0:
             # action = Action.explore()
-            print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
+            # print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
             explore_val = self.action.explore()
             return explore_val
 
@@ -38,14 +39,14 @@ class Exploit(IHandler):
         self.state = state
 
     def check_epsilon(self, test, epsilon):
-        if 1 > epsilon >= test > 0:
+        if 0 < epsilon < test < 1:
             # action = Action.exploit()
 
-            print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
+            # print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
             return self.action.exploit(self.model, self.state)
 
 
 class FallbackHandler(IHandler):
     def check_epsilon(self, test, epsilon):
-        print(f'handled in {self.__class__.__name__}')
+        # print(f'handled in {self.__class__.__name__}')
         raise ValueError("epsilon must be in range 0 to 1 :", epsilon)

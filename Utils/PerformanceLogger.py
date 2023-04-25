@@ -2,10 +2,7 @@ import inspect
 import warnings
 from dataclasses import dataclass, field
 from typing import List, Dict
-
-from Outlet.Cellular.FactoryCellular import FactoryCellular
-from Service.Entertainment.Entertainment import FactoryEntertainment
-from Vehicle.Car import Car
+from RL.Agent.Agent import Agent
 from Vehicle.IVehicle import Vehicle
 from Service.IService import Service
 from Outlet.IOutlet import Outlet
@@ -32,9 +29,57 @@ class PerformanceLogger(metaclass=SingletonMeta):
     _outlet_services_power_allocation: Dict[Outlet, List[float]] = field(default_factory=dict)
     _outlet_services_requested_number: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_services_ensured_number: Dict[Outlet, List[int]] = field(default_factory=dict)
+    _outlet_occupancy: Dict[Outlet, float] = field(default_factory=dict)
+    _outlet_utility: Dict[Outlet, float] = field(default_factory=dict)
+    _decentralized_reward: Dict[Agent, float] = field(default_factory=dict)
+    _centralized_reward: Dict[Agent, float] = field(default_factory=dict)
+    _service_power_allocate:Dict[Service, float] = field(default_factory=dict)
     _request_costs: List[int] = field(default_factory=list)
     _power_costs: List[float] = field(default_factory=list)
     served_ratio: List[float] = field(default_factory=list)
+
+    @property
+    def service_power_allocate(self):
+        return self._service_power_allocate
+
+    def set_service_power_allocate(self, outlet, cost):
+        if outlet not in self._service_power_allocate:
+            self._service_power_allocate[outlet] = {}
+        self._service_power_allocate[outlet] = cost
+
+    @property
+    def centralized_reward(self):
+        return self._centralized_reward
+
+    def set_centralized_reward(self, outlet, reward):
+        if outlet not in self._centralized_reward:
+            self._centralized_reward[outlet] = {}
+        self._centralized_reward[outlet] = reward
+    @property
+    def decentralized_reward(self):
+        return self._decentralized_reward
+
+    def set_decentralized_reward(self, outlet, reward):
+        if outlet not in self._decentralized_reward:
+            self._decentralized_reward[outlet] = {}
+        self._decentralized_reward[outlet] = reward
+    @property
+    def outlet_occupancy(self):
+        return self._outlet_occupancy
+
+    def set_outlet_occupancy(self, outlet, occupancy):
+        if outlet not in self._outlet_occupancy:
+            self._outlet_occupancy[outlet] = {}
+        self._outlet_occupancy[outlet] = occupancy
+
+    @property
+    def outlet_utility(self):
+        return self._outlet_utility
+
+    def set_outlet_utility(self, outlet, utility):
+        if outlet not in self._outlet_utility:
+            self._outlet_utility[outlet] = {}
+        self._outlet_utility[outlet] = utility
 
     @property
     def services_type(self):
@@ -52,6 +97,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
         if outlet not in self._outlet_services_ensured_number:
             self._outlet_services_ensured_number[outlet] = {}
         self._outlet_services_ensured_number[outlet] = num
+
     @property
     def outlet_services_requested_number(self):
         return self._outlet_services_requested_number
@@ -60,6 +106,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
         if outlet not in self._outlet_services_requested_number:
             self._outlet_services_requested_number[outlet] = {}
         self._outlet_services_requested_number[outlet] = num
+
     @property
     def outlet_services_power_allocation(self):
         return self._outlet_services_power_allocation

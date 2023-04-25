@@ -15,7 +15,7 @@ class ActionResponse:
     def exploit(self, model, state):
 
         state = np.array(state).reshape([1, np.array(state).shape[0]])
-        c=np.array(model.predict(state)).reshape(1,2)
+        c=np.array(model.predict(state , verbose=0)).reshape(1,2)
         return np.argmax(c[0])
 
     def execute(self, state, action):

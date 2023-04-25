@@ -82,14 +82,20 @@ class CentralizedState(State):
         return x
 
     def calculate_utility(self):
-        percentage_array = self.services_ensured / self.services_requested
+        percentage_array = np.zeros(self.num_services)
+        for i,j in enumerate(self.services_requested):
+            if j == 0 :
+                percentage_array[i] = 0
+            else:
+                percentage_array[i] = self.services_ensured[i] / self.services_requested[i]
         return percentage_array
 
 
     def resetsate(self):
 
-        self._services_ensured = np.zeros(self.num_services)
-        self._services_requested = np.zeros(self.num_services)
+        # self._services_ensured = np.zeros(self.num_services)
+        # self._services_requested = np.zeros(self.num_services)
+        self._allocated_power = np.zeros(self.num_services)
 
     def calculate_state(self, binary):
         temp = list(numpy.concatenate(binary).flat)

@@ -16,11 +16,13 @@ class Outlet(ABC):
     __id = -1
 
     def __init__(
-        self,
-        position: Tuple[float],
-        radius: float,
-        power: [float],
-        requests_allocated_power: [float],
+            self,
+            id_,
+            position: Tuple[float],
+            radius: float,
+            power: [float],
+            requests_allocated_power: [float],
+
     ):
         """
         Parameters
@@ -38,12 +40,48 @@ class Outlet(ABC):
                                                                                          DeCentralizedState()).model_.build_model(
             "decentralized", 7, 2).build()
         self._distinct = self.__class__.__id
+        self.id_ = id_
         self.position = position
         self._radius = radius
         self._power = power  # bit rate
         self.requests_allocated_power = requests_allocated_power
         self._power_distinct = []
         self.request_buffer = []
+        self._occupancy = 0
+        self._utility = 0
+        self._sum_of_service_requested_power_allocation = 0
+
+    @property
+    def utility(self):
+        return self._utility
+
+    @utility.setter
+    def utility(self, u):
+        self._utility = u
+
+    @property
+    def outlet_id(self):
+        return self.id_
+
+    @outlet_id.setter
+    def outlet_id(self, i):
+        self.id_ = i
+
+    @property
+    def occupancy(self):
+        return self._occupancy
+
+    @occupancy.setter
+    def occupancy(self, o):
+        self._occupancy = o
+
+    @property
+    def sum_of_service_requested_power_allocation(self):
+        return self._sum_of_service_requested_power_allocation
+
+    @sum_of_service_requested_power_allocation.setter
+    def sum_of_service_requested_power_allocation(self, s):
+        self._sum_of_service_requested_power_allocation = s
 
     @property
     def radius(self):
@@ -64,6 +102,10 @@ class Outlet(ABC):
     @property
     def distinct(self):
         return self._distinct
+
+    @distinct.setter
+    def distinct(self, d):
+        self._distinct = d
 
     @abstractmethod
     def calculate_coverage_area(self):

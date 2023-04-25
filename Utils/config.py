@@ -4,17 +4,17 @@ import numpy as np
 
 SERVICES_TYPES = {
     "ENTERTAINMENT": {
-        "REALTIME": np.arange(start=5, stop=9 + 1),
+        "REALTIME": np.arange(start=5, stop=10),
         "BANDWIDTH": np.arange(start=8, stop=10 + 1),
         "CRITICAL": np.arange(start=1, stop=2 + 1),
     },
     "SAFETY": {
-        "REALTIME": np.arange(start=9, stop=10 + 1),
+        "REALTIME": np.arange(start=9, stop=10 ),
         "BANDWIDTH": np.arange(start=1, stop=3 + 1),
         "CRITICAL": np.arange(start=9, stop=10 + 1),
     },
     "AUTONOMOUS": {
-        "REALTIME": np.arange(start=9, stop=10 + 1),
+        "REALTIME": np.arange(start=9, stop=10),
         "BANDWIDTH": np.arange(start=7, stop=8 + 1),
         "CRITICAL": np.arange(start=8, stop=10 + 1),
     },
@@ -29,11 +29,11 @@ Grids={
 
 
 REALTIME_BANDWIDTH = {
-    "WIFI": list(range(1, 3)),
+    "Wifi": list(range(1, 3)),
     "ThreeG": list(range(3, 5)),
     "FourG": list(range(5, 7)),
     "FiveG": list(range(7, 9)),
-    "SATELLITE": list(range(9, 10)),
+    "Satellite": list(range(9, 10)),
 }
 
 CRITICAL_BANDWIDTH = {

@@ -4,10 +4,6 @@ from abc import ABCMeta
 class RLMeta(type):
     def __new__(mcs, name, bases, class_dict):
         class_ = super().__new__(mcs, name, bases, class_dict)
-        #setattr(mcs,'env','1')
-        #setattr(mcs,'agent','2')
-
-
         # call the parent class's __new__ method to create the class
 
         # make sure the new class has agent and env attributes

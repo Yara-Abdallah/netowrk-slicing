@@ -27,7 +27,7 @@ class Cost:
 
     def cost_setter(self, realtime_value):
         cost = self.bit_rate
-        if realtime_value in cf.REALTIME_BANDWIDTH.get("WIFI"):
+        if realtime_value in cf.REALTIME_BANDWIDTH.get("Wifi"):
             cost = self.bit_rate
         elif realtime_value in cf.REALTIME_BANDWIDTH.get("ThreeG"):
             cost = self.bit_rate * 1.1
@@ -35,7 +35,7 @@ class Cost:
             cost = self.bit_rate * 1.3
         elif realtime_value in cf.REALTIME_BANDWIDTH.get("FiveG"):
             cost = self.bit_rate * 1.5
-        elif realtime_value in cf.REALTIME_BANDWIDTH.get("SATELLITE"):
+        elif realtime_value in cf.REALTIME_BANDWIDTH.get("Satellite"):
             cost = self.bit_rate * 2
         return cost
 
