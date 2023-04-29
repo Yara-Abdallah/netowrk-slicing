@@ -30,6 +30,7 @@ class Vehicle(ABC):
         self.x = x
         self.y = y
 
+
     def check_position(self):
         position = env_variables.get_position_vehicle(self.id)
         self.x = position[0]

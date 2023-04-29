@@ -47,9 +47,12 @@ class CentralizedReward(Reward):
         self._services_requested = np.zeros(self.num_services)
 
     def calculate_reward(self):
-        percentage_array = self.services_ensured / self.services_requested
-        #self.reward_value = sum(percentage_array) / self.num_services
-        #self.reward_value
+        percentage_array = np.zeros(self.num_services)
+        for i, j in enumerate(self.services_requested):
+            if j == 0:
+                percentage_array[i] = 0
+            else:
+                percentage_array[i] = self.services_ensured[i] / self.services_requested[i]
         return percentage_array
 
 
