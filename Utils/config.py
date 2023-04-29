@@ -41,6 +41,7 @@ CRITICAL_BANDWIDTH = {
 }
 
 outlet_types = {
+
     "3G": {
         "NUM_ANTENNAS": [2],
         "CHANNEL_BANDWIDTH": np.arange(1.25, 5, 0.25),
@@ -68,6 +69,16 @@ outlet_types = {
         "NUM_SLOTS_PER_FRAME": [10],
         "NUM_FRAMES_PER_SECOND": [60],
     },
+    "wifi":{
+        "NUM_ANTENNAS": [2],
+        "CHANNEL_BANDWIDTH": np.arange(0.75, 5, 0.25),
+        "CODING_RATE": [1 / 2, 1 / 3],
+        "MODULATION_ORDER": [4],
+        "AVERAGE_SYMBOLS_PER_SLOT": np.arange(80, 120, 1),
+        "NUM_SLOTS_PER_FRAME": [5],
+        "NUM_FRAMES_PER_SECOND": [2],
+    }
+
 }
 
 

@@ -15,15 +15,16 @@ class ConcreteObserver(Observer):
 
 
     def check(self, subject):
-        def check_radius(i, outlet):
-            if (outlet[0] - self.outlet_radius[i]) <= subject.x <= (
-                    outlet[0] + self.outlet_radius[i]
-            ) and (outlet[1] - self.outlet_radius[i]) <= subject.y <= (
-                    outlet[1] + self.outlet_radius[i]
+        def check_radius(outlet):
+            if (outlet.position[0] - outlet.radius) <= subject.x <= (
+                    outlet.position[0] + outlet.radius
+            ) and (outlet.position[1] - outlet.radius) <= subject.y <= (
+                    outlet.position[1] + outlet.radius
             ):
-                return self.outlets[i]
+                return outlet
 
-        subject.outlets_serve = list(map(lambda outlet: check_radius(outlet[0], outlet[1]), enumerate(self.outlet_pos)))
+
+        subject.outlets_serve = list(map(lambda outlet: check_radius(outlet), self.outlets))
         subject.outlets_serve = list(filter(lambda x: x is not None, subject.outlets_serve))
 
 

@@ -53,21 +53,23 @@ class Car(Vehicle):
             return result
 
         car_request_tuple = self.car_requests()[0]
+        # print("car_request_tuple : ", car_request_tuple)
+        # print(" self.outlets_serve : ", self.outlets_serve)
 
-        # filtered_realtime = dict(filter(lambda item: int(min(item[1])) >= int(car_request_tuple[2].realtime),
-        #                                 config.REALTIME_BANDWIDTH.items()))
-        # names = [i.__class__.__name__ for i in self.outlets_serve]
-        # names = set(names)
-        # filtered_realtime_names = [i[0] for i in filtered_realtime.items()]
-        # common_elements = names.intersection(filtered_realtime_names)
-        # temp = common_elements.pop()
-        # common_elements.add(temp)
-        #
-        # if len(common_elements) == 1 and list(common_elements)[0] == 'Satellite':
-        #     return self.outlets_serve[-1], car_request_tuple
-        # else:
-        #     list_outlet_to_make_greedy_on = list(
-        #         filter(lambda item: list(common_elements)[0] == item.__class__.__name__, self.outlets_serve))
+        filtered_realtime = dict(filter(lambda item: int(min(item[1])) >= int(car_request_tuple[2].realtime),
+                                        config.REALTIME_BANDWIDTH.items()))
+        names = [i.__class__.__name__ for i in self.outlets_serve]
+        names = set(names)
+        filtered_realtime_names = [i[0] for i in filtered_realtime.items()]
+        common_elements = names.intersection(filtered_realtime_names)
+        temp = common_elements.pop()
+        common_elements.add(temp)
+
+        if len(common_elements) == 1 and list(common_elements)[0] == 'Satellite':
+            return self.outlets_serve[-1], car_request_tuple
+        else:
+            list_outlet_to_make_greedy_on = list(
+                filter(lambda item: list(common_elements)[0] == item.__class__.__name__, self.outlets_serve))
 
         distance = list(map(lambda x: euclidian_distance(x), self.outlets_serve))
         return self.outlets_serve[distance.index(min(distance))], car_request_tuple

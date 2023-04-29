@@ -5,10 +5,10 @@ import traci
 # Get the current working directory
 current_dir = os.getcwd()
 
-network_path = current_dir + '\\Environment\\Area\\map.sumocfg'
-random_routes_path = current_dir + '\\Environment\\Area\\map.rou.xml'
+network_path = current_dir + '\\Environment\\Area2\\map.sumocfg'
+random_routes_path = current_dir + '\\Environment\\Area2\\map.rou.xml'
 
-types_outlets = ['3G', '4G', '5G', 'Wifi']
+types_outlets = ['3G', '4G', '5G','wifi']
 
 outlet_radius = [1000] * 39
 
@@ -16,7 +16,8 @@ outlets = {
     '3G': [],
     '4G': [],
     '5G': [],
-    'wifi': [],
+    'wifi':[]
+
 }
 all_routes = []
 

@@ -19,7 +19,7 @@ class Satellite(Outlet):
         self.services = []
         self.vehicles = kwargs.get("vehicles_list", [])
         self._supported_services_distinct = []
-        self._max_capacity = 2000000000
+        self._max_capacity = 200000000
 
 
     @property

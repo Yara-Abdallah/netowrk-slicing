@@ -4,7 +4,7 @@ from RL.RLEnvironment.Action.Action import Action
 
 class ActionAssignment:
     def __init__(self):
-        self.grid_cell = 3
+        self.grid_cell = 5
         self.num_services = 3
 
     def explore(self):

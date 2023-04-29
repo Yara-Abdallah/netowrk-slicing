@@ -19,7 +19,7 @@ class DeCentralizedState(State):
         self._allocated_power = np.zeros(3)
         self._supported_services = copy.deepcopy(self.allocated_power)
         self._services_ensured = np.zeros(self.num_services)
-        self._services_requested=np.zeros(self.num_services)
+        self._services_requested = np.zeros(self.num_services)
         self._tower_capacity = 0.0
 
     @staticmethod

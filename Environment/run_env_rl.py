@@ -38,15 +38,17 @@ fig_reward_centralize.subplots_adjust(hspace=0.8)
 lines_out_reward_centralize = []
 
 
-# for i, ax in enumerate(axs.flatten()):
-#     line, = ax.plot([], [], label=f"O{i} utility", color='b')
-#     line1, = ax.plot([], [], label=f"O{i} requested", color='r')
-#     line2, = ax.plot([], [], label=f"O{i} ensured", color='g')
-#     lines.append(line)
-#     lines_requested.append(line1)
-#     lines_ensured.append(line2)
-#     ax.legend()
+fig_satellite, axs_satellite = plt.subplots(nrows=1, ncols=1, figsize=(30, 22))
+fig_satellite.subplots_adjust(hspace=0.8)
 
+lines_satellite_utility = 0
+satellite_utility=[]
+def plotting_satellite():
+    lines_satellite_utility, = axs_satellite.plot([], [], label=f"satellite utility", color='b')
+    return lines_satellite_utility
+
+
+lines_satellite_utility = plotting_satellite()
 
 def plotting_Utility_Requested_Ensured():
     j = 0
@@ -163,7 +165,7 @@ class Environment:
         list(map(lambda x: append_outlets(x), poi_ids))
 
         satellite = Satellite(1, 1, [1, 1, 0], 0, [0, 0],
-                              100000000000000, [],
+                              10000000000, [],
                               [10, 10, 10])
         outlets.append(satellite)
 
@@ -190,6 +192,9 @@ class Environment:
         """
         select outlets in network to display type of each outlet
         """
+        # for key in env_variables.outlets.keys():
+        #     for _id,_ in env_variables.outlets[key]:
+        #         self.gui.toggleSelection(_id, 'poi')
         from itertools import chain
         array = list(map(lambda x: x, chain(*list(map(lambda x: x[1], env_variables.outlets.items())))))
         list(map(lambda x: self.gui.toggleSelection(x[0], 'poi'), map(lambda x: x, array)))
@@ -357,7 +362,7 @@ class Environment:
 
         performance_logger.service_requested = {car: service}
         # .................................................................................................
-        performance_logger.set_service_handled(outlet, car, service)
+        performance_logger.set_service_handled(outlet, info[1][1], service)
         request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
         request_cost = RequestCost(request_bandwidth, service.realtime)
         request_cost.cost_setter(service.realtime)
@@ -366,7 +371,7 @@ class Environment:
         performance_logger.set_service_power_allocate(service, request_bandwidth.allocated)
         self.services_aggregation(performance_logger, outlet, service.__class__.__name__, request_cost.cost)
 
-        # print("performance ligger occupancy : ", performance_logger.outlet_occupancy)
+        # print("performance logger occupancy : ", performance_logger.outlet_occupancy)
 
         if len(outlet.power_distinct[0]) == 0:
             outlet.power = [0.0, 0.0, 0.0]
@@ -378,6 +383,7 @@ class Environment:
 
         outlet.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[outlet]
         outlet.dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
+        # print(f" outlet service requested : {outlet} , {outlet.dqn.environment.state.services_requested}")
 
         self.ensured_service_aggrigation(performance_logger, outlet, service.__class__.__name__,
                                          outlet.dqn.agents.action_value)
@@ -404,14 +410,17 @@ class Environment:
         occupancy = sum(performance_logger.outlet_services_power_allocation[outlet]) / outlet.max_capacity
         # print(f"sum : {sum(performance_logger.outlet_services_power_allocation[outlet])}  max {outlet.max_capacity} ")
         # print(f"dev :  {sum(performance_logger.outlet_services_power_allocation[outlet])/outlet.max_capacity}")
+
         outlet.sum_of_service_requested_power_allocation = sum(
             performance_logger.outlet_services_power_allocation[outlet])
         outlet.occupancy = int(occupancy * 100)
+        # print("outlet occupancy :  ", outlet.occupancy)
 
         performance_logger.set_outlet_occupancy(outlet, outlet.occupancy)
 
         outlet.dqn.environment.state.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
         outlet.dqn.environment.reward.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
+        # print(f" outlet service ensured : {outlet} , {outlet.dqn.environment.state.services_ensured}")
 
         if sum(outlet.dqn.environment.state.services_requested) == 0 and sum(
                 outlet.dqn.environment.state.services_ensured) == 0:
@@ -424,8 +433,12 @@ class Environment:
         else:
             outlet.utility = 0
 
+        if outlet.__class__.__name__ == 'Satellite':
+            # print("satellite_utility : ", outlet.utility)
+            satellite_utility.append(outlet.utility)
+
         performance_logger.set_outlet_utility(outlet, outlet.utility)
-        # print("outlet.utility ............... : ", outlet.utility)
+        # print("outlet.utility : ", outlet.utility)
         # print("outlet.dqn.agents.epsilon ....... : ", outlet.dqn.agents.epsilon)
 
         state_value_decentralize = outlet.dqn.environment.state.calculate_state()
@@ -445,6 +458,11 @@ class Environment:
 
             # gridcell_dqn.environment.state.resetsate()
             # gridcell_dqn.environment.reward.resetreward()
+            gridcell_dqn.environment.state.services_requested = [0.0, 0.0, 0.0]
+            gridcell_dqn.environment.reward.services_requested = [0.0, 0.0, 0.0]
+            gridcell_dqn.environment.state.services_ensured = [0.0, 0.0, 0.0]
+            gridcell_dqn.environment.reward.services_ensured = [0.0, 0.0, 0.0]
+
             sum_of_utility_of_all_outlets = [0, 0, 0]
             ratio_of_utility = [0, 0, 0]
             sum_ = 0
@@ -469,6 +487,12 @@ class Environment:
                 gridcell_dqn.environment.reward.services_requested += outlet.dqn.environment.reward.services_requested
                 gridcell_dqn.environment.state.services_ensured += outlet.dqn.environment.state.services_ensured
                 gridcell_dqn.environment.reward.services_ensured += outlet.dqn.environment.reward.services_ensured
+                #
+                # print(f"service requested in grid {ind} , {gridcell_dqn.environment.state.services_requested}")
+                # print(f"service requested in outlet {i} , {outlet.dqn.environment.state.services_requested}")
+                #
+                # print(f"service ensured in grid {ind} , {gridcell_dqn.environment.state.services_ensured}")
+                # print(f"service ensured in outlet {i} , {outlet.dqn.environment.state.services_ensured}")
 
                 sum_of_utility_of_all_outlets = sum_of_utility_of_all_outlets + outlet.dqn.environment.reward.calculate_reward()
 
@@ -484,14 +508,16 @@ class Environment:
                 if sum_of_utility_of_all_outlets[index] != 0:
                     ratio_of_utility[index] = reward_value_centralize[index] / sum_of_utility_of_all_outlets[index]
 
-            for outlet in gridcell_dqn.agents.grid_outlets:
+            for k, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
                 outlet.dqn.environment.reward.reward_value = sum(
                     outlet.dqn.environment.reward.calculate_reward() * ratio_of_utility) / 3
+                # print(f"reward value outlet {k} , {outlet.dqn.environment.reward.reward_value}")
                 outlet.dqn.agents.remember(state_value_decentralize, action_value_decentralize,
                                            outlet.dqn.environment.reward.reward_value, next_state_decentralize)
                 state_value_decentralize = next_state_decentralize
 
             gridcell_dqn.environment.reward.reward_value = sum(reward_value_centralize) / 3
+            # print(f"reward value grid {ind} , {gridcell_dqn.environment.reward.reward_value}")
             gridcell_dqn.agents.remember(state_value_centralize, action_value_centralize,
                                          gridcell_dqn.environment.reward.reward_value,
                                          next_state_centralize)
@@ -499,16 +525,20 @@ class Environment:
     def terminate_service(self, veh, outlets, performance_logger):
         for out in outlets:
             if out not in veh.outlets_serve:
-                serv = performance_logger.handled_services[veh][out]
-
-                out.max_capacity = out.max_capacity + performance_logger.service_power_allocate[serv]
+                if out in performance_logger.service_handled:
+                    if veh in performance_logger.service_handled[out]:
+                        serv = performance_logger.service_handled[out][veh]
+                        # print("performance_logger.service_power_allocate[serv] : ", performance_logger.service_power_allocate[serv])
+                        out._max_capacity = out._max_capacity + performance_logger.service_power_allocate[serv]
+            else :
+                out._max_capacity = out._max_capacity
 
     def run(self):
         gridcells_dqn = []
-
         self.starting()
 
         outlets = self.get_all_outlets()
+
         self.Grids = self.fill_grids(outlets)
         step = 0
         print("\n")
@@ -583,8 +613,8 @@ class Environment:
             list(map(lambda veh: self.car_interact(veh, observer, performance_logger, gridcells_dqn, outlets),
                      env_variables.vehicles.values()))
 
-            # list(map(lambda veh: self.terminate_service(veh, outlets, performance_logger),
-            #          env_variables.vehicles.values()))
+            list(map(lambda veh: self.terminate_service(veh, outlets, performance_logger),
+                     env_variables.vehicles.values()))
 
             # for i in range(5):
             #     for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
@@ -600,8 +630,8 @@ class Environment:
                 x_data, y_data = line.get_data()
                 x_data = np.append(x_data, steps)
                 y_data = np.append(y_data, temp_outlets[j].utility)
-                print(x_data.shape, " utility ", y_data.shape, "outlet num : ", j, " value : ",
-                      temp_outlets[j].utility)  # print the shape
+                # print(x_data.shape, " utility ", y_data.shape, "outlet num : ", j, " value : ",
+                #       temp_outlets[j].utility)  # print the shape
 
                 line.set_data(x_data, y_data)
 
@@ -609,8 +639,8 @@ class Environment:
                 x_data, y_data = line1.get_data()
                 x_data = np.append(x_data, steps)
                 y_data = np.append(y_data, sum(temp_outlets[j].dqn.environment.state.services_requested))
-                print(x_data.shape, " requested ", y_data.shape, "outlet num : ", j, " value : ",
-                      sum(temp_outlets[j].dqn.environment.state.services_requested))  # print the shape
+                # print(x_data.shape, " requested ", y_data.shape, "outlet num : ", j, " value : ",
+                #       sum(temp_outlets[j].dqn.environment.state.services_requested))  # print the shape
 
                 line1.set_data(x_data, y_data)
 
@@ -618,8 +648,8 @@ class Environment:
                 x_data, y_data = line2.get_data()
                 x_data = np.append(x_data, steps)
                 y_data = np.append(y_data, sum(temp_outlets[j].dqn.environment.state.services_ensured))
-                print(x_data.shape, " 3 ", y_data.shape, "outlet num : ", j, " value : ",
-                      sum(temp_outlets[j].dqn.environment.state.services_ensured))  # print the shape
+                # print(x_data.shape, " 3 ", y_data.shape, "outlet num : ", j, " value : ",
+                #       sum(temp_outlets[j].dqn.environment.state.services_ensured))  # print the shape
 
                 line2.set_data(x_data, y_data)
 
@@ -627,17 +657,23 @@ class Environment:
                 x_data, y_data = line3.get_data()
                 x_data = np.append(x_data, steps)
                 y_data = np.append(y_data, temp_outlets[j].dqn.environment.reward.reward_value)
-                print(x_data.shape, " 4 ", y_data.shape, "outlet num : ", j, " value : ",
-                      temp_outlets[j].dqn.environment.reward.reward_value)
+                # print(x_data.shape, " 4 ", y_data.shape, "outlet num : ", j, " value : ",
+                #       temp_outlets[j].dqn.environment.reward.reward_value)
                 line3.set_data(x_data, y_data)
 
             for j, line4 in enumerate(lines_out_reward_centralize):
                 x_data, y_data = line4.get_data()
                 x_data = np.append(x_data, steps)
                 y_data = np.append(y_data, gridcells_dqn[j].environment.reward.reward_value)
-                print(x_data.shape, " 5 ", y_data.shape, "outlet num : ", j, " value : ",
-                      gridcells_dqn[j].environment.reward.reward_value)
+                # print(x_data.shape, " 5 ", y_data.shape, "outlet num : ", j, " value : ",
+                #       gridcells_dqn[j].environment.reward.reward_value)
                 line4.set_data(x_data, y_data)
+
+            axs_satellite.legend()
+            axs_satellite.relim()
+            axs_satellite.autoscale_view()
+
+            # fig_satellite.canvas.draw()
 
             for axs_ in [axs, axs_reward_decentralize, axs_reward_centralize]:
                 for ax in axs_.flatten():
@@ -652,14 +688,18 @@ class Environment:
                 else:
                     fig_reward_centralize.canvas.draw()
 
+
+
             if steps - prev == snapshot_time:
                 prev = steps
                 path1 = f'I://Documents//utility_requested_ensured//snapshot{steps}'
                 path2 = f'I://Documents//reward_decentralized//snapshot{steps}'
                 path3 = f'I://Documents//reward_centralized//snapshot{steps}'
+                path4 = f'I://Documents//rl_satellite//snapshot{steps}'
                 fig.savefig(path1 + '.png')
                 fig_reward_decentralize.savefig(path2 + '.png')
                 fig_reward_centralize.savefig(path3 + '.png')
+                fig_satellite.savefig(path4 + '.png')
                 plt.pause(0.001)
 
             if steps % 2 == 0:

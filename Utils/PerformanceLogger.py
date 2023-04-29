@@ -31,12 +31,23 @@ class PerformanceLogger(metaclass=SingletonMeta):
     _outlet_services_ensured_number: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_occupancy: Dict[Outlet, float] = field(default_factory=dict)
     _outlet_utility: Dict[Outlet, float] = field(default_factory=dict)
+    _gridcell_utility: Dict[Outlet, float] = field(default_factory=dict)
     _decentralized_reward: Dict[Agent, float] = field(default_factory=dict)
     _centralized_reward: Dict[Agent, float] = field(default_factory=dict)
-    _service_power_allocate:Dict[Service, float] = field(default_factory=dict)
+    _service_power_allocate: Dict[Service, float] = field(default_factory=dict)
     _request_costs: List[int] = field(default_factory=list)
     _power_costs: List[float] = field(default_factory=list)
     served_ratio: List[float] = field(default_factory=list)
+
+    @property
+    def gridcell_utility(self):
+        return self._gridcell_utility
+
+    def set_gridcell_utility(self, outlet, utility):
+        if outlet not in self._gridcell_utility:
+            self._gridcell_utility[outlet] = {}
+        self._gridcell_utility[outlet] = utility
+
 
     @property
     def service_power_allocate(self):
@@ -55,6 +66,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
         if outlet not in self._centralized_reward:
             self._centralized_reward[outlet] = {}
         self._centralized_reward[outlet] = reward
+
     @property
     def decentralized_reward(self):
         return self._decentralized_reward
@@ -63,6 +75,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
         if outlet not in self._decentralized_reward:
             self._decentralized_reward[outlet] = {}
         self._decentralized_reward[outlet] = reward
+
     @property
     def outlet_occupancy(self):
         return self._outlet_occupancy

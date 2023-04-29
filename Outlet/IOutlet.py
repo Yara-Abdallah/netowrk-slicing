@@ -50,7 +50,27 @@ class Outlet(ABC):
         self._occupancy = 0
         self._utility = 0
         self._sum_of_service_requested_power_allocation = 0
+        self._services_requested = [0, 0, 0]
+        self._services_ensured = [0, 0, 0]
+    @property
+    def raduis(self):
+        return self._radius
+    @raduis.setter
+    def raduis(self,r):
+        self._radius=r
+    @property
+    def services_ensured(self):
+        return self._services_ensured
 
+    @services_ensured.setter
+    def services_ensured(self, serv):
+        self._services_ensured = serv
+    @property
+    def services_requested(self):
+        return self._services_requested
+    @services_requested.setter
+    def services_requested(self,serv):
+        self._services_requested = serv
     @property
     def utility(self):
         return self._utility
@@ -126,3 +146,4 @@ class Outlet(ABC):
     @property
     def power_distinct(self):
         return [self._power, self._distinct]
+

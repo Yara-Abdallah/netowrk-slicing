@@ -5,6 +5,7 @@ class Wifi(Cellular):
     """
     outlet from type wifi
     """
+    _max_capacity = 100
 
     def calculate_coverage_area(self):
         """Returns
