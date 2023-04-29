@@ -2,16 +2,22 @@ from Outlet.Cellular.ICellular import Cellular
 
 
 class ThreeG(Cellular):
-    def __init__(self, agent, supported_services, services_list, vehicles_list):
-        super().__init__()
-        self.agent = agent
-        self.supported_services = supported_services
-        self.services_list = services_list
-        self.vehicles_list = vehicles_list
+    """
+    outlet from type 3G
+    """
 
     def calculate_coverage_area(self):
-        return 1
+        """Returns
+            -------
+            float
+            The coverage area that the tower will response the requests in it."""
+        print(",,,,,,,,,,,,",self.coms.calculate_data_rate())
 
     def calculate_downlink(self):
+        """Returns
+            -------
+            float
+            The downlink that the tower will use it for responsing the requests ."""
         return 2
+
 
