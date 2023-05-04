@@ -1,9 +1,13 @@
+import gc
+import math
+import os
+
 import traci
 from Environment import env_variables
 import xml.etree.ElementTree as ET
-import random
+import random as ra
 from uuid import uuid4
-
+from numpy import random as nump_rand
 from Outlet.Sat.sat import Satellite
 from RL.RLBuilder import RLBuilder
 from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
@@ -17,42 +21,44 @@ from Vehicle.Car import Car
 from Outlet.Cellular.FactoryCellular import FactoryCellular
 from Vehicle.VehicleOutletObserver import ConcreteObserver
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib
 
-fig, axs = plt.subplots(nrows=5, ncols=3, figsize=(100, 32))
+matplotlib.use('agg')
+
+fig, axs = plt.subplots(nrows=7, ncols=3, figsize=(100, 32))
 fig.subplots_adjust(hspace=0.8)
 
 lines_out_utility = []
 lines_out_requested = []
 lines_out_ensured = []
 
-fig_reward_decentralize, axs_reward_decentralize = plt.subplots(nrows=5, ncols=3, figsize=(100, 32))
+fig_reward_decentralize, axs_reward_decentralize = plt.subplots(nrows=7, ncols=3, figsize=(100, 32))
 fig_reward_decentralize.subplots_adjust(hspace=0.8)
 
 lines_out_reward_decentralize = []
 
-fig_reward_centralize, axs_reward_centralize = plt.subplots(nrows=5, ncols=1, figsize=(100, 32))
+fig_reward_centralize, axs_reward_centralize = plt.subplots(nrows=7, ncols=1, figsize=(100, 32))
 fig_reward_centralize.subplots_adjust(hspace=0.8)
 
 lines_out_reward_centralize = []
 
 
-fig_satellite, axs_satellite = plt.subplots(nrows=1, ncols=1, figsize=(30, 22))
-fig_satellite.subplots_adjust(hspace=0.8)
+# fig_satellite, axs_satellite = plt.subplots(nrows=1, ncols=1, figsize=(30, 22))
+# fig_satellite.subplots_adjust(hspace=0.8)
+#
+# lines_satellite_utility = 0
+# satellite_utility=[]
+# def plotting_satellite():
+#     lines_satellite_utility, = axs_satellite.plot([], [], label=f"satellite utility", color='b')
+#     return lines_satellite_utility
+#
 
-lines_satellite_utility = 0
-satellite_utility=[]
-def plotting_satellite():
-    lines_satellite_utility, = axs_satellite.plot([], [], label=f"satellite utility", color='b')
-    return lines_satellite_utility
-
-
-lines_satellite_utility = plotting_satellite()
+# lines_satellite_utility = plotting_satellite()
 
 def plotting_Utility_Requested_Ensured():
     j = 0
-    for i in range(5):
+    for i in range(7):
         row = 0
         line, line1, line2 = 0, 0, 0
         for index in range(3):
@@ -171,15 +177,38 @@ class Environment:
 
         return outlets
 
+    def distance(self, outlet1, outlet2):
+        """Returns the Euclidean distance between two outlets"""
+        return math.sqrt(
+            (outlet1.position[0] - outlet2.position[0]) ** 2 + (outlet1.position[1] - outlet2.position[1]) ** 2)
+
+    def fill_grids_with_the_nearest(self, outlets):
+        sub_dis = []
+        dis = []
+        elements = []
+        for j in outlets:
+            dis = []
+            for i in outlets:
+                dis.append(self.distance(j, i))
+            if len(dis) >= 3:
+                sorted_dis = sorted(dis)
+                min_indices = [dis.index(sorted_dis[i]) for i in range(3)]
+                elements = [outlets[i] for i in min_indices]
+                outlets = [element for index, element in enumerate(outlets) if index not in min_indices]
+                sub_dis.append(elements)
+        return sub_dis
+
     @staticmethod
-    def fill_grids(outlets):
+    def fill_grids(grids):
         Grids = {
             "grid1": [],
             "grid2": [],
             "grid3": [],
             "grid4": [],
+            "grid5": [],
+            "grid6": [],
+            "grid7": [],
         }
-        grids = [outlets[i:i + 3] for i in range(0, len(outlets), 3)]
 
         def grid_namer(i, grid):
             name = "grid" + str(i + 1)
@@ -218,14 +247,21 @@ class Environment:
             uid = str(uuid4())
             self.vehicle.add(vehID=uid, routeID=id_route_)
 
-        list(map(add_vehicle, random.choices(all_routes, k=number_vehicles)))
+            env_variables.vehicles[uid] = Car(uid, 0.0, 0.0)
+
+        list(map(add_vehicle, ra.choices(all_routes, k=number_vehicles)))
 
     def starting(self):
         """
         The function starts the simulation by calling the sumoBinary, which is the sumo-gui or sumo
         depending on the nogui option
         """
-        sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
+
+        os.environ['SUMO_NUM_THREADS'] = '8'
+        # show gui
+        # sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
+        # dont show gui
+        sumo_cmd = ["sumo", "-c", env_variables.network_path]
         traci.start(sumo_cmd)
 
         # end the simulation and d
@@ -238,18 +274,34 @@ class Environment:
         the add to env_variables.vehicles (dictionary)
         """
         ids_arrived = self.simulation.getArrivedIDList()
+        print(" ids_arrived : , ", ids_arrived)
 
         def remove_vehicle(id_):
+            print("del car object ")
             del env_variables.vehicles[id_]
 
-        list(map(remove_vehicle, ids_arrived))
+        if len(ids_arrived) != 0:
+            list(map(remove_vehicle, ids_arrived))
+
+        vehicle_ids = traci.vehicle.getIDList()
+
+        # remove vehicles that have finished their routes
+        for vehicle_id in vehicle_ids:
+            # check if the vehicle has finished its route
+            route = traci.vehicle.getRoute(vehicle_id)
+            edge = traci.vehicle.getRoadID(vehicle_id)
+            if len(route) > 0 and edge == route[-1]:
+                # remove the vehicle from the simulation
+                print("remove the vehicle from the simulation ")
+                del env_variables.vehicles[vehicle_id]
+                traci.vehicle.remove(vehicle_id)
 
     def add_new_vehicles(self):
         """
         Add vehicles which inserted into the road network in this time step.
         the add to env_variables.vehicles (dictionary)
         """
-        ids_new_vehicles = self.simulation.getDepartedIDList()
+        ids_new_vehicles = traci.vehicle.getIDList()
 
         def create_vehicle(id_):
             env_variables.vehicles[id_] = Car(id_, 0, 0)
@@ -278,7 +330,7 @@ class Environment:
         :return: vehicles that running in road network in this time step
         """
         self.remove_vehicles_arrived()
-        self.add_new_vehicles()
+        # self.add_new_vehicles()
         return env_variables.vehicles
 
     def ensured_service_aggrigation(self, performance_logger, outlet, service_type, action_value):
@@ -344,11 +396,15 @@ class Environment:
                 performance_logger.outlet_services_power_allocation[outlet][2] = float(x) + float(
                     request_cost)
 
+    # from memory_profiler import profile
+    #
+    # @profile
     def car_interact(self, car, observer, performance_logger, gridcells_dqn, outlets):
         # car.outlets_serve.append(outlets[-1])
 
         car.attach(observer)
-        car.set_state(car.get_x(), car.get_y())
+        car.set_state(float(round(traci.vehicle.getPosition(car.id)[0], 4)),
+                      float(round(traci.vehicle.getPosition(car.id)[1], 4)))
 
         car.add_satellite(outlets[-1])
 
@@ -358,16 +414,20 @@ class Environment:
         outlet = info[0]
 
         # print("outlet is : ", outlet)
-        # print("outlet . max capacity : ",outlet.max_capacity)
+        # print("outlet . max capacity : ",outlet._max_capacity)
 
-        performance_logger.service_requested = {car: service}
         # .................................................................................................
-        performance_logger.set_service_handled(outlet, info[1][1], service)
+        if outlet not in performance_logger.service_handled:
+            performance_logger.set_service_handled(outlet, info[1][1], service)
+
+        # print("befor deletion ......... : ", performance_logger.service_handled)
+        # print("size of dec :  ", len(performance_logger.service_handled))
+        # print("size of inner dec : ", len(performance_logger.service_handled[outlet]))
+
         request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
         request_cost = RequestCost(request_bandwidth, service.realtime)
         request_cost.cost_setter(service.realtime)
         # print(f"request cost from car {car.get_id()} : ->  {service.__class__.__name__, service.bandwidth, request_cost.cost} \n ")
-        performance_logger.request_costs.append(request_cost.cost)
         performance_logger.set_service_power_allocate(service, request_bandwidth.allocated)
         self.services_aggregation(performance_logger, outlet, service.__class__.__name__, request_cost.cost)
 
@@ -377,37 +437,44 @@ class Environment:
             outlet.power = [0.0, 0.0, 0.0]
             performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
             performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
-            performance_logger.set_outlet_utility(outlet, 0.0)
-            performance_logger.set_outlet_occupancy(outlet, 0.0)
-            performance_logger.set_centralized_reward(outlet.dqn.agents, 0.0)
 
         outlet.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[outlet]
         outlet.dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[outlet]
         # print(f" outlet service requested : {outlet} , {outlet.dqn.environment.state.services_requested}")
 
-        self.ensured_service_aggrigation(performance_logger, outlet, service.__class__.__name__,
-                                         outlet.dqn.agents.action_value)
-        self.power_aggregation(performance_logger, outlet, service.__class__.__name__, request_cost.cost,
-                               outlet.dqn.agents.action_value)
-
-        outlet.power = performance_logger.outlet_services_power_allocation[outlet]
         # print("outlet power is ........................ :  ", outlet.power)
         tower_cost = TowerCost(request_bandwidth, service.realtime)
         tower_cost.cost_setter(service.realtime)
-        performance_logger.power_costs.append(tower_cost.cost)
         # print(f"bandwidth_demand is:{request_bandwidth.allocated:.2f} ")
 
         cost2 = 0
-        if outlet.dqn.agents.action_value == 1:
-            cost2 = outlet.max_capacity - request_bandwidth.allocated
-            # print(f"capacity is: {outlet.max_capacity} MBps outlet type : {outlet.__class__.__name__}")
-            # print(f"tower capacity after send request from  {car.get_id()} : ->  {cost2} \n ")
-            tower_cost.cost = cost2
+
+        # print("action value : ", outlet.dqn.agents.action_value)
+
+        if outlet not in performance_logger._outlet_services_power_allocation:
+            performance_logger.set_outlet_services_power_allocation(outlet, [0.0, 0.0, 0.0])
+
+        if outlet._max_capacity > request_bandwidth.allocated:
+            self.ensured_service_aggrigation(performance_logger, outlet, service.__class__.__name__,
+                                             outlet.dqn.agents.action_value)
+            self.power_aggregation(performance_logger, outlet, service.__class__.__name__, request_cost.cost,
+                                   outlet.dqn.agents.action_value)
+            outlet.power = performance_logger.outlet_services_power_allocation[outlet]
+
+            if outlet.dqn.agents.action_value == 1:
+                outlet._max_capacity = outlet._max_capacity - request_bandwidth.allocated
+                # print(f"capacity is: {outlet.max_capacity} MBps outlet type : {outlet.__class__.__name__}")
+                # print(f"tower capacity after send request from  {car.get_id()} : ->  {cost2} \n ")
+                tower_cost.cost = outlet._max_capacity
+        else:
+
+            outlet.power = performance_logger.outlet_services_power_allocation[outlet]
+            outlet._max_capacity = outlet._max_capacity
 
         outlet.dqn.environment.state.allocated_power = outlet.power
         outlet.dqn.environment.state.tower_capacity = cost2
 
-        occupancy = sum(performance_logger.outlet_services_power_allocation[outlet]) / outlet.max_capacity
+        occupancy = sum(performance_logger.outlet_services_power_allocation[outlet]) / outlet._max_capacity
         # print(f"sum : {sum(performance_logger.outlet_services_power_allocation[outlet])}  max {outlet.max_capacity} ")
         # print(f"dev :  {sum(performance_logger.outlet_services_power_allocation[outlet])/outlet.max_capacity}")
 
@@ -415,8 +482,6 @@ class Environment:
             performance_logger.outlet_services_power_allocation[outlet])
         outlet.occupancy = int(occupancy * 100)
         # print("outlet occupancy :  ", outlet.occupancy)
-
-        performance_logger.set_outlet_occupancy(outlet, outlet.occupancy)
 
         outlet.dqn.environment.state.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
         outlet.dqn.environment.reward.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
@@ -433,11 +498,10 @@ class Environment:
         else:
             outlet.utility = 0
 
-        if outlet.__class__.__name__ == 'Satellite':
-            # print("satellite_utility : ", outlet.utility)
-            satellite_utility.append(outlet.utility)
+        # if outlet.__class__.__name__ == 'Satellite':
+        #     # print("satellite_utility : ", outlet.utility)
+        #     satellite_utility.append(outlet.utility)
 
-        performance_logger.set_outlet_utility(outlet, outlet.utility)
         # print("outlet.utility : ", outlet.utility)
         # print("outlet.dqn.agents.epsilon ....... : ", outlet.dqn.agents.epsilon)
 
@@ -450,6 +514,7 @@ class Environment:
 
         # print("action_value for Decentralized agent   ", action_value_decentralize)
         outlet.dqn.agents.action_value = action_value_decentralize
+        # print("action value after chain : ",outlet.dqn.agents.action_value)
         next_state_decentralize = action_decentralize.execute(outlet.dqn.environment.state,
                                                               action_value_decentralize)
 
@@ -472,10 +537,6 @@ class Environment:
                     outlet.power = [0.0, 0.0, 0.0]
                     performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
                     performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
-                    performance_logger.set_outlet_utility(outlet, 0.0)
-                    performance_logger.set_outlet_occupancy(outlet, 0.0)
-                    performance_logger.set_centralized_reward(gridcell_dqn.agents, 0.0)
-                    performance_logger.set_decentralized_reward(outlet.dqn.agents, 0.0)
 
                 outlet.distinct = gridcell_dqn.agents.outlets_id[i]
                 gridcell_dqn.environment.state.allocated_power = outlet.power_distinct
@@ -489,10 +550,10 @@ class Environment:
                 gridcell_dqn.environment.reward.services_ensured += outlet.dqn.environment.reward.services_ensured
                 #
                 # print(f"service requested in grid {ind} , {gridcell_dqn.environment.state.services_requested}")
-                # print(f"service requested in outlet {i} , {outlet.dqn.environment.state.services_requested}")
+                # print(f"service requested in outlet {i} , {outlet.dqn.environment.state.services_requested} , outlet type {outlet.__class__.__name__} , capacity {outlet._max_capacity}")
                 #
                 # print(f"service ensured in grid {ind} , {gridcell_dqn.environment.state.services_ensured}")
-                # print(f"service ensured in outlet {i} , {outlet.dqn.environment.state.services_ensured}")
+                # print(f"service ensured in outlet {i} , {outlet.dqn.environment.state.services_ensured} , outlet type {outlet.__class__.__name__} , capacity {outlet._max_capacity}")
 
                 sum_of_utility_of_all_outlets = sum_of_utility_of_all_outlets + outlet.dqn.environment.reward.calculate_reward()
 
@@ -524,22 +585,39 @@ class Environment:
 
     def terminate_service(self, veh, outlets, performance_logger):
         for out in outlets:
+            if out in performance_logger.service_handled:
+                if veh in performance_logger.service_handled[out] and veh not in env_variables.vehicles:
+                    serv = performance_logger.service_handled[out][veh]
+                    out._max_capacity = out._max_capacity + performance_logger.service_power_allocate[serv]
+                    del performance_logger.service_handled[out][veh]
+                    del performance_logger.service_power_allocate[serv]
+                    del serv
+
             if out not in veh.outlets_serve:
                 if out in performance_logger.service_handled:
                     if veh in performance_logger.service_handled[out]:
                         serv = performance_logger.service_handled[out][veh]
-                        # print("performance_logger.service_power_allocate[serv] : ", performance_logger.service_power_allocate[serv])
                         out._max_capacity = out._max_capacity + performance_logger.service_power_allocate[serv]
-            else :
+                        # print("inside ...... ")
+                        # print("before deletion ......... : ", performance_logger.service_handled)
+                        del performance_logger.service_handled[out][veh]
+                        # print("after deletion ......... : ", performance_logger.service_handled)
+                        del performance_logger.service_power_allocate[serv]
+                        del serv
+
+
+            else:
                 out._max_capacity = out._max_capacity
 
     def run(self):
+
         gridcells_dqn = []
         self.starting()
 
         outlets = self.get_all_outlets()
+        # print(".... len : ",len(outlets))
+        self.Grids = self.fill_grids(self.fill_grids_with_the_nearest(outlets[:21]))
 
-        self.Grids = self.fill_grids(outlets)
         step = 0
         print("\n")
         outlets_pos = self.get_positions_of_outlets(outlets)
@@ -551,6 +629,8 @@ class Environment:
         build3 = RLBuilder()
         build4 = RLBuilder()
         build5 = RLBuilder()
+        build6 = RLBuilder()
+        build7 = RLBuilder()
 
         gridcell_dqn1 = build1.agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
                                                                                            CentralizedState()).model_.build_model(
@@ -582,39 +662,99 @@ class Environment:
         gridcell_dqn5.agents.grid_outlets = self.Grids.get("grid5")
         gridcell_dqn5.agents.outlets_id = list(range(len(gridcell_dqn5.agents.grid_outlets)))
 
+        gridcell_dqn6 = build6.agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
+                                                                                           CentralizedState()).model_.build_model(
+            "centralized", 6, 9).build()
+        gridcell_dqn6.agents.grid_outlets = self.Grids.get("grid6")
+        gridcell_dqn6.agents.outlets_id = list(range(len(gridcell_dqn6.agents.grid_outlets)))
+
+        gridcell_dqn7 = build7.agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
+                                                                                           CentralizedState()).model_.build_model(
+            "centralized", 6, 9).build()
+        gridcell_dqn7.agents.grid_outlets = self.Grids.get("grid7")
+        gridcell_dqn7.agents.outlets_id = list(range(len(gridcell_dqn7.agents.grid_outlets)))
+
         gridcells_dqn.append(gridcell_dqn1)
         gridcells_dqn.append(gridcell_dqn2)
         gridcells_dqn.append(gridcell_dqn3)
         gridcells_dqn.append(gridcell_dqn4)
         gridcells_dqn.append(gridcell_dqn5)
+        gridcells_dqn.append(gridcell_dqn6)
+        gridcells_dqn.append(gridcell_dqn7)
 
         steps = 0
 
         # Initialize previous_steps variable
         previous_steps = 0
-        snapshot_time = 2
+        snapshot_time = 15
+        previous_steps_centralize = 0
         prev = 0
-        temp_outlet_reward = []
         poi_ids = traci.poi.getIDList()
         temp_outlets = []
-
-        for i in range(5):
+        vehic = 0
+        for i in range(7):
             for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
                 temp_outlets.append(outlet)
 
         while step < env_variables.TIME:
+            gc.get_count()
+            gc.collect(0)
             steps += 1
             traci.simulationStep()
-            print("step is ....................................... ", step)
-            self.get_current_vehicles()
+
+
             if step == 0:
-                self.generate_vehicles(250)
-                self.select_outlets_to_show_in_gui()
+                number_cars = int(nump_rand.normal(loc=env_variables.number_cars_mean_std['mean'],
+                                                   scale=env_variables.number_cars_mean_std['std']))
+                # print("number_cars: ", number_cars)
+                # self.add_new_vehicles()
+                self.generate_vehicles(number_cars)
+                # vehic = self.get_current_vehicles()
+
+                # self.select_outlets_to_show_in_gui()
+            if traci.vehicle.getIDCount() <= env_variables.threashold_number_veh:
+                number_cars = int(nump_rand.normal(loc=env_variables.number_cars_mean_std['mean'],
+                                                   scale=env_variables.number_cars_mean_std['std']))
+
+                # print("number_cars: ", number_cars)
+                # self.add_new_vehicles()
+                self.generate_vehicles(number_cars)
+                # vehic = self.get_current_vehicles()
+
+            vehic = self.get_current_vehicles()
+            # print("num of env_variables.vehicles : ", len(env_variables.vehicles))
+            print("step is ....................................... ", step)
             list(map(lambda veh: self.car_interact(veh, observer, performance_logger, gridcells_dqn, outlets),
                      env_variables.vehicles.values()))
 
             list(map(lambda veh: self.terminate_service(veh, outlets, performance_logger),
                      env_variables.vehicles.values()))
+
+            # night time
+            if 0 <= step <= env_variables.period1:
+                env_variables.number_cars_mean_std['mean'] = 55
+                env_variables.number_cars_mean_std['std'] = 2
+                env_variables.threashold_number_veh = 25
+            # day time
+            elif env_variables.period1 + 10 < step <= env_variables.period2:
+                env_variables.number_cars_mean_std['mean'] = 120
+                env_variables.number_cars_mean_std['std'] = 5
+                env_variables.threashold_number_veh = 100
+
+            elif env_variables.period2 + 10 < step <= env_variables.period3:
+                env_variables.number_cars_mean_std['mean'] = 250
+                env_variables.number_cars_mean_std['std'] = 5
+                env_variables.threashold_number_veh = 200
+
+            elif env_variables.period3 + 10 < step <= env_variables.period4:
+                env_variables.number_cars_mean_std['mean'] = 120
+                env_variables.number_cars_mean_std['std'] = 5
+                env_variables.threashold_number_veh = 100
+
+            elif env_variables.period4 + 10 < step <= env_variables.period5:
+                env_variables.number_cars_mean_std['mean'] = 55
+                env_variables.number_cars_mean_std['std'] = 2
+                env_variables.threashold_number_veh = 25
 
             # for i in range(5):
             #     for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
@@ -622,10 +762,11 @@ class Environment:
 
             # self.update_outlet_utility(outlet_utility)
             # self.update_outlet_occupancy(outlet_occupancy)
-            for i in range(5):
+
+            for i in range(7):
                 for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
                     self.update_outlet_color(outlet.outlet_id, outlet.utility)
-
+            #
             for j, line in enumerate(lines_out_utility):
                 x_data, y_data = line.get_data()
                 x_data = np.append(x_data, steps)
@@ -668,10 +809,10 @@ class Environment:
                 # print(x_data.shape, " 5 ", y_data.shape, "outlet num : ", j, " value : ",
                 #       gridcells_dqn[j].environment.reward.reward_value)
                 line4.set_data(x_data, y_data)
-
-            axs_satellite.legend()
-            axs_satellite.relim()
-            axs_satellite.autoscale_view()
+            #
+            # axs_satellite.legend()
+            # axs_satellite.relim()
+            # axs_satellite.autoscale_view()
 
             # fig_satellite.canvas.draw()
 
@@ -681,40 +822,42 @@ class Environment:
                     ax.relim()
                     ax.autoscale_view()
                 # Draw the figure after each loop
-                if axs is axs:
-                    fig.canvas.draw()
-                elif axs is axs_reward_decentralize:
-                    fig_reward_decentralize.canvas.draw()
-                else:
-                    fig_reward_centralize.canvas.draw()
-
-
+                # if axs is axs:
+                #     fig.canvas.draw()
+                # elif axs is axs_reward_decentralize:
+                #     fig_reward_decentralize.canvas.draw()
+                # else:
+                #     fig_reward_centralize.canvas.draw()
 
             if steps - prev == snapshot_time:
                 prev = steps
-                path1 = f'I://Documents//utility_requested_ensured//snapshot{steps}'
-                path2 = f'I://Documents//reward_decentralized//snapshot{steps}'
-                path3 = f'I://Documents//reward_centralized//snapshot{steps}'
-                path4 = f'I://Documents//rl_satellite//snapshot{steps}'
-                fig.savefig(path1 + '.png')
-                fig_reward_decentralize.savefig(path2 + '.png')
-                fig_reward_centralize.savefig(path3 + '.png')
-                fig_satellite.savefig(path4 + '.png')
-                plt.pause(0.001)
 
-            if steps % 2 == 0:
-                plt.pause(0.001)
+                path1 = f'D://datavisulaiztion//utility_requested_ensured//snapshot{steps}'
+                path2 = f'D://datavisulaiztion//reward_decentralized//snapshot{steps}'
+                path3 = f'D://datavisulaiztion//reward_centralized//snapshot{steps}'
 
-            if steps - previous_steps >= 30:
+                # path1 = f'I://Documents//utility_requested_ensured//snapshot{steps}'
+                # path2 = f'I://Documents//reward_decentralized//snapshot{steps}'
+                # path3 = f'I://Documents//reward_centralized//snapshot{steps}'
+                # path4 = f'I://Documents//rl_satellite//snapshot{steps}'
+                fig.set_size_inches(10, 8)
+                fig_reward_centralize.set_size_inches(15, 10)
+                fig_reward_decentralize.set_size_inches(10, 8)  # set physical size of plot in inches
+                fig.savefig(path1 + '.svg', dpi=300)
+                fig_reward_decentralize.savefig(path2 + '.svg', dpi=300)
+                fig_reward_centralize.savefig(path3 + '.svg', dpi=300)
+
+                # fig_satellite.savefig(path4 + '.png')
+                # plt.pause(0.001)
+            else:
+                plt.close(fig)
+                plt.close(fig_reward_decentralize)
+                plt.close(fig_reward_centralize)
+
+            if steps - previous_steps >= env_variables.centralized_replay_buffer:
                 previous_steps = steps
                 for ind, gridcell_dqn in enumerate(gridcells_dqn):
                     for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
-                        performance_logger.set_decentralized_reward(outlet.dqn.agents,
-                                                                    outlet.dqn.environment.reward.reward_value)
-
-                        performance_logger.set_centralized_reward(gridcell_dqn.agents,
-                                                                  gridcell_dqn.environment.reward.reward_value
-                                                                  )
 
                         # performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
                         # performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
@@ -726,20 +869,44 @@ class Environment:
                             outlet.dqn.agents.replay_buffer_decentralize(outlet.dqn.agents.batch_size, outlet.dqn.model)
                         # outlet.dqn.environment.state.resetsate(outlet.max_capacity)
 
-            if steps - previous_steps >= 24 * 30:
-                previous_steps = steps
+            if steps - previous_steps_centralize >= env_variables.centralized_replay_buffer:
+                previous_steps_centralize = steps
+
                 for ind, gridcell_dqn in enumerate(gridcells_dqn):
                     if len(gridcell_dqn.agents.memory) > gridcell_dqn.agents.batch_size:
                         print("replay buffer of centralize ")
-                        gridcell_dqn.agents.replay_buffer_centralize(gridcell_dqn.agents.batch_size,
+                        gridcell_dqn.agents.replay_buffer_centralize(128,
                                                                      gridcell_dqn.model)
-                    # gridcell_dqn.environment.state.resetsate()
+            # gridcell_dqn.environment.state.resetsate()
 
             step += 1
-            if step == 24 * 60 * 7:
+
+            if step == env_variables.TIME:
+                gridcell_dqn1.model.save("D://datavisulaiztion//centralized_weights//weights1.hdf5")
+                gridcell_dqn2.model.save("D://datavisulaiztion//centralized_weights//weights2.hdf5")
+                gridcell_dqn3.model.save("D://datavisulaiztion//centralized_weights//weights3.hdf5")
+                gridcell_dqn4.model.save("D://datavisulaiztion//centralized_weights//weights4.hdf5")
+                gridcell_dqn5.model.save("D://datavisulaiztion//centralized_weights//weights5.hdf5")
+                gridcell_dqn6.model.save("D://datavisulaiztion//centralized_weights//weights6.hdf5")
+                gridcell_dqn7.model.save("D://datavisulaiztion//centralized_weights//weights7.hdf5")
+                for index, g in enumerate(temp_outlets):
+                    g.dqn.model.save(f"D://datavisulaiztion//decentralized_weights//weights_outlet{index}.hdf5")
+
+
+            # if step == env_variables.TIME:
+            #     gridcell_dqn1.model.save("I://Documents//centralized_weights//weights_{1}.hdf5")
+            #     gridcell_dqn2.model.save("I://Documents//centralized_weights//weights_{2}.hdf5")
+            #     gridcell_dqn3.model.save("I://Documents//centralized_weights//weights_{3}.hdf5")
+            #     gridcell_dqn4.model.save("I://Documents//centralized_weights//weights_{4}.hdf5")
+            #     gridcell_dqn5.model.save("I://Documents//centralized_weights//weights_{5}.hdf5")
+            #     gridcell_dqn6.model.save("I://Documents//centralized_weights//weights_{6}.hdf5")
+            #     gridcell_dqn7.model.save("I://Documents//centralized_weights//weights_{7}.hdf5")
+            #     for index, g in enumerate(temp_outlets):
+            #         g.dqn.model.save(f"I://Documents//decentralized_weights//weights_{index}.hdf5")
+
                 self.logging_the_final_results(performance_logger)
                 break
 
-        plt.show()
+        # plt.show()
         plt.close()
         traci.close()

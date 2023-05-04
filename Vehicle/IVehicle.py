@@ -7,7 +7,7 @@ import traci
 
 class Vehicle(ABC):
     # TODO: replace int with road object in annotation
-    def __init__(self, id_, x, y, **kwargs):
+    def __init__(self, id_, x : float , y : float, **kwargs):
         """
         Parameters
         ----------
@@ -32,9 +32,8 @@ class Vehicle(ABC):
 
 
     def check_position(self):
-        position = env_variables.get_position_vehicle(self.id)
-        self.x = position[0]
-        self.y = position[1]
+        self.x = float(round(traci.vehicle.getPosition(self.id)[0],4))
+        self.y = float(round(traci.vehicle.getPosition(self.id)[1],4))
 
     def get_x(self):
         self.check_position()

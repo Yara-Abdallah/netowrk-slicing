@@ -26,8 +26,8 @@ class AbstractAgent():
         self.episodes = episodes
         self.cumulative_reward = cumulative_reward
         self.step = step
-        self.memory = deque(maxlen=4000)
-        self.batch_size = 15
+        self.memory = deque(maxlen=2048)
+        self.batch_size = 32
         # model state action reward
 
     @property

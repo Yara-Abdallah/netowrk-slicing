@@ -16,6 +16,9 @@ class ConcreteObserver(Observer):
 
     def check(self, subject):
         def check_radius(outlet):
+
+
+
             if (outlet.position[0] - outlet.radius) <= subject.x <= (
                     outlet.position[0] + outlet.radius
             ) and (outlet.position[1] - outlet.radius) <= subject.y <= (
