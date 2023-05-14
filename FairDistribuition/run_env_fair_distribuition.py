@@ -223,7 +223,7 @@ class Environment:
         ids_arrived = self.simulation.getArrivedIDList()
 
         def remove_vehicle(id_):
-            del env_variables.vehicles[id_]
+            env_variables.vehicles[id_] = None
 
         list(map(remove_vehicle, ids_arrived))
 
@@ -386,6 +386,7 @@ class Environment:
         # print("outlet . max capacity : ",outlet.max_capacity)
 
         performance_logger.service_requested = {car: service}
+
         # .................................................................................................
 
         request_bandwidth = Bandwidth(service.bandwidth, service.criticality)

@@ -40,7 +40,7 @@ TIME = 1000
 #10000 * 7
 
 
-
+requests = []
 period1 = 2000
 period2 = 4000
 period3 = 6000

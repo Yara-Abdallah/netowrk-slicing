@@ -1,3 +1,5 @@
+import cProfile
+
 from Environment import run_env_rl
 from memory_profiler import profile
 
@@ -7,6 +9,12 @@ import gc
 gc.set_debug(gc.DEBUG_UNCOLLECTABLE) # Enable debugging of circular references
 
 def main():
+
+    from pympler.tracker import SummaryTracker
+    tracker = SummaryTracker()
+
+    # ... some code you want to investigate ...
+
     env = run_env_rl.Environment()
     env.run()
 

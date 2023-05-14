@@ -222,7 +222,7 @@ class Environment:
         ids_arrived = self.simulation.getArrivedIDList()
 
         def remove_vehicle(id_):
-            del env_variables.vehicles[id_]
+            env_variables.vehicles[id_] = None
 
         list(map(remove_vehicle, ids_arrived))
 
@@ -440,6 +440,7 @@ class Environment:
                 pass
 
     def run(self):
+
         gridcells_dqn = []
         self.starting()
         greedy = Greedy()
@@ -504,7 +505,7 @@ class Environment:
         while step < env_variables.TIME:
             steps += 1
             traci.simulationStep()
-            print("step is ....................................... ", step)
+
             self.get_current_vehicles()
             if step == 0:
                 self.generate_vehicles(250)

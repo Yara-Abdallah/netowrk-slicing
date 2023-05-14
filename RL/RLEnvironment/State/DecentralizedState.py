@@ -1,6 +1,6 @@
 import copy
-import rx
-import rx.operators as ops
+# import rx
+# import rx.operators as ops
 import numpy as np
 from RL.RLEnvironment.State.State import State
 
@@ -10,6 +10,8 @@ class DeCentralizedState(State):
     _services_ensured: np.ndarray
     _services_requested: np.ndarray
     _tower_capacity: float
+    _state_value_decentralize =[0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+    _next_state_decentralize=[0.0,0.0,0.0,0.0,0.0,0.0,0.0]
 
     def __init__(self):
         super().__init__()
@@ -22,9 +24,26 @@ class DeCentralizedState(State):
         self._services_requested = np.zeros(self.num_services)
         self._tower_capacity = 0.0
 
+
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
+    @property
+    def state_value_decentralize(self):
+        return  self._state_value_decentralize
+
+    @state_value_decentralize.setter
+    def state_value_decentralize(self,val):
+        self._state_value_decentralize = val
+
+    @property
+    def next_state_decentralize(self):
+        return self._next_state_decentralize
+
+    @next_state_decentralize.setter
+    def next_state_decentralize(self,val):
+        self._next_state_decentralize = val
 
     @property
     def tower_capacity(self):
@@ -76,8 +95,6 @@ class DeCentralizedState(State):
         return percentage_array
 
     def resetsate(self, tower_capacity):
-        # self._services_ensured = np.zeros(self.num_services)
-        # self.services_requested = np.zeros(self.num_services)
         self._allocated_power = np.zeros(self.num_services)
         self._tower_capacity = tower_capacity
 
@@ -86,4 +103,6 @@ class DeCentralizedState(State):
         final_state.append(self._tower_capacity)
         final_state.extend(self.allocated_power)
         final_state.extend(self.calculate_utility())
+        if len(final_state)==0 :
+            final_state = [0.0,0.0,0.0,0.0,0.0,0.0,0.0]
         return final_state

@@ -3,6 +3,8 @@ import copy
 import numpy
 import numpy as np
 import rx
+
+# import rx
 import rx.operators as ops
 from RL.RLEnvironment.State.State import State
 
@@ -16,6 +18,8 @@ class CentralizedState(State):
     _services_ensured: np.ndarray
     _services_requested: np.ndarray
     _tower_capacity: float
+    _state_value_centralize =[0.0,0.0,0.0,0.0,0.0,0.0]
+    _next_state_centralize =[0.0,0.0,0.0,0.0,0.0,0.0]
 
     def __init__(self):
         super().__init__()
@@ -31,6 +35,21 @@ class CentralizedState(State):
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
+    @property
+    def state_value_centralize(self):
+        return self._state_value_centralize
+    @state_value_centralize.setter
+    def state_value_centralize(self,val):
+        self._state_value_centralize =  val
+
+    @property
+    def next_state_centralize(self):
+        return self._next_state_centralize
+
+    @next_state_centralize.setter
+    def next_state_centralize(self, val):
+        self._next_state_centralize = val
 
     @property
     def tower_capacity(self):

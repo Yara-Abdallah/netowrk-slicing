@@ -4,8 +4,16 @@ from RL.RLEnvironment.Action.Action import Action
 
 class ActionAssignment:
     def __init__(self):
-        self.grid_cell = 5
+        self.grid_cell = 3
         self.num_services = 3
+        self._action_value_centralize = 0
+
+    @property
+    def action_value_centralize(self):
+        return self._action_value_centralize
+    @action_value_centralize.setter
+    def action_value_centralize(self,val):
+        self._action_value_centralize = val
 
     def explore(self):
         return np.random.randint(2, size=(self.num_services, self.grid_cell))

@@ -4,8 +4,16 @@ from RL.RLEnvironment.Action.Action import Action
 
 class ActionResponse:
     def __init__(self):
-        self.grid_cell = 5
+        self.grid_cell = 3
         self.num_services = 3
+        self._action_value_decentralize = 0
+
+    @property
+    def action_value_decentralize(self):
+        return self._action_value_decentralize
+    @action_value_decentralize.setter
+    def action_value_decentralize(self,val):
+        self._action_value_decentralize = val
 
 
     def explore(self):

@@ -24,11 +24,20 @@ class Service(ABC):
         self.bandwidth = bandwidth
         self.criticality = criticality
         self._realtime = realtime
+        self._service_power_allocate = 0
 
     # def __str__(self):
     #     return f"service criticality : {self.criticality} ,  service bandwidth : {self.bandwidth} , " \
     #            f"service real time : {self.realtime}"
 
+
+    @property
+    def service_power_allocate(self):
+        return self._service_power_allocate
+
+    @service_power_allocate.setter
+    def service_power_allocate(self,value):
+        self._service_power_allocate = value
     @abstractmethod
     def calculate_arrival_rate(self):
         """ the rate at which messages or packets are received by a system or a network over a period of time """
