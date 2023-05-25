@@ -1,13 +1,13 @@
 from keras.optimizers import Adam
 
-from RL.RLAlgorithms.DecentralizeModel import Model
+from RL.RLAlgorithms.DecentralizeModel import DecentralizeModel
 
 
 class ModelBuilder_Decentralize:
 
     def __init__(self, model=None):
         if model is None:
-            self.model = Model(state_size=7, action_size=2,
+            self.model = DecentralizeModel(state_size=7, action_size=2,
                                activation_function="relu", loss_function="mse", optimization_algorithm=Adam,
                                learning_rate=0.5, output_activation="sigmoid").build_model()
         else:

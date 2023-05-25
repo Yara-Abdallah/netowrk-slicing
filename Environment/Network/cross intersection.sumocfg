@@ -1,8 +1,8 @@
 <configuration>
     <input>
         <net-file value="cross_intersection.net.xml"/>
-        <route-files value="cross intersection0.rou.xml"/>
-        <!--<additional-files value="demo.add.xml"/>-->
+        <!--<route-files value="cross_intersection.rou.xml"/>-->
+        <additional-files value="cross_intersection.add.xml"/>
 
     </input>
 

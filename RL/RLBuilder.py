@@ -2,14 +2,14 @@ from RL.AgentBuilder import ActionBuilder, AgentBuilder_
 from RL.DecentralizeModelBuilder import ModelBuilder_Decentralize
 from RL.EnvBuilder import EnvironmentBuilder
 from RL.CentralizeModelBuilder import ModelBuilder_Centralize
-from RL.RLAlgorithms.Centralized_DQN import DQN
+from RL.RLAlgorithms.Centralized_DQN import CentralizeDQN
 from keras.optimizers import Adam
 
 
 class RLBuilder:
     def __init__(self, rl=None):
         if rl is None:
-            self.rl = DQN()
+            self.rl = CentralizeDQN()
         else:
             self.rl = rl
 

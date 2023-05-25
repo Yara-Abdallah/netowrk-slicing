@@ -8,12 +8,11 @@ class Satellite(Outlet):
     """
 
     def __init__(
-            self, agent, coms: Communications, supported_services, *args, **kwargs
+            self, coms: Communications, supported_services, *args, **kwargs
     ):
 
 
         super().__init__(*args)
-        self.agent = agent
         self.coms = coms
         self.supported_services = supported_services
         self.services = []

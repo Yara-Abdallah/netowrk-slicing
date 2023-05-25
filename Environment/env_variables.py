@@ -1,12 +1,22 @@
 import os
 
 import traci
+from pathlib import Path
 
 # Get the current working directory
-current_dir = os.getcwd()
+# current_dir = os.getcwd()
 
-network_path = current_dir + '\\Environment\\Area2\\map.sumocfg'
-random_routes_path = current_dir + '\\Environment\\Area2\\map.rou.xml'
+# network_path = current_dir + '\\Environment\\Area2\\map.sumocfg'
+# random_routes_path = current_dir + '\\Environment\\Area2\\map.rou.xml'
+
+
+# network_path = current_dir + '\\Environment\\Network\\cross intersection.sumocfg'
+# random_routes_path = current_dir + '\\Environment\\Network\\cross_intersection.rou.xml'
+#
+
+current_dir = Path(__file__).resolve().parent
+network_path = os.path.join(current_dir, "Network", "cross intersection.sumocfg")
+random_routes_path = os.path.join(current_dir, "Network", "cross_intersection.rou.xml")
 
 types_outlets = ['3G', '4G', '5G','wifi']
 
@@ -36,19 +46,24 @@ default_types_vehicles = [
     'DEFAULT_VEHTYPE']
 
 vehicles = {}
-TIME = 1000
+TIME = 1280
 #10000 * 7
-
+Threshold_of_utility = 0.1
+Threshold_of_utility_acc = 0.5
 
 requests = []
-period1 = 2000
-period2 = 4000
-period3 = 6000
-period4 = 8000
-period5 = 10000
+period1 = 256
+period2 = 512
+period3 = 786
+period4 = 1024
+period5 = 1280
+
+ENTERTAINMENT_RATIO = 0
+SAFETY_RATIO = 0
+AUTONOMOUS_RATIO = 0
 
 decentralized_replay_buffer = 30
-centralized_replay_buffer = 10 * 30
+centralized_replay_buffer = 32
 def get_position_vehicle(id_):
     try:
         p = round(traci.vehicle.getPosition(id_),4)

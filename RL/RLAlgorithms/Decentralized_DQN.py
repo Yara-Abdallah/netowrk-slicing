@@ -2,14 +2,12 @@
 from RL.RLAlgorithms.AbstractRL import AbstractRL
 
 
-class DQN(AbstractRL):
+class DecentralizeDQN(AbstractRL):
     def __init__(self, model, *args):
         super().__init__(*args)
         self.model = model
 
 
-    # def create_model(self) -> Sequential:
-    #    return self.model.build_model()
 
     def load(self, filename):
         self.model.load(filename)

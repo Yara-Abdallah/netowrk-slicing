@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2023-05-17 15:35:54 by Eclipse SUMO netedit Version 1.14.1
+-->
+
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+    <!-- Shapes -->
+    <poi id="poi_0" type="wifi" color="255,240,0" layer="202.00" x="891.65" y="92.34"/>
+    <poi id="poi_1" type="wifi" color="255,240,0" layer="202.00" x="698.92" y="14.21"/>
+    <poi id="poi_10" type="3G" color="255,240,0" layer="202.00" x="778.49" y="198.51"/>
+    <poi id="poi_11" type="3G" color="255,240,0" layer="202.00" x="722.07" y="-150.59"/>
+    <poi id="poi_12" type="3G" color="255,240,0" layer="202.00" x="590.93" y="-198.51"/>
+    <poi id="poi_13" type="3G" color="255,240,0" layer="202.00" x="394.45" y="3.65"/>
+    <poi id="poi_14" type="3G" color="255,240,0" layer="202.00" x="389.58" y="201.76"/>
+    <poi id="poi_15" type="3G" color="255,240,0" layer="202.00" x="177.67" y="-2.84"/>
+    <poi id="poi_16" type="3G" color="255,240,0" layer="202.00" x="163.87" y="-200.95"/>
+    <poi id="poi_17" type="3G" color="255,240,0" layer="202.00" x="100.54" y="154.67"/>
+    <poi id="poi_18" type="4G" color="255,240,0" layer="202.00" x="301.89" y="-92.96"/>
+    <poi id="poi_19" type="4G" color="255,240,0" layer="202.00" x="698.11" y="115.70"/>
+    <poi id="poi_2" type="wifi" color="255,240,0" layer="202.00" x="885.66" y="-193.64"/>
+    <poi id="poi_20" type="5G" color="255,240,0" layer="202.00" x="499.19" y="62.11"/>
+    <poi id="poi_3" type="wifi" color="255,240,0" layer="202.00" x="503.25" y="186.34"/>
+    <poi id="poi_4" type="wifi" color="255,240,0" layer="202.00" x="504.87" y="7.71"/>
+    <poi id="poi_5" type="wifi" color="255,240,0" layer="202.00" x="503.25" y="-190.39"/>
+    <poi id="poi_6" type="wifi" color="255,240,0" layer="202.00" x="299.46" y="195.27"/>
+    <poi id="poi_7" type="wifi" color="255,240,0" layer="202.00" x="302.70" y="6.09"/>
+    <poi id="poi_8" type="wifi" color="255,240,0" layer="202.00" x="302.70" y="-192.83"/>
+    <poi id="poi_9" type="wifi" color="255,240,0" layer="202.00" x="102.16" y="15.02"/>
+</additional>

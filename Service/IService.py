@@ -30,7 +30,22 @@ class Service(ABC):
     #     return f"service criticality : {self.criticality} ,  service bandwidth : {self.bandwidth} , " \
     #            f"service real time : {self.realtime}"
 
-
+    def request_supported(self,outlet):
+        if self.__class__.__name__=='FactorySafety':
+            if outlet.supported_services[0] == 1 :
+                return 1
+            else :
+                return 0
+        elif self.__class__.__name__=='FactoryEntertainment':
+            if outlet.supported_services[1] == 1 :
+                return 1
+            else :
+                return 0
+        elif self.__class__.__name__=='FactoryAutonomous':
+            if outlet.supported_services[2] == 1 :
+                return 1
+            else :
+                return 0
     @property
     def service_power_allocate(self):
         return self._service_power_allocate

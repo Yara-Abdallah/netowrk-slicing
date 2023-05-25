@@ -9,9 +9,11 @@ class DeCentralizedState(State):
     allocated_power: [float]
     _services_ensured: np.ndarray
     _services_requested: np.ndarray
-    _tower_capacity: float
-    _state_value_decentralize =[0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-    _next_state_decentralize=[0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+    _services_ensured_prev: np.ndarray
+    _services_requested_prev: np.ndarray
+    _tower_capacity = 0.0
+    _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    _next_state_decentralize = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
     def __init__(self):
         super().__init__()
@@ -22,8 +24,9 @@ class DeCentralizedState(State):
         self._supported_services = copy.deepcopy(self.allocated_power)
         self._services_ensured = np.zeros(self.num_services)
         self._services_requested = np.zeros(self.num_services)
+        self._services_ensured_prev = np.zeros(self.num_services)
+        self._services_requested_prev = np.zeros(self.num_services)
         self._tower_capacity = 0.0
-
 
     @staticmethod
     def state_shape(num_services, grid_cell):
@@ -31,10 +34,10 @@ class DeCentralizedState(State):
 
     @property
     def state_value_decentralize(self):
-        return  self._state_value_decentralize
+        return self._state_value_decentralize
 
     @state_value_decentralize.setter
-    def state_value_decentralize(self,val):
+    def state_value_decentralize(self, val):
         self._state_value_decentralize = val
 
     @property
@@ -42,7 +45,7 @@ class DeCentralizedState(State):
         return self._next_state_decentralize
 
     @next_state_decentralize.setter
-    def next_state_decentralize(self,val):
+    def next_state_decentralize(self, val):
         self._next_state_decentralize = val
 
     @property
@@ -70,6 +73,22 @@ class DeCentralizedState(State):
         self._services_ensured = np.array(value)
 
     @property
+    def services_requested_prev(self):
+        return self._services_requested_prev
+
+    @services_requested_prev.setter
+    def services_requested_prev(self, value):
+        self._services_requested_prev = value
+
+    @property
+    def services_ensured_prev(self):
+        return self._services_ensured_prev
+
+    @services_ensured_prev.setter
+    def services_ensured_prev(self, value: np.ndarray):
+        self._services_ensured_prev = np.array(value)
+
+    @property
     def allocated_power(self):
         return self._allocated_power
 
@@ -87,13 +106,18 @@ class DeCentralizedState(State):
 
     def calculate_utility(self):
         percentage_array = np.zeros(self.num_services)
-        for i, j in enumerate(self.services_requested):
-            if j == 0:
+        for i in range(3):
+            if (self._services_ensured[i] - self._services_ensured_prev[i]) == 0 and (
+                    self._services_requested[i] - self._services_requested_prev[i]) == 0:
                 percentage_array[i] = 0
+            elif (self._services_ensured[i] - self._services_ensured_prev[i]) != 0 and (
+                    self._services_requested[i] - self._services_requested_prev[i]) != 0:
+                percentage_array[i] = (self._services_ensured[i] - self._services_ensured_prev[i]) / (
+                        self._services_requested[i] - self._services_requested_prev[i])
             else:
-                percentage_array[i] = self.services_ensured[i] / self.services_requested[i]
-        return percentage_array
+                percentage_array[i] = 0
 
+        return percentage_array
     def resetsate(self, tower_capacity):
         self._allocated_power = np.zeros(self.num_services)
         self._tower_capacity = tower_capacity
@@ -103,6 +127,6 @@ class DeCentralizedState(State):
         final_state.append(self._tower_capacity)
         final_state.extend(self.allocated_power)
         final_state.extend(self.calculate_utility())
-        if len(final_state)==0 :
-            final_state = [0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+        if len(final_state) == 0:
+            final_state = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         return final_state

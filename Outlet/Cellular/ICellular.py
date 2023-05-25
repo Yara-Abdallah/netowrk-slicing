@@ -3,6 +3,10 @@ from Communications.IComs import Communications
 from Outlet.IOutlet import Outlet
 import numpy as np
 
+from RL.RLBuilder import RLBuilder
+from RL.RLEnvironment.Action.ActionResponse import ActionResponse
+from RL.RLEnvironment.Reward.DecentralizedReward import DeCentralizedReward
+from RL.RLEnvironment.State.DecentralizedState import DeCentralizedState
 from Utils.config import outlet_types
 
 
@@ -34,6 +38,10 @@ class Cellular(Outlet):
         """
 
         super().__init__(*args)
+
+        self.dqn = RLBuilder().agent.build_agent(ActionResponse()).environment.build_env(DeCentralizedReward(),
+                                                                                         DeCentralizedState()).model_.build_model(
+            "decentralized", 7, 2).build()
         self.agent = agent
         self.coms = coms
         self.supported_services = supported_services

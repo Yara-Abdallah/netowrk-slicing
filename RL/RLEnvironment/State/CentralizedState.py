@@ -17,7 +17,8 @@ class CentralizedState(State):
     filtered_powers = []
     _services_ensured: np.ndarray
     _services_requested: np.ndarray
-    _tower_capacity: float
+    _services_ensured_prev: np.ndarray
+    _services_requested_prev: np.ndarray
     _state_value_centralize =[0.0,0.0,0.0,0.0,0.0,0.0]
     _next_state_centralize =[0.0,0.0,0.0,0.0,0.0,0.0]
 
@@ -30,6 +31,8 @@ class CentralizedState(State):
         self._supported_services = copy.deepcopy(self.allocated_power)
         self._services_ensured = np.zeros(self.num_services)
         self._services_requested = np.zeros(self.num_services)
+        self._services_ensured_prev = np.zeros(self.num_services)
+        self._services_requested_prev = np.zeros(self.num_services)
         self._tower_capacity = 0.0
 
     @staticmethod
@@ -52,13 +55,20 @@ class CentralizedState(State):
         self._next_state_centralize = val
 
     @property
-    def tower_capacity(self):
-        return self._tower_capacity
+    def services_requested_prev(self):
+        return self._services_requested_prev
 
-    @tower_capacity.setter
-    def tower_capacity(self, value):
-        self._tower_capacity = value
+    @services_requested_prev.setter
+    def services_requested_prev(self, value):
+        self._services_requested_prev = np.array(value)
 
+    @property
+    def services_ensured_prev(self):
+        return self._services_ensured_prev
+
+    @services_ensured_prev.setter
+    def services_ensured_prev(self, value: np.ndarray):
+        self._services_ensured_prev = np.array(value)
     @property
     def services_requested(self):
         return self._services_requested
@@ -102,11 +112,17 @@ class CentralizedState(State):
 
     def calculate_utility(self):
         percentage_array = np.zeros(self.num_services)
-        for i,j in enumerate(self.services_requested):
-            if j == 0 :
+        for i in range(3):
+            if (self._services_ensured[i] - self._services_ensured_prev[i]) == 0 and (
+                    self._services_requested[i] - self._services_requested_prev[i]) == 0:
                 percentage_array[i] = 0
+            elif (self._services_ensured[i] - self._services_ensured_prev[i]) != 0 and (
+                    self._services_requested[i] - self._services_requested_prev[i]) != 0:
+                percentage_array[i] = (self._services_ensured[i] - self._services_ensured_prev[i]) / (
+                        self._services_requested[i] - self._services_requested_prev[i])
             else:
-                percentage_array[i] = self.services_ensured[i] / self.services_requested[i]
+                percentage_array[i] = 0
+
         return percentage_array
 
 

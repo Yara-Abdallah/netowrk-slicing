@@ -14,7 +14,7 @@ from RL.RLAlgorithms.AbstractRL import AbstractRL
 # from RL.RLEnvironment.State.DecentralizedState import DeCentralizedState
 #
 
-class DQN(AbstractRL):
+class CentralizeDQN(AbstractRL):
     def init(self, *args):
         super().init(*args)
 
@@ -32,11 +32,7 @@ class DQN(AbstractRL):
     def model(self, m):
         self._model = m
 
-    def load(self, filename):
-        self.model.load(filename)
 
-    def save(self, filename):
-        self.model.save(filename)
 
     @property
     def environment(self):
