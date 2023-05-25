@@ -343,7 +343,6 @@ class Environment:
         if info != None:
             service = info[1][2]
             outlet = info[0]
-            print("outlet choosen : ", outlet)
 
             if outlet not in performance_logger.service_handled:
                 performance_logger.set_service_handled(outlet, info[1][1], service)
