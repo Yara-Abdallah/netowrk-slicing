@@ -8,13 +8,13 @@ matplotlib.use('agg')
 
 
 def plotting_Utility_Requested_Ensured():
-    fig, axs = plt.subplots(nrows=7, ncols=3, figsize=(100, 32))
+    fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(100, 52))
     fig.subplots_adjust(hspace=0.8)
     lines_out_utility = []
     lines_out_requested = []
     lines_out_ensured = []
     j = 0
-    for i in range(7):
+    for i in range(1):
         row = 0
         line, line1, line2 = 0, 0, 0
         for index in range(3):
@@ -36,22 +36,30 @@ def plotting_Utility_Requested_Ensured():
 
 
 def plotting_reward_decentralize():
-    fig_reward_decentralize, axs_reward_decentralize = plt.subplots(nrows=7, ncols=3, figsize=(100, 32))
+    fig_reward_decentralize, axs_reward_decentralize = plt.subplots(nrows=1, ncols=3, figsize=(100, 120))
     fig_reward_decentralize.subplots_adjust(hspace=0.8)
     lines_out_reward_decentralize = []
     for i, ax in enumerate(axs_reward_decentralize.flatten()):
         line, = ax.plot([], [], label=f"O{i + 1} reward", color='b')
         lines_out_reward_decentralize.append(line)
     return fig_reward_decentralize, axs_reward_decentralize ,lines_out_reward_decentralize
-def plotting_reward_centralize():
-    fig_reward_centralize, axs_reward_centralize = plt.subplots(nrows=7, ncols=1, figsize=(100, 32))
-    fig_reward_centralize.subplots_adjust(hspace=0.8)
-    lines_out_reward_centralize = []
+# def plotting_reward_centralize():
+#     fig_reward_centralize, axs_reward_centralize = plt.subplots(nrows=1, ncols=1, figsize=(100, 52))
+#     fig_reward_centralize.subplots_adjust(hspace=0.8)
+#     lines_out_reward_centralize = []
+#
+#     for i, ax in enumerate(axs_reward_centralize.flatten()):
+#         line, = ax.plot([], [], label=f"grid{i + 1} reward", color='b')
+#         lines_out_reward_centralize.append(line)
+#     return fig_reward_centralize, axs_reward_centralize , lines_out_reward_centralize
 
-    for i, ax in enumerate(axs_reward_centralize.flatten()):
-        line, = ax.plot([], [], label=f"grid{i + 1} reward", color='b')
-        lines_out_reward_centralize.append(line)
-    return fig_reward_centralize, axs_reward_centralize , lines_out_reward_centralize
+
+def plotting_reward_centralize():
+    fig_reward_centralize, ax_reward_centralize = plt.subplots(figsize=(100, 52))
+
+    line, = ax_reward_centralize.plot([], [], label="grid reward", color='b')
+
+    return fig_reward_centralize, ax_reward_centralize, [line]
 
 
 

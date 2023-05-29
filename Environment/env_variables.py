@@ -46,7 +46,7 @@ default_types_vehicles = [
     'DEFAULT_VEHTYPE']
 
 vehicles = {}
-TIME = 1280
+TIME = 1280 * 3
 #10000 * 7
 Threshold_of_utility = 0.1
 Threshold_of_utility_acc = 0.5

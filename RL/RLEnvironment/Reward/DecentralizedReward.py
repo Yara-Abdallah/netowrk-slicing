@@ -21,11 +21,18 @@ class DeCentralizedReward(Reward):
         self.reward_value = 0
         self._dx_t = np.zeros(self.num_services)
         self._dx_t_prev = np.zeros(self.num_services)
+        self._coeff = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+    @property
+    def coeff(self):
+        return self._coeff
 
+    @coeff.setter
+    def coeff(self,coeff_value ):
+        self._coeff = coeff_value
     @property
     def dx_t(self):
         return self._dx_t

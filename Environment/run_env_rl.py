@@ -507,27 +507,27 @@ class Environment:
                         ratio_of_utility[index] = utility_value_centralize[index] / sum_of_utility_of_all_outlets[index]
 
                 for outlet in gridcell.agents.grid_outlets:
-                        dx_t = outlet.dqn.environment.reward.calculate_utility()
-                        # print("dx_t :",dx_t)
-                        outlet.dqn.environment.reward.dx_t = dx_t - outlet.dqn.environment.reward.dx_t_prev
-                        averaging_value_utility_decentralize = sum(
-                            outlet.dqn.environment.reward.dx_t * ratio_of_utility) / 3.0
+                    dx_t = outlet.dqn.environment.reward.calculate_utility()
+                    # print("dx_t :",dx_t)
+                    outlet.dqn.environment.reward.dx_t = dx_t - outlet.dqn.environment.reward.dx_t_prev
+                    averaging_value_utility_decentralize = sum(
+                        outlet.dqn.environment.reward.dx_t * ratio_of_utility) / 3.0
 
-                        coeff = outlet.dqn.environment.reward.coefficient(outlet._max_capacity,
-                                                                          service.service_power_allocate,
-                                                                          outlet.dqn.agents.action_value,
-                                                                          service.request_supported(outlet))
+                    outlet.dqn.environment.reward.coeff = outlet.dqn.environment.reward.coefficient(outlet._max_capacity,
+                                                                      service.service_power_allocate,
+                                                                      outlet.dqn.agents.action_value,
+                                                                      service.request_supported(outlet))
 
-                        outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.reward_value + (
-                                averaging_value_utility_decentralize + (
-                                    abs(averaging_value_utility_decentralize) * coeff))
+                    outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.reward_value + (
+                            averaging_value_utility_decentralize + (
+                                abs(averaging_value_utility_decentralize) * outlet.dqn.environment.reward.coeff))
 
-                        outlet.dqn.agents.remember(outlet.dqn.environment.state.state_value_decentralize,
-                                                   outlet.dqn.agents.action.command.action_value_decentralize,
-                                                   outlet.dqn.environment.reward.reward_value,
-                                                   outlet.dqn.environment.state.next_state_decentralize)
+                    outlet.dqn.agents.remember(outlet.dqn.environment.state.state_value_decentralize,
+                                               outlet.dqn.agents.action.command.action_value_decentralize,
+                                               outlet.dqn.environment.reward.reward_value,
+                                               outlet.dqn.environment.state.next_state_decentralize)
 
-                        outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.next_state_decentralize
+                    outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.next_state_decentralize
 
             if outlet.__class__.__name__ != "Satellite":
                 del service
@@ -587,7 +587,7 @@ class Environment:
         gc.set_threshold(700, max_size // gc.get_threshold()[1])
         #
         build = []
-        for i in range(7):
+        for i in range(1):
             build.append(RLBuilder())
             gridcells_dqn.append(
                 build[i].agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
@@ -596,7 +596,7 @@ class Environment:
             gridcells_dqn[i].agents.grid_outlets = self.Grids.get(f"grid{i + 1}")
             gridcells_dqn[i].agents.outlets_id = list(range(len(gridcells_dqn[i].agents.grid_outlets)))
 
-        for i in range(7):
+        for i in range(1):
             for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
                 temp_outlets.append(outlet)
 
@@ -693,17 +693,35 @@ class Environment:
             update_lines_reward_decentralized(lines_out_reward_decentralize, steps, temp_outlets)
             update_lines_reward_centralized(lines_out_reward_centralize, steps, gridcells_dqn)
 
+            # for axs_ in [axs, axs_reward_decentralize, axs_reward_centralize]:
+            #     for ax in axs_.flatten():
+            #         ax.legend()
+            #         ax.relim()
+            #         ax.autoscale_view()
+            #     if axs is axs:
+            #         fig.canvas.draw()
+            #     elif axs is axs_reward_decentralize:
+            #         fig_reward_decentralize.canvas.draw()
+            #     else:
+            #         fig_reward_centralize.canvas.draw()
+
             for axs_ in [axs, axs_reward_decentralize, axs_reward_centralize]:
-                for ax in axs_.flatten():
-                    ax.legend()
-                    ax.relim()
-                    ax.autoscale_view()
-                if axs is axs:
-                    fig.canvas.draw()
-                elif axs is axs_reward_decentralize:
-                    fig_reward_decentralize.canvas.draw()
+                if hasattr(axs_, 'flatten'):
+                    for ax in axs_.flatten():
+                        ax.legend()
+                        ax.relim()
+                        ax.autoscale_view()
                 else:
-                    fig_reward_centralize.canvas.draw()
+                    axs_.legend()
+                    axs_.relim()
+                    axs_.autoscale_view()
+
+            if axs is axs:
+                fig.canvas.draw()
+            elif axs is axs_reward_decentralize:
+                fig_reward_decentralize.canvas.draw()
+            else:
+                fig_reward_centralize.canvas.draw()
 
             if steps - prev == snapshot_time:
                 prev = steps
@@ -714,10 +732,10 @@ class Environment:
                 path1 = os.path.join(p1, f'snapshot{steps}')
                 path2 = os.path.join(p2, f'snapshot{steps}')
                 path3 = os.path.join(p3, f'snapshot{steps}')
-                print(" path3 : ", path3)
+                # print(" path3 : ", path3)
                 fig.set_size_inches(10, 8)
                 fig_reward_centralize.set_size_inches(15, 10)
-                fig_reward_decentralize.set_size_inches(10, 8)  # set physical size of plot in inches
+                fig_reward_decentralize.set_size_inches(30, 20)  # set physical size of plot in inches
                 fig.savefig(path1 + '.svg', dpi=300)
                 fig_reward_decentralize.savefig(path2 + '.svg', dpi=300)
                 fig_reward_centralize.savefig(path3 + '.svg', dpi=300)
@@ -798,7 +816,7 @@ class Environment:
             step += 1
 
             if step == env_variables.TIME:
-                for i in range(7):
+                for i in range(1):
                     gridcells_dqn[i].model.save(os.path.join(path4, f'weights_{i}.hdf5'))
 
                 for index, g in enumerate(temp_outlets):
