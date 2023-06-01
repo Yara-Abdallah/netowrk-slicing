@@ -46,7 +46,7 @@ default_types_vehicles = [
     'DEFAULT_VEHTYPE']
 
 vehicles = {}
-TIME = 1280 * 3
+
 #10000 * 7
 Threshold_of_utility = 0.1
 Threshold_of_utility_acc = 0.5
@@ -61,6 +61,11 @@ period5 = 1280
 ENTERTAINMENT_RATIO = 0
 SAFETY_RATIO = 0
 AUTONOMOUS_RATIO = 0
+
+number_of_days = 7
+episodes = 5 * number_of_days
+TIME = 1280 * number_of_days
+day_time = 1280
 
 decentralized_replay_buffer = 30
 centralized_replay_buffer = 32

@@ -1,5 +1,5 @@
 import copy
-
+from pandas.core.common import flatten
 import numpy
 import numpy as np
 import rx
@@ -19,8 +19,10 @@ class CentralizedState(State):
     _services_requested: np.ndarray
     _services_ensured_prev: np.ndarray
     _services_requested_prev: np.ndarray
-    _state_value_centralize =[0.0,0.0,0.0,0.0,0.0,0.0]
-    _next_state_centralize =[0.0,0.0,0.0,0.0,0.0,0.0]
+    _capacity_each_tower = [0.0, 0.0, 0.0]
+    _state_value_centralize = [0.0]*21
+    _next_state_centralize = [0.0]*21
+    _averaging_value_utility_centralize = 0.0
 
     def __init__(self):
         super().__init__()
@@ -33,18 +35,34 @@ class CentralizedState(State):
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured_prev = np.zeros(self.num_services)
         self._services_requested_prev = np.zeros(self.num_services)
-        self._tower_capacity = 0.0
+        self._capacity_each_tower = [0.0, 0.0, 0.0]
+        self._averaging_value_utility_centralize_prev = 0.0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+    @property
+    def averaging_value_utility_centralize_prev (self):
+        return self._averaging_value_utility_centralize_prev
+    @averaging_value_utility_centralize_prev.setter
+    def averaging_value_utility_centralize_prev(self,value):
+        self._averaging_value_utility_centralize_prev = value
+
+    @property
+    def capacity_each_tower(self):
+        return self._capacity_each_tower
+
+    @capacity_each_tower.setter
+    def capacity_each_tower(self, value):
+        self._capacity_each_tower = value
 
     @property
     def state_value_centralize(self):
         return self._state_value_centralize
+
     @state_value_centralize.setter
-    def state_value_centralize(self,val):
-        self._state_value_centralize =  val
+    def state_value_centralize(self, val):
+        self._state_value_centralize = val
 
     @property
     def next_state_centralize(self):
@@ -69,6 +87,7 @@ class CentralizedState(State):
     @services_ensured_prev.setter
     def services_ensured_prev(self, value: np.ndarray):
         self._services_ensured_prev = np.array(value)
+
     @property
     def services_requested(self):
         return self._services_requested
@@ -113,41 +132,53 @@ class CentralizedState(State):
     def calculate_utility(self):
         percentage_array = np.zeros(self.num_services)
         for i in range(3):
-            if (self._services_ensured[i] ) == 0 and (
-                    self._services_requested[i] ) == 0:
+            if (self._services_ensured[i] - self._services_ensured_prev[i]) == 0 and (
+                    self._services_requested[i] - self._services_requested_prev[i]) == 0:
                 percentage_array[i] = 0
-            elif (self._services_ensured[i] ) != 0 and (
-                    self._services_requested[i] ) != 0:
-                percentage_array[i] = (self._services_ensured[i] ) / (
-                        self._services_requested[i] )
+            elif (self._services_ensured[i] - self._services_ensured_prev[i]) != 0 and (
+                    self._services_requested[i] - self._services_requested_prev[i]) != 0:
+
+                percentage_array[i] = (self._services_ensured[i]- self._services_ensured_prev[i]) / (
+                        self._services_requested[i] - self._services_requested_prev[i])
             else:
                 percentage_array[i] = 0
 
         return percentage_array
 
+    def resetsate(self, tower_capacity):
+        self._services_requested = np.zeros(self.num_services)
+        self._services_ensured = np.zeros(self.num_services)
+        self._capacity_each_tower = tower_capacity
 
-    def resetsate(self):
+    # def calculate_state(self, binary):
+    #     temp = list(numpy.concatenate(binary).flat)
+    #     count_zero = np.all(temp)
+    #     if count_zero == False:
+    #         self.accumulated_powers = []
+    #         final_state = []
+    #         xs = rx.from_(binary)
+    #         disposable = xs.pipe(
+    #             ops.map_indexed(
+    #                 lambda x, i: (i, np.where(np.array(x) == 1.0))),
+    #             ops.map(lambda x: [x[0], x[1][0]]),
+    #             ops.map(self.filter_power))
+    #         disposable.subscribe(self.observer_sum)
+    #         # final_state.append(self.tower_capacity)
+    #         final_state.extend(self.accumulated_powers)
+    #         final_state.extend(self.calculate_utility())
+    #         return final_state
+    #     else:
+    #         return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    def calculate_state(self):
+        final_state = []
+        final_state.extend(self.capacity_each_tower)
+        print(" (self.supported_services[:0]): ", (self.supported_services[:0]))
+        print(" list(self.supported_services[:0]) ",list(self.supported_services[:0]))
+        final_state.extend(list(flatten(self.supported_services[:0])))
+        final_state.extend(list(flatten(self.supported_services[:1])))
+        final_state.extend(list(flatten(self.supported_services[:2])))
+        final_state.extend(self.services_requested)
+        final_state.extend(self.services_ensured)
+        final_state.extend(self.calculate_utility())
 
-        # self._services_ensured = np.zeros(self.num_services)
-        # self._services_requested = np.zeros(self.num_services)
-        self._allocated_power = np.zeros(self.num_services)
-
-    def calculate_state(self, binary):
-        temp = list(numpy.concatenate(binary).flat)
-        count_zero = np.all(temp)
-        if count_zero == False:
-            self.accumulated_powers = []
-            final_state = []
-            xs = rx.from_(binary)
-            disposable = xs.pipe(
-                ops.map_indexed(
-                    lambda x, i: (i, np.where(np.array(x) == 1.0))),
-                ops.map(lambda x: [x[0], x[1][0]]),
-                ops.map(self.filter_power))
-            disposable.subscribe(self.observer_sum)
-            # final_state.append(self.tower_capacity)
-            final_state.extend(self.accumulated_powers)
-            final_state.extend(self.calculate_utility())
-            return final_state
-        else:
-            return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        return final_state

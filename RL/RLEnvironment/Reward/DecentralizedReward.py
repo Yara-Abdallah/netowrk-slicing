@@ -19,8 +19,8 @@ class DeCentralizedReward(Reward):
         self._services_ensured_prev = np.zeros(self.num_services)
         self._services_requested_prev = np.zeros(self.num_services)
         self.reward_value = 0
-        self._dx_t = np.zeros(self.num_services)
-        self._dx_t_prev = np.zeros(self.num_services)
+        self._dx_t = 0.0
+        self._dx_t_prev = 0.0
         self._coeff = 0
 
     @staticmethod

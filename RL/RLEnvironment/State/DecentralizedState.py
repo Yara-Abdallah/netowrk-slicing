@@ -12,8 +12,8 @@ class DeCentralizedState(State):
     _services_ensured_prev: np.ndarray
     _services_requested_prev: np.ndarray
     _tower_capacity = 0.0
-    _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    _next_state_decentralize = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0]
+    _next_state_decentralize = [0.0]*13
 
     def __init__(self):
         super().__init__()
@@ -119,14 +119,18 @@ class DeCentralizedState(State):
 
         return percentage_array
     def resetsate(self, tower_capacity):
-        self._allocated_power = np.zeros(self.num_services)
+        self._services_requested = np.zeros(self.num_services)
+        self._services_ensured = np.zeros(self.num_services)
         self._tower_capacity = tower_capacity
+
 
     def calculate_state(self):
         final_state = []
         final_state.append(self._tower_capacity)
-        final_state.extend(self.allocated_power)
+        final_state.extend(self._supported_services)
+        final_state.extend(self._services_requested)
+        final_state.extend(self._services_ensured)
         final_state.extend(self.calculate_utility())
         if len(final_state) == 0:
-            final_state = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            final_state = [0.0]*13
         return final_state

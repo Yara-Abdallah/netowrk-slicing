@@ -68,13 +68,13 @@ class CentralizedReward(Reward):
     def calculate_utility(self):
         percentage_array = np.zeros(self.num_services)
         for i in range(3):
-            if (self._services_ensured[i]) == 0 and (
-                    self._services_requested[i]) == 0:
+            if (self._services_ensured[i] - self._services_ensured_prev[i]) == 0 and (
+                    self._services_requested[i] - self._services_requested_prev[i]) == 0:
                 percentage_array[i] = 0
-            elif (self._services_ensured[i]) != 0 and (
-                    self._services_requested[i]) != 0:
-                percentage_array[i] = (self._services_ensured[i]) / (
-                    self._services_requested[i])
+            elif (self._services_ensured[i] - self._services_ensured_prev[i]) != 0 and (
+                    self._services_requested[i] - self._services_requested_prev[i]) != 0:
+                percentage_array[i] = (self._services_ensured[i]- self._services_ensured_prev[i] )/ (
+                        self._services_requested[i] - self._services_requested_prev[i])
             else:
                 percentage_array[i] = 0
 

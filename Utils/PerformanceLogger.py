@@ -48,7 +48,6 @@ class PerformanceLogger(metaclass=SingletonMeta):
             self._gridcell_utility[outlet] = {}
         self._gridcell_utility[outlet] = utility
 
-
     @property
     def service_power_allocate(self):
         return self._service_power_allocate
@@ -173,3 +172,11 @@ class PerformanceLogger(metaclass=SingletonMeta):
             )
         else:
             self._power_costs.extend(value)
+
+    def reset_state_decentralize_requirement(self):
+        for key in self._outlet_services_requested_number:
+            self._outlet_services_requested_number[key] = [0, 0, 0]
+        for key in self._outlet_services_ensured_number:
+            self._outlet_services_ensured_number[key] = [0, 0, 0]
+        for key in self._outlet_services_power_allocation:
+            self._outlet_services_power_allocation[key] = [0, 0, 0]

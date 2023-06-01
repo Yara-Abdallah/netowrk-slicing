@@ -1,13 +1,12 @@
 from keras import backend as K
 from keras import Sequential
-from keras.models import save_model,load_model
+from keras.models import save_model, load_model
 from keras.layers import Dense
 from keras.optimizers import Adam
 
 
-
 class CentralizeModel():
-    def __init__(self, state_size=6, action_size=9, activation_function="relu", loss_function="mse",
+    def __init__(self, state_size=21, action_size=9, activation_function="relu", loss_function="mse",
                  optimization_algorithm=Adam,
                  learning_rate=0.5, output_activation="sigmoid", **kwargs):
         self.state_size = state_size
@@ -27,21 +26,20 @@ class CentralizeModel():
         model_.compile(loss=self.loss_function,
                        optimizer=self.optimization_algorithm(learning_rate=self.learning_rate))
         return model_
-    def save(self,filename):
+
+    def save(self, filename):
         self.save_model(filename)
 
-    def load(self,filename):
+    def load(self, filename):
         return load_model(filename)
 
     def load_weights(self, filename):
         """ Load model from file. """
         self.load_weights(filename)
 
-
-    def save_weights(self , filename):
+    def save_weights(self, filename):
         """ Save model to file. """
         self.save_weights(filename)
-
 
     def predict(self, state):
         """ Predict value based on state. """

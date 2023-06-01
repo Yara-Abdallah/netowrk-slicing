@@ -1,4 +1,6 @@
 from abc import abstractmethod
+from collections import deque
+
 from Communications.IComs import Communications
 from Outlet.IOutlet import Outlet
 import numpy as np
@@ -41,7 +43,7 @@ class Cellular(Outlet):
 
         self.dqn = RLBuilder().agent.build_agent(ActionResponse()).environment.build_env(DeCentralizedReward(),
                                                                                          DeCentralizedState()).model_.build_model(
-            "decentralized", 7, 2).build()
+            "decentralized", 13, 2).build()
         self.agent = agent
         self.coms = coms
         self.supported_services = supported_services
@@ -50,8 +52,16 @@ class Cellular(Outlet):
         self._supported_services_distinct = []
         self._capacity: float = 0.0
         self.max_capacity = tower
+        self._max_buffer_size = int(self._max_capacity / 30)
+        # self._buffer_request = deque(maxlen=self._max_buffer_size)
+        # print("int(self._max_capacity / 30) ", int(self._max_capacity / 30))
+        # print("type : ", self.__class__.__name__)
+
+
 
     class BuildMaxCapacity:
+
+
         def calculate_max_capacity(
                 self,
                 num_antennas,
@@ -108,11 +118,21 @@ class Cellular(Outlet):
             self.BuildMaxCapacity().randomized_tower_based_max_capacity(value)
         )
 
-    # def get_state_reward_information(self, performance_logger, new_capacity):
-    #     self.dqn.environment.state.allocated_power = self.power_distinct
-    #     self.dqn.environment.state.tower_capacity = new_capacity
-    #     self.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number[self]
-    #     self.dqn.environment.reward.services_requested = performance_logger.outlet_services_requested_number[self]
+    # @property
+    # def buffer_request(self):
+    #     return self._buffer_request
+    #
+    # @buffer_request.setter
+    # def buffer_request(self, value):
+    #     self._buffer_request = value
+
+    @property
+    def max_buffer_size(self):
+        return self._max_buffer_size
+    @max_buffer_size.setter
+    def max_buffer_size(self,value):
+        self._max_buffer_size = value
+
 
 
 

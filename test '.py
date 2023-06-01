@@ -1,19 +1,20 @@
-# my_list = [[1, 2], [3, 4], [1, 2]] # a list of lists
-# my_set = set(map(frozenset, my_list)) # convert the list of lists to a set of frozensets
-# for fs in my_set:
-#     print(list(fs))
-import gc
-import sys
+import matplotlib.pyplot as plt
 
+num_episodes = 5
+num_steps = 256
+accumulated_rewards = []  # List to store accumulated rewards
 
-my_object = [1, 2, 3]
-object_id = id(my_object)
-my_object = None
-# do something with my_object...
-gc.collect()
-if object_id in (id(obj) for obj in gc.get_objects()):
-    print("my_object still exists in memory")
+# Generate example accumulated rewards (replace with your actual accumulated reward values)
+for episode in range(num_episodes):
+    accumulated_reward = sum([episode * num_steps + step for step in range(num_steps)])
+    accumulated_rewards.append(accumulated_reward)
 
-else:
-    print("my_object has been garbage collected")
+# Calculate average reward across episodes
+average_reward = sum(accumulated_rewards) / num_episodes
 
+# Plotting the average reward across episodes
+plt.plot(range(num_episodes), [average_reward] * num_episodes)
+plt.xlabel('Episode')
+plt.ylabel('Average Reward')
+plt.title('Average Reward across Episodes')
+plt.show()
