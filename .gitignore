@@ -8,7 +8,7 @@ node_modules/
 dist/
 venv/
 htmlcov/
-
+results/
 # Compiled Java class files
 *.class
 
