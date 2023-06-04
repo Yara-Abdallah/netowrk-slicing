@@ -119,9 +119,11 @@ class DeCentralizedState(State):
 
         return percentage_array
     def resetsate(self, tower_capacity):
+        print("reset state of decentralize")
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured = np.zeros(self.num_services)
         self._tower_capacity = tower_capacity
+
 
 
     def calculate_state(self):

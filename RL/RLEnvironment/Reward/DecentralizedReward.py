@@ -103,6 +103,12 @@ class DeCentralizedReward(Reward):
 
         return percentage_array
 
+
+    def resetreward(self):
+        print("reset reward of decentralize")
+        self._services_requested = np.zeros(self.num_services)
+        self._services_ensured = np.zeros(self.num_services)
+
     def coefficient(self, max_capacity, power_allocated_service, action, request_supported):
         if max_capacity > power_allocated_service and action == 1 and request_supported == 1:
             return 2

@@ -19,6 +19,7 @@ class Cellular(Outlet):
     """
 
     _max_capacity: float
+    _current_capacity : float
 
     def __init__(
             self, tower, agent, coms: Communications, supported_services, *args, **kwargs
@@ -52,7 +53,8 @@ class Cellular(Outlet):
         self._supported_services_distinct = []
         self._capacity: float = 0.0
         self.max_capacity = tower
-        self._max_buffer_size = int(self._max_capacity / 30)
+        self._max_buffer_size = int(self._max_capacity/30)
+
         # self._buffer_request = deque(maxlen=self._max_buffer_size)
         # print("int(self._max_capacity / 30) ", int(self._max_capacity / 30))
         # print("type : ", self.__class__.__name__)
@@ -117,6 +119,14 @@ class Cellular(Outlet):
         self._max_capacity = (
             self.BuildMaxCapacity().randomized_tower_based_max_capacity(value)
         )
+        self._current_capacity = self._max_capacity
+
+    @property
+    def current_capacity(self):
+        return self._current_capacity
+    @current_capacity.setter
+    def current_capacity(self, value):
+        self._current_capacity = value
 
     # @property
     # def buffer_request(self):

@@ -146,8 +146,11 @@ class CentralizedState(State):
         return percentage_array
 
     def resetsate(self, tower_capacity):
+        print("reset state of centralize")
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured = np.zeros(self.num_services)
+        self._services_requested_prev = np.zeros(self.num_services)
+        self._services_ensured_prev = np.zeros(self.num_services)
         self._capacity_each_tower = tower_capacity
 
     # def calculate_state(self, binary):

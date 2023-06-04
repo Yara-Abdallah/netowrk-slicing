@@ -65,6 +65,13 @@ class CentralizedReward(Reward):
     def services_ensured_prev(self, value: np.ndarray):
         self._services_ensured_prev = np.array(value)
 
+
+    def resetreward(self):
+        print("reset reward of centralize")
+        self._services_ensured_prev = np.zeros(self.num_services)
+        self._services_requested_prev = np.zeros(self.num_services)
+        self._services_requested = np.zeros(self.num_services)
+        self._services_ensured = np.zeros(self.num_services)
     def calculate_utility(self):
         percentage_array = np.zeros(self.num_services)
         for i in range(3):
@@ -73,7 +80,7 @@ class CentralizedReward(Reward):
                 percentage_array[i] = 0
             elif (self._services_ensured[i] - self._services_ensured_prev[i]) != 0 and (
                     self._services_requested[i] - self._services_requested_prev[i]) != 0:
-                percentage_array[i] = (self._services_ensured[i]- self._services_ensured_prev[i] )/ (
+                percentage_array[i] = (self._services_ensured[i]-self._services_ensured_prev[i] )/(
                         self._services_requested[i] - self._services_requested_prev[i])
             else:
                 percentage_array[i] = 0
