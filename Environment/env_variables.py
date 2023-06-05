@@ -48,7 +48,7 @@ default_types_vehicles = [
 vehicles = {}
 
 #10000 * 7
-Threshold_of_utility = 0.1
+Threshold_of_utility = 0.2
 Threshold_of_utility_acc = 0.5
 
 requests = []

@@ -20,6 +20,7 @@ class CentralizedReward(Reward):
         self._services_ensured_prev = np.zeros(self.num_services)
         self._services_requested_prev = np.zeros(self.num_services)
         self._reward_value = 0
+        self._gridcell_reward_episode = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
@@ -32,6 +33,14 @@ class CentralizedReward(Reward):
     @reward_value.setter
     def reward_value(self, r):
         self._reward_value = r
+
+    @property
+    def gridcell_reward_episode(self):
+        return self._gridcell_reward_episode
+
+    @gridcell_reward_episode.setter
+    def gridcell_reward_episode(self, r):
+        self._gridcell_reward_episode = r
 
     @property
     def services_requested(self):

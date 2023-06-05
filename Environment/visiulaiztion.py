@@ -90,7 +90,7 @@ def update_lines_reward_decentralized(lines_out_reward_decentralize,steps,outlet
     for j, line3 in enumerate(lines_out_reward_decentralize):
         x_data, y_data = line3.get_data()
         x_data = np.append(x_data, steps)
-        y_data = np.append(y_data, outlets[j].dqn.environment.reward.reward_value)
+        y_data = np.append(y_data, outlets[j].dqn.environment.reward.episode_reward_decentralize)
         # print(" reward value dec : ", outlets[j].dqn.environment.reward.reward_value )
 
         # print("xdata : ",x_data)
@@ -103,6 +103,6 @@ def update_lines_reward_centralized(lines_out_reward_centralize,steps,gridcells_
     for j, line4 in enumerate(lines_out_reward_centralize):
         x_data, y_data = line4.get_data()
         x_data = np.append(x_data, steps)
-        y_data = np.append(y_data, gridcells_dqn[j].environment.reward.reward_value)
+        y_data = np.append(y_data, gridcells_dqn[j].environment.reward.gridcell_reward_episode)
         # print(" reward value ce  : ", gridcells_dqn[j].environment.reward.reward_value )
         line4.set_data(x_data, y_data)

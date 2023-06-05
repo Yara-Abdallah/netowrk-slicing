@@ -175,8 +175,8 @@ class CentralizedState(State):
     def calculate_state(self):
         final_state = []
         final_state.extend(self.capacity_each_tower)
-        print(" (self.supported_services[:0]): ", (self.supported_services[:0]))
-        print(" list(self.supported_services[:0]) ",list(self.supported_services[:0]))
+        # print(" (self.supported_services[:0]): ", (self.supported_services[:0]))
+        # print(" list(self.supported_services[:0]) ",list(self.supported_services[:0]))
         final_state.extend(list(flatten(self.supported_services[:0])))
         final_state.extend(list(flatten(self.supported_services[:1])))
         final_state.extend(list(flatten(self.supported_services[:2])))

@@ -22,10 +22,19 @@ class DeCentralizedReward(Reward):
         self._dx_t = 0.0
         self._dx_t_prev = 0.0
         self._coeff = 0
+        self._episode_reward_decentralize = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
+    @property
+    def episode_reward_decentralize(self):
+        return self._episode_reward_decentralize
+
+    @episode_reward_decentralize.setter
+    def episode_reward_decentralize(self,value):
+        self._episode_reward_decentralize = value
     @property
     def coeff(self):
         return self._coeff
