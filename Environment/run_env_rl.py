@@ -409,7 +409,6 @@ class Environment:
                     if gridcell != None:
                         list_ = []
                         for out_ in gridcell.agents.grid_outlets:
-
                             list_.append(out_.current_capacity)
                         gridcell.environment.state.capacity_each_tower = list_
                         gridcell.environment.state.state_value_centralize[0] = list_[0]
@@ -549,6 +548,9 @@ class Environment:
                     outlet.dqn.environment.reward.dx_t = averaging_value_utility_decentralize - outlet.dqn.environment.reward.dx_t_prev
                     # print("outlet.dqn.environment.reward.dx_t : ",outlet.dqn.environment.reward.dx_t)
                     # print(" outlet.current_capacity ", outlet.current_capacity )
+                    print("dx of outlet : ", outlet.dqn.environment.reward.dx_t)
+                    print("service.service_power_allocate : ", service.service_power_allocate)
+                    print("outlet.current_capacity : ", outlet.current_capacity)
                     outlet.dqn.environment.reward.coeff = outlet.dqn.environment.reward.coefficient(
                         outlet.current_capacity,
                         service.service_power_allocate,
@@ -558,9 +560,21 @@ class Environment:
                     # print("outlet.dqn.environment.reward.reward_value : " , outlet.dqn.environment.reward.reward_value )
                     # print(" outlet.dqn.environment.reward.dx_t ", outlet.dqn.environment.reward.dx_t)
                     # print("outlet.dqn.environment.reward.coeff ", outlet.dqn.environment.reward.coeff)
-                    outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.reward_value + (
-                            outlet.dqn.environment.reward.dx_t + (
-                            abs(outlet.dqn.environment.reward.dx_t) * outlet.dqn.environment.reward.coeff))
+                    # outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.reward_value + (
+                    #         outlet.dqn.environment.reward.dx_t + (
+                    #         abs(outlet.dqn.environment.reward.dx_t) * outlet.dqn.environment.reward.coeff))
+                    if outlet.dqn.environment.reward.dx_t == 0 and outlet.dqn.environment.reward.coeff > 0:
+                        outlet.dqn.environment.reward.reward_value = (outlet.dqn.environment.reward.coeff * 0.01)
+                    elif outlet.dqn.environment.reward.dx_t == 0 and outlet.dqn.environment.reward.coeff <= 0:
+                        outlet.dqn.environment.reward.reward_value = (outlet.dqn.environment.reward.coeff * 0.01)
+                    elif outlet.dqn.environment.reward.dx_t > 0 and outlet.dqn.environment.reward.coeff > 0:
+                        outlet.dqn.environment.reward.reward_value = (outlet.dqn.environment.reward.dx_t * outlet.dqn.environment.reward.coeff * 10)
+                    elif outlet.dqn.environment.reward.dx_t > 0 and outlet.dqn.environment.reward.coeff <= 0:
+                        outlet.dqn.environment.reward.reward_value =(outlet.dqn.environment.reward.dx_t * outlet.dqn.environment.reward.coeff * 0.1)
+                    elif outlet.dqn.environment.reward.dx_t < 0 and outlet.dqn.environment.reward.coeff > 0:
+                        outlet.dqn.environment.reward.reward_value =(abs(outlet.dqn.environment.reward.dx_t) * outlet.dqn.environment.reward.coeff * 0.1)
+                    elif outlet.dqn.environment.reward.dx_t < 0 and outlet.dqn.environment.reward.coeff <= 0:
+                        outlet.dqn.environment.reward.reward_value =(abs(outlet.dqn.environment.reward.dx_t) * outlet.dqn.environment.reward.coeff * 10)
 
                     outlet.dqn.agents.remember(outlet.dqn.environment.state.state_value_decentralize,
                                                outlet.dqn.agents.action.command.action_value_decentralize,
@@ -654,6 +668,7 @@ class Environment:
         for i in range(1):
             for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
                 temp_outlets.append(outlet)
+                print("outlet : ", outlet.__class__.__name__ )
 
         while step < env_variables.TIME:
 
@@ -745,9 +760,6 @@ class Environment:
             list(map(lambda veh: self.terminate_service(veh, outlets, performance_logger),
                      env_variables.vehicles.values()))
 
-
-
-
             for axs_ in [axs, axs_reward_decentralize, axs_reward_centralize]:
                 if hasattr(axs_, 'flatten'):
                     for ax in axs_.flatten():
@@ -811,18 +823,22 @@ class Environment:
                     # print("env_variables.Threshold_of_utility : ", env_variables.Threshold_of_utility)
                     dx = averaging_value_utility_centralize - gridcell.environment.state.averaging_value_utility_centralize_prev
                     print("dx centralize : ", dx)
-                    if dx > 0 and averaging_value_utility_centralize >= env_variables.Threshold_of_utility :
+                    if dx > 0 and averaging_value_utility_centralize >= env_variables.Threshold_of_utility:
                         gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + 10
-                    elif dx < 0 and averaging_value_utility_centralize < env_variables.Threshold_of_utility :
+                    elif dx < 0 and averaging_value_utility_centralize < env_variables.Threshold_of_utility:
                         gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value - 10
-                    elif dx > 0 and averaging_value_utility_centralize < env_variables.Threshold_of_utility :
-                        gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + (10* abs(averaging_value_utility_centralize - env_variables.Threshold_of_utility))
-                    elif dx < 0 and averaging_value_utility_centralize >= env_variables.Threshold_of_utility :
-                        gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + (-10 * abs(averaging_value_utility_centralize - env_variables.Threshold_of_utility))
-                    elif dx == 0  and averaging_value_utility_centralize >= env_variables.Threshold_of_utility :
-                        gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + (averaging_value_utility_centralize - env_variables.Threshold_of_utility)
-                    elif dx == 0 and averaging_value_utility_centralize < env_variables.Threshold_of_utility :
-                        gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + (averaging_value_utility_centralize - env_variables.Threshold_of_utility)
+                    elif dx > 0 and averaging_value_utility_centralize < env_variables.Threshold_of_utility:
+                        gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + (
+                                5 * abs(averaging_value_utility_centralize - env_variables.Threshold_of_utility))
+                    elif dx < 0 and averaging_value_utility_centralize >= env_variables.Threshold_of_utility:
+                        gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + (
+                                -5 * abs(averaging_value_utility_centralize - env_variables.Threshold_of_utility))
+                    elif dx == 0 and averaging_value_utility_centralize >= env_variables.Threshold_of_utility:
+                        gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + (
+                                averaging_value_utility_centralize - env_variables.Threshold_of_utility)
+                    elif dx == 0 and averaging_value_utility_centralize < env_variables.Threshold_of_utility:
+                        gridcell.environment.reward.reward_value = gridcell.environment.reward.reward_value + (
+                                averaging_value_utility_centralize - env_variables.Threshold_of_utility)
 
                     # if averaging_value_utility_centralize < env_variables.Threshold_of_utility:
                     #     # print("less")
@@ -902,10 +918,9 @@ class Environment:
                     gridcell_dqn.environment.reward.resetreward()
                     gridcell_dqn.environment.state.resetsate(list_)
                     gridcell_dqn.environment.reward.reward_value = 0
-                    gridcell_dqn.environment.state.state_value_centralize =  gridcell_dqn.environment.state.calculate_state()
+                    gridcell_dqn.environment.state.state_value_centralize = gridcell_dqn.environment.state.calculate_state()
 
                 performance_logger.reset_state_decentralize_requirement()
-
 
             step += 1
 
