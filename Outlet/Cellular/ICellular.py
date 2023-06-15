@@ -44,7 +44,7 @@ class Cellular(Outlet):
 
         self.dqn = RLBuilder().agent.build_agent(ActionResponse()).environment.build_env(DeCentralizedReward(),
                                                                                          DeCentralizedState()).model_.build_model(
-            "decentralized", 13, 2).build()
+            "decentralized", 14, 2).build()
         self.agent = agent
         self.coms = coms
         self.supported_services = supported_services

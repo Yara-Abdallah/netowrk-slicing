@@ -184,4 +184,5 @@ class CentralizedState(State):
         final_state.extend(self.services_ensured)
         final_state.extend(self.calculate_utility())
 
+
         return final_state

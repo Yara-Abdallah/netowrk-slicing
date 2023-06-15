@@ -20,6 +20,19 @@ class ActionAssignment:
 
     def exploit(self, model, state):
         state = np.array(state).reshape([1, np.array(state).shape[0]])
+        #np.array(model.predict(state, verbose=0).reshape(3, 3), )
+        # x ,y , z =[],[],[]
+        # x.append(np.array(model.predict(state, verbose=0).reshape(1,2), ))
+        # x.append(np.array(model.predict(state, verbose=0).reshape(1,2), ))
+        # x.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
+        # y.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
+        # y.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
+        # y.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
+        # z.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
+        # z.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
+        # z.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
+        # list_ = [x,y,z]
+        # np.array(list_).reshape(3, 3)
         return np.array(model.predict(state, verbose=0).reshape(3, 3), )
 
     def execute(self, state, action_decision):

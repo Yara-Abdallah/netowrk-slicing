@@ -50,30 +50,35 @@ class Agent(AbstractAgent):
 
     def replay_buffer_decentralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
+        target = 0
         for state, action, reward, next_state in minibatch:
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
                 target = reward + self.gamma * np.argmax(model.predict(next_state, verbose=0)[0])
+                print("decentralize q value : ", target)
             state = np.array(state).reshape([1, np.array(state).shape[0]])
             target_f = np.round(model.predict(state, verbose=0))
             target_f[0][action] = target
             model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
-
+        return target
     def replay_buffer_centralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
+        target = []
         for state, action, reward, next_state in minibatch:
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
                 target = reward + self.gamma * (model.predict(next_state, verbose=0)[0])
+                print("centralize q value : ", target)
             state = np.array(state).reshape([1, np.array(state).shape[0]])
             target = np.array(target).reshape([1, 9])
             model.fit(state, target, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
+        return target
 
     def remember(self, state, action, reward, next_state):
         self.memory.append((state, action, reward, next_state))

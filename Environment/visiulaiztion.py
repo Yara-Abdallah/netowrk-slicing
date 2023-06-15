@@ -34,7 +34,14 @@ def plotting_Utility_Requested_Ensured():
 
     return fig,axs,lines_out_utility,lines_out_requested,lines_out_ensured
 
-
+def plotting_Qvalue_decentralize():
+    fig_Qvalue_decentralize, axs_Qvalue_decentralize = plt.subplots(nrows=1, ncols=3, figsize=(100, 120))
+    fig_Qvalue_decentralize.subplots_adjust(hspace=0.8)
+    lines_out_Qvalue_decentralize = []
+    for i, ax in enumerate(axs_Qvalue_decentralize.flatten()):
+        line, = ax.plot([], [], label=f"O{i + 1} reward", color='b')
+        lines_out_Qvalue_decentralize.append(line)
+    return fig_Qvalue_decentralize, axs_Qvalue_decentralize, lines_out_Qvalue_decentralize
 def plotting_reward_decentralize():
     fig_reward_decentralize, axs_reward_decentralize = plt.subplots(nrows=1, ncols=3, figsize=(100, 120))
     fig_reward_decentralize.subplots_adjust(hspace=0.8)

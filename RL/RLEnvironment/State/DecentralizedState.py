@@ -12,8 +12,8 @@ class DeCentralizedState(State):
     _services_ensured_prev: np.ndarray
     _services_requested_prev: np.ndarray
     _tower_capacity = 0.0
-    _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0]
-    _next_state_decentralize = [0.0]*13
+    _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    _next_state_decentralize = [0.0] * 14
 
     def __init__(self):
         super().__init__()
@@ -27,10 +27,19 @@ class DeCentralizedState(State):
         self._services_ensured_prev = np.zeros(self.num_services)
         self._services_requested_prev = np.zeros(self.num_services)
         self._tower_capacity = 0.0
+        self._mean_power_allocated_requests = 0.0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
+    @property
+    def mean_power_allocated_requests(self):
+        return self._mean_power_allocated_requests
+
+    @mean_power_allocated_requests.setter
+    def mean_power_allocated_requests(self, value):
+        self._mean_power_allocated_requests = value
 
     @property
     def state_value_decentralize(self):
@@ -118,21 +127,34 @@ class DeCentralizedState(State):
                 percentage_array[i] = 0
 
         return percentage_array
+
     def resetsate(self, tower_capacity):
         print("reset state of decentralize")
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured = np.zeros(self.num_services)
         self._tower_capacity = tower_capacity
-
-
+        self._allocated_power = np.zeros(self.num_services)
 
     def calculate_state(self):
         final_state = []
-        final_state.append(self._tower_capacity)
+        final_state.append(self.tower_capacity)
+        final_state.append(self._mean_power_allocated_requests)
         final_state.extend(self._supported_services)
         final_state.extend(self._services_requested)
         final_state.extend(self._services_ensured)
-        final_state.extend(self.calculate_utility())
+        final_state.extend(self._allocated_power)
+        # final_state.extend(self.calculate_utility())
         if len(final_state) == 0:
-            final_state = [0.0]*13
+            final_state = [0.0] * 14
         return final_state
+    def calculate_initial_state(self):
+        state =[]
+        state.append(self.tower_capacity)
+        state.append(self._mean_power_allocated_requests)
+        state.extend(self._supported_services)
+        state.extend(self._services_requested)
+        state.extend(self._services_ensured)
+        state.extend(self._allocated_power)
+
+        return state
+

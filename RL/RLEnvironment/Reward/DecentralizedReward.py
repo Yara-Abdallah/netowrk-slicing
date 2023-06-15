@@ -1,3 +1,5 @@
+import math
+
 from RL.RLEnvironment.Reward.Reward import Reward
 import numpy as np
 
@@ -33,20 +35,23 @@ class DeCentralizedReward(Reward):
         return self._episode_reward_decentralize
 
     @episode_reward_decentralize.setter
-    def episode_reward_decentralize(self,value):
+    def episode_reward_decentralize(self, value):
         self._episode_reward_decentralize = value
+
     @property
     def coeff(self):
         return self._coeff
 
     @coeff.setter
-    def coeff(self,coeff_value ):
+    def coeff(self, coeff_value):
         self._coeff = coeff_value
+
     @property
     def dx_t(self):
         return self._dx_t
+
     @dx_t.setter
-    def dx_t(self,d):
+    def dx_t(self, d):
         self._dx_t = d
 
     @property
@@ -112,11 +117,23 @@ class DeCentralizedReward(Reward):
 
         return percentage_array
 
-
     def resetreward(self):
         print("reset reward of decentralize")
-        self._services_requested = np.zeros(self.num_services)
-        self._services_ensured = np.zeros(self.num_services)
+        # self._services_requested = np.zeros(self.num_services)
+        # self._services_ensured = np.zeros(self.num_services)
+
+    def calculate_reward(self, x, action, max_capacity):
+        if action == 0:
+            action = -1
+        if x > 0:
+            reward = action * math.pow(math.sqrt(x), -1 * action)
+            return reward
+        elif x < 0:
+            alpha = 1 / max_capacity
+            reward = -1 * action * alpha * math.pow(x, 2)
+            return reward
+        else:
+            return 1
 
     def coefficient(self, max_capacity, power_allocated_service, action, request_supported):
         if max_capacity > power_allocated_service and action == 1 and request_supported == 1:

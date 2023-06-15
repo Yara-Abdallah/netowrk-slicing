@@ -26,9 +26,13 @@ class PerformanceLogger(metaclass=SingletonMeta):
     _services_type: str = ""
     requested_services: List[Dict[Vehicle, Service]] = field(default_factory=list)
     handled_services: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
+
     _outlet_services_power_allocation: Dict[Outlet, List[float]] = field(default_factory=dict)
     _outlet_services_requested_number: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_services_ensured_number: Dict[Outlet, List[int]] = field(default_factory=dict)
+    _outlet_services_requested_number_with_action_period: Dict[Outlet, List[int]] = field(default_factory=dict)
+    _outlet_services_ensured_number_with_action_period: Dict[Outlet, List[int]] = field(default_factory=dict)
+    _outlet_services_power_allocation_with_action_period: Dict[Service, float] = field(default_factory=dict)
     _outlet_occupancy: Dict[Outlet, float] = field(default_factory=dict)
     _outlet_utility: Dict[Outlet, float] = field(default_factory=dict)
     _gridcell_utility: Dict[Outlet, float] = field(default_factory=dict)
@@ -127,6 +131,33 @@ class PerformanceLogger(metaclass=SingletonMeta):
         if outlet not in self._outlet_services_power_allocation:
             self._outlet_services_power_allocation[outlet] = {}
         self._outlet_services_power_allocation[outlet] = service
+
+    @property
+    def outlet_services_ensured_number_with_action_period(self):
+        return self._outlet_services_ensured_number_with_action_period
+
+    def set_outlet_services_ensured_number_with_action_period(self, outlet, num):
+        if outlet not in self._outlet_services_ensured_number_with_action_period:
+            self._outlet_services_ensured_number_with_action_period[outlet] = {}
+        self._outlet_services_ensured_number_with_action_period[outlet] = num
+
+    @property
+    def outlet_services_requested_number_with_action_period(self):
+        return self._outlet_services_requested_number_with_action_period
+
+    def set_outlet_services_requested_number_with_action_period(self, outlet, num):
+        if outlet not in self._outlet_services_requested_number_with_action_period:
+            self._outlet_services_requested_number_with_action_period[outlet] = {}
+        self._outlet_services_requested_number_with_action_period[outlet] = num
+
+    @property
+    def outlet_services_power_allocation_with_action_period(self):
+        return self._outlet_services_power_allocation_with_action_period
+
+    def set_outlet_services_power_allocation_with_action_period(self, outlet, service):
+        if outlet not in self._outlet_services_power_allocation_with_action_period:
+            self._outlet_services_power_allocation_with_action_period[outlet] = {}
+        self._outlet_services_power_allocation_with_action_period[outlet] = service
 
     @property
     def service_requested(self):
