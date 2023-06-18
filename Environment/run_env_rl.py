@@ -234,7 +234,7 @@ class Environment:
         # show gui
         # sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
         # dont show gui
-        sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
+        sumo_cmd = ["sumo", "-c", env_variables.network_path]
         traci.start(sumo_cmd)
 
         # end the simulation and d
@@ -359,7 +359,24 @@ class Environment:
             elif flage == -1 and x != 0:
                 outlet_services_power_allocation[outlet][2] = float(x) - float(
                     service.service_power_allocate)
+    def add_value_to_text(self,path,value):
 
+        with open(path, "a+") as file:
+            lines = file.readlines()
+
+            # Retrieve the last line
+
+            line = lines[-1]
+                # Split the line into values
+            if line != "":
+                values = line.strip().split()
+                # Check if the number of values equals 10  H://work_projects//network_slicing//ns//results//decentralize_action_value.txt
+                # H://work_projects//network_slicing//ns//results//decentralize_z_c.txt
+                if len(values) == 10:
+                    file.write("\n")
+                else:
+                    file.write(" ")
+                    file.write(str(value))
     def requests_buffering(self, car, observer, performance_logger, steps, previous_period):
         car.attach(observer)
         car.set_state(float(round(traci.vehicle.getPosition(car.id)[0], 4)),
@@ -398,6 +415,11 @@ class Environment:
 
                 if outlet not in performance_logger.outlet_services_power_allocation:
                     performance_logger.set_outlet_services_power_allocation(outlet, [0.0, 0.0, 0.0])
+
+                if outlet not in performance_logger.decentralize_z_c:
+                    performance_logger.set_decentralize_z_c(outlet, 0)
+                if outlet not in performance_logger.decentralize_action_value:
+                    performance_logger.set_decentralize_action_value(outlet, 0)
 
                 service.service_power_allocate = request_bandwidth.allocated
                 if len(outlet.power_distinct[0]) == 0:
@@ -487,14 +509,17 @@ class Environment:
                         performance_logger.outlet_services_requested_number_with_action_period[outlet]
                     outlet.dqn.environment.state.services_ensured = [0, 0, 0]
                     performance_logger.set_outlet_services_ensured_number_with_action_period(outlet, [0, 0, 0])
-
+                # self.add_value_to_text("H://work_projects//network_slicing//ns//results//decentralize_z_c",x)
+                # # self.add_value_to_text("H://work_projects//network_slicing//ns//results//decentralize_action_value",
+                #                        outlet.dqn.agents.action.command.action_value_decentralize)
                 outlet.dqn.environment.state.next_state_decentralize = action_decentralize.execute(
                     outlet.dqn.environment.state,
                     outlet.dqn.agents.action.command.action_value_decentralize)
 
                 # print("next state is : ", outlet.dqn.environment.state.next_state_decentralize)
                 outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward(
-                    x, outlet.dqn.agents.action.command.action_value_decentralize, sum(performance_logger.outlet_services_power_allocation_with_action_period[outlet]))
+                    x, outlet.dqn.agents.action.command.action_value_decentralize,
+                    sum(performance_logger.outlet_services_power_allocation_with_action_period[outlet]))
                 # print("reward value is :  ", outlet.dqn.environment.reward.reward_value)
 
                 outlet.dqn.agents.remember(outlet.dqn.environment.state.state_value_decentralize,
@@ -765,9 +790,9 @@ class Environment:
 
             if steps - prev == snapshot_time:
                 prev = steps
-                path1 = os.path.join(p1, f'snapshot{steps}')
-                path2 = os.path.join(p2, f'snapshot{steps}')
-                path3 = os.path.join(p3, f'snapshot{steps}')
+                path1 = os.path.join(p1, f'snapshot')
+                path2 = os.path.join(p2, f'snapshot')
+                path3 = os.path.join(p3, f'snapshot')
                 fig.set_size_inches(10, 8)
                 fig_reward_centralize.set_size_inches(15, 10)
                 fig_reward_decentralize.set_size_inches(30, 20)  # set physical size of plot in inches
