@@ -64,7 +64,7 @@ AUTONOMOUS_RATIO = 0
 
 number_of_days = 3
 episodes = 5 * number_of_days
-TIME = 1000 * period1
+TIME = 85 * period1
 day_time = 1280
 
 decentralized_replay_buffer = 32

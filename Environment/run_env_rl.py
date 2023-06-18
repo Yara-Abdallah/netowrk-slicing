@@ -14,7 +14,8 @@ from uuid import uuid4
 from numpy import random as nump_rand
 from Environment.visiulaiztion import plotting_reward_decentralize, plotting_reward_centralize, \
     plotting_Utility_Requested_Ensured, update_lines_outlet_utility, update_lines_outlet_requested, \
-    update_lines_outlet_ensured, update_lines_reward_decentralized, update_lines_reward_centralized ,plotting_Qvalue_decentralize
+    update_lines_outlet_ensured, update_lines_reward_decentralized, update_lines_reward_centralized, \
+    plotting_Qvalue_decentralize
 from RL.RLBuilder import RLBuilder
 from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
 from RL.RLEnvironment.Reward.CentralizedReward import CentralizedReward
@@ -48,6 +49,8 @@ fig_reward_decentralize, axs_reward_decentralize, lines_out_reward_decentralize 
 fig_reward_centralize, axs_reward_centralize, lines_out_reward_centralize = plotting_reward_centralize()
 fig, axs, lines_out_utility, lines_out_requested, lines_out_ensured = plotting_Utility_Requested_Ensured()
 fig_Qvalue_decentralize, axs_Qvalue_decentralize, lines_out_Qvalue_decentralize = plotting_Qvalue_decentralize()
+
+
 class Environment:
     size = 0
     data = {}
@@ -231,7 +234,7 @@ class Environment:
         # show gui
         # sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
         # dont show gui
-        sumo_cmd = ["sumo", "-c", env_variables.network_path]
+        sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
         traci.start(sumo_cmd)
 
         # end the simulation and d
@@ -491,7 +494,7 @@ class Environment:
 
                 # print("next state is : ", outlet.dqn.environment.state.next_state_decentralize)
                 outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward(
-                    x, outlet.dqn.agents.action.command.action_value_decentralize, outlet.max_capacity)
+                    x, outlet.dqn.agents.action.command.action_value_decentralize, sum(performance_logger.outlet_services_power_allocation_with_action_period[outlet]))
                 # print("reward value is :  ", outlet.dqn.environment.reward.reward_value)
 
                 outlet.dqn.agents.remember(outlet.dqn.environment.state.state_value_decentralize,
@@ -548,8 +551,6 @@ class Environment:
             elif dx < 0 and averaging_value_utility_centralize > env_variables.Threshold_of_utility:
                 gridcell.environment.reward.reward_value = (
                     dx)
-
-            # print("centralize reward value is :  ", gridcell.environment.reward.reward_value)
 
             gridcell.agents.remember(gridcell.environment.state.state_value_centralize,
                                      gridcell.agents.action.command.action_value_centralize,
@@ -631,7 +632,7 @@ class Environment:
         max_size = 273741824
 
         gc.set_threshold(700, max_size // gc.get_threshold()[1])
-        #
+        gc.collect(0)
         build = []
         for i in range(1):
             build.append(RLBuilder())
@@ -682,13 +683,13 @@ class Environment:
             print("step is ....................................... ", step)
 
             # night time
-            if 0 <= step <= env_variables.period1:
-                env_variables.number_cars_mean_std['mean'] = 85
-                env_variables.number_cars_mean_std['std'] = 2
-                env_variables.threashold_number_veh = 25
-                env_variables.ENTERTAINMENT_RATIO = 0.2
-                env_variables.AUTONOMOUS_RATIO = 0.3
-                env_variables.SAFETY_RATIO = 0.5
+            # if 0 <= step <= env_variables.period1:
+            #     env_variables.number_cars_mean_std['mean'] = 85
+            #     env_variables.number_cars_mean_std['std'] = 2
+            #     env_variables.threashold_number_veh = 25
+            #     env_variables.ENTERTAINMENT_RATIO = 0.2
+            #     env_variables.AUTONOMOUS_RATIO = 0.3
+            #     env_variables.SAFETY_RATIO = 0.5
             # day time
             # elif env_variables.period1 + 10 < step <= env_variables.period2:
             #     env_variables.number_cars_mean_std['mean'] = 100
@@ -699,12 +700,12 @@ class Environment:
             #     env_variables.SAFETY_RATIO = 0.4
 
             # elif env_variables.period2 + 10 < step <= env_variables.period3:
-            #     env_variables.number_cars_mean_std['mean'] = 150
-            #     env_variables.number_cars_mean_std['std'] = 2
-            #     env_variables.threashold_number_veh = 85
-            #     env_variables.ENTERTAINMENT_RATIO = 0.6
-            #     env_variables.AUTONOMOUS_RATIO = 0.2
-            #     env_variables.SAFETY_RATIO = 0.2
+            env_variables.number_cars_mean_std['mean'] = 150
+            env_variables.number_cars_mean_std['std'] = 2
+            env_variables.threashold_number_veh = 85
+            env_variables.ENTERTAINMENT_RATIO = 0.6
+            env_variables.AUTONOMOUS_RATIO = 0.2
+            env_variables.SAFETY_RATIO = 0.2
 
             # elif env_variables.period3 + 10 < step <= env_variables.period4:
             #     env_variables.number_cars_mean_std['mean'] = 100

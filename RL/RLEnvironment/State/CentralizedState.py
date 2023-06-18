@@ -157,7 +157,7 @@ class CentralizedState(State):
     #     temp = list(numpy.concatenate(binary).flat)
     #     count_zero = np.all(temp)
     #     if count_zero == False:
-    #         self.accumulated_powers = []
+    #         self.accumulated _powers = []
     #         final_state = []
     #         xs = rx.from_(binary)
     #         disposable = xs.pipe(

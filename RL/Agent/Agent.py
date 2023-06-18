@@ -56,7 +56,7 @@ class Agent(AbstractAgent):
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
                 target = reward + self.gamma * np.argmax(model.predict(next_state, verbose=0)[0])
-                print("decentralize q value : ", target)
+                # print("decentralize q value : ", target)
             state = np.array(state).reshape([1, np.array(state).shape[0]])
             target_f = np.round(model.predict(state, verbose=0))
             target_f[0][action] = target
@@ -72,7 +72,7 @@ class Agent(AbstractAgent):
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
                 target = reward + self.gamma * (model.predict(next_state, verbose=0)[0])
-                print("centralize q value : ", target)
+                # print("centralize q value : ", target)
             state = np.array(state).reshape([1, np.array(state).shape[0]])
             target = np.array(target).reshape([1, 9])
             model.fit(state, target, epochs=1, verbose=0)
