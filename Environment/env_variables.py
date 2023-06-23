@@ -52,7 +52,7 @@ Threshold_of_utility = 0.2
 Threshold_of_utility_acc = 0.5
 
 requests = []
-period1 = 160
+period1 = 320
 period2 = 160
 period3 = 160
 period4 = 160
@@ -64,10 +64,10 @@ AUTONOMOUS_RATIO = 0
 
 number_of_days = 3
 episodes = 5 * number_of_days
-TIME = 85 * period1
+TIME = 45 * period1
 day_time = 1280
 
-decentralized_replay_buffer = 32
+decentralized_replay_buffer = 30
 centralized_replay_buffer = 32
 def get_position_vehicle(id_):
     try:

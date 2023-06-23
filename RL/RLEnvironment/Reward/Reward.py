@@ -15,5 +15,4 @@ class Reward:
     @reward_value.setter
     def reward_value(self,reward_value):
         self._reward_value = reward_value
-    def calculate_utility(self):
-        pass
+

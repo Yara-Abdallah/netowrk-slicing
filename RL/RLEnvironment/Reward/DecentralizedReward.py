@@ -122,17 +122,21 @@ class DeCentralizedReward(Reward):
         # self._services_requested = np.zeros(self.num_services)
         # self._services_ensured = np.zeros(self.num_services)
 
-    def calculate_reward(self, x, action, c):
+    def calculate_reward(self, x, action, c , max_capacity):
         if action == 0:
             action = -1
         if x > 0:
-            reward = action * math.pow(math.sqrt(x), -1 * action)
-            return reward
+            if action == 1:
+                reward = action * math.pow(math.sqrt(x/max_capacity), -1 * action)
+                return reward
+            elif action == -1:
+                reward = action * math.pow(math.sqrt(x), -1 * action)
+                return reward
         elif x < 0:
             alpha = 1 / c
             reward = -1 * action * math.pow(alpha,2) * math.pow(x, 2)
             return reward
-        else:
+        elif x == 0:
             return 1
 
     def coefficient(self, max_capacity, power_allocated_service, action, request_supported):

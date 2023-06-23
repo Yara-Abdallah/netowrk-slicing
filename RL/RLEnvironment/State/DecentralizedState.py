@@ -129,7 +129,6 @@ class DeCentralizedState(State):
         return percentage_array
 
     def resetsate(self, tower_capacity):
-        print("reset state of decentralize")
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured = np.zeros(self.num_services)
         self._tower_capacity = tower_capacity
@@ -139,22 +138,26 @@ class DeCentralizedState(State):
         final_state = []
         final_state.append(self.tower_capacity)
         final_state.append(self._mean_power_allocated_requests)
-        final_state.extend(self._supported_services)
+        if isinstance(self._supported_services[0], np.ndarray):
+            final_state.extend([i.item() for i in self._supported_services])
+        else:
+            final_state.extend(self._supported_services)
         final_state.extend(self._services_requested)
         final_state.extend(self._services_ensured)
         final_state.extend(self._allocated_power)
-        # final_state.extend(self.calculate_utility())
         if len(final_state) == 0:
             final_state = [0.0] * 14
         return final_state
+
     def calculate_initial_state(self):
-        state =[]
+        state = []
         state.append(self.tower_capacity)
         state.append(self._mean_power_allocated_requests)
-        state.extend(self._supported_services)
+        if isinstance(self._supported_services[0], np.ndarray):
+            state.extend([i.item() for i in self._supported_services])
+        else:
+            state.extend(self._supported_services)
         state.extend(self._services_requested)
         state.extend(self._services_ensured)
         state.extend(self._allocated_power)
-
         return state
-

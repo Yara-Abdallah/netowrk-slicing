@@ -54,6 +54,7 @@ class Cellular(Outlet):
         self._capacity: float = 0.0
         self.max_capacity = tower
         self._max_buffer_size = int(self._max_capacity/30)
+        self._qvalue = 0.0
 
         # self._buffer_request = deque(maxlen=self._max_buffer_size)
         # print("int(self._max_capacity / 30) ", int(self._max_capacity / 30))
@@ -110,6 +111,12 @@ class Cellular(Outlet):
     def supported_services_distinct(self):
         return [self.supported_services, self._distinct]
 
+    @property
+    def qvalue(self):
+        return self._qvalue
+    @qvalue.setter
+    def qvalue(self,value):
+        self._qvalue = value
     @property
     def max_capacity(self):
         return self._max_capacity

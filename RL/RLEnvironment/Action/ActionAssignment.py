@@ -6,8 +6,14 @@ class ActionAssignment:
     def __init__(self):
         self.grid_cell = 3
         self.num_services = 3
-        self._action_value_centralize = 0
-
+        self._action_value_centralize = [[0] * 8 for _ in range(9)]
+        self._action_objects = [[0] * 8 for _ in range(9)]
+    @property
+    def action_objects (self):
+        return self._action_objects
+    @action_objects.setter
+    def action_objects(self,value):
+        self._action_objects = value
     @property
     def action_value_centralize(self):
         return self._action_value_centralize
@@ -16,24 +22,14 @@ class ActionAssignment:
         self._action_value_centralize = val
 
     def explore(self):
-        return np.random.randint(2, size=(self.num_services, self.grid_cell))
+        c = np.random.randint(2, size=(1,2))
+        return np.argmax(c[0])
 
     def exploit(self, model, state):
+        #return np.array(model.predict(state, verbose=0).reshape(3, 3), )
         state = np.array(state).reshape([1, np.array(state).shape[0]])
-        #np.array(model.predict(state, verbose=0).reshape(3, 3), )
-        # x ,y , z =[],[],[]
-        # x.append(np.array(model.predict(state, verbose=0).reshape(1,2), ))
-        # x.append(np.array(model.predict(state, verbose=0).reshape(1,2), ))
-        # x.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
-        # y.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
-        # y.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
-        # y.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
-        # z.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
-        # z.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
-        # z.append(np.array(model.predict(state, verbose=0).reshape(1, 2), ))
-        # list_ = [x,y,z]
-        # np.array(list_).reshape(3, 3)
-        return np.array(model.predict(state, verbose=0).reshape(3, 3), )
+        c = np.array(model.predict(state, verbose=0)).reshape(1, 2)
+        return np.argmax(c[0])
 
     def execute(self, state, action_decision):
         # state.supported_services = action_decision

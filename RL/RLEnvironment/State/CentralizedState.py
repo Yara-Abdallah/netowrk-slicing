@@ -11,42 +11,86 @@ from RL.RLEnvironment.State.State import State
 
 class CentralizedState(State):
     allocated_power: [float]
-    supported_services: [bool]
+    supported_services: np.ndarray[int]
     indices = []
     accumulated_powers = []
     filtered_powers = []
-    _services_ensured: np.ndarray
-    _services_requested: np.ndarray
-    _services_ensured_prev: np.ndarray
-    _services_requested_prev: np.ndarray
+    _services_ensured: np.ndarray[int]
+    _services_requested: np.ndarray[int]
+    _services_ensured_prev: np.ndarray[int]
+    _services_requested_prev: np.ndarray[int]
     _capacity_each_tower = [0.0, 0.0, 0.0]
-    _state_value_centralize = [0.0]*21
-    _next_state_centralize = [0.0]*21
+    _index_outlet: int
+    _max_capacity_each_outlet = [0.0, 0.0, 0.0]
+    _index_service: int
+    _state_value_centralize = [[0.0] * 8 for _ in range(9)]
+    _next_state_centralize = [[0.0] * 8 for _ in range(9)]
     _averaging_value_utility_centralize = 0.0
+    _supported_service: int
+    _utility_value_centralize_prev = 0.0
 
     def __init__(self):
         super().__init__()
         self.grid_cell = 3
         self.num_services = 3
         self.state_shape = CentralizedState.state_shape(self.num_services, self.grid_cell)
-        self._allocated_power = np.zeros(self.state_shape)
-        self._supported_services = copy.deepcopy(self.allocated_power)
-        self._services_ensured = np.zeros(self.num_services)
-        self._services_requested = np.zeros(self.num_services)
-        self._services_ensured_prev = np.zeros(self.num_services)
-        self._services_requested_prev = np.zeros(self.num_services)
+        self._allocated_power = 0
+        self._supported_services = np.zeros((3, 3))
+        self._services_ensured = np.zeros(3)
+        self._services_requested = np.zeros(3)
+        self._services_ensured_prev = np.zeros(3)
+        self._services_requested_prev = np.zeros(3)
         self._capacity_each_tower = [0.0, 0.0, 0.0]
         self._averaging_value_utility_centralize_prev = 0.0
+        self._index_outlet = 0
+        self._max_capacity_each_outlet = [0.0, 0.0, 0.0]
+        self._index_service = 0
+        self._supported_service = 0
+        self._utility_value_centralize_prev = 0.0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
     @property
-    def averaging_value_utility_centralize_prev (self):
+    def utility_value_centralize_prev(self):
+        return self._utility_value_centralize_prev
+
+    @utility_value_centralize_prev.setter
+    def utility_value_centralize_prev(self, value):
+        self._utility_value_centralize_prev = value
+
+    @property
+    def averaging_value_utility_centralize_prev(self):
         return self._averaging_value_utility_centralize_prev
+
     @averaging_value_utility_centralize_prev.setter
-    def averaging_value_utility_centralize_prev(self,value):
+    def averaging_value_utility_centralize_prev(self, value):
         self._averaging_value_utility_centralize_prev = value
+
+    @property
+    def max_capacity_each_outlet(self):
+        return self._max_capacity_each_outlet
+
+    @max_capacity_each_outlet.setter
+    def max_capacity_each_outlet(self, value):
+        self._max_capacity_each_outlet = value
+
+    @property
+    def index_outlet(self):
+        return self._index_outlet
+
+    @index_outlet.setter
+    def index_outlet(self, value):
+        self._index_outlet = value
+
+    @property
+    def index_service(self):
+        return self._index_service
+
+    @index_service.setter
+    def index_service(self, value):
+        self._index_service = value
 
     @property
     def capacity_each_tower(self):
@@ -78,15 +122,15 @@ class CentralizedState(State):
 
     @services_requested_prev.setter
     def services_requested_prev(self, value):
-        self._services_requested_prev = np.array(value)
+        self._services_requested_prev = value
 
     @property
     def services_ensured_prev(self):
         return self._services_ensured_prev
 
     @services_ensured_prev.setter
-    def services_ensured_prev(self, value: np.ndarray):
-        self._services_ensured_prev = np.array(value)
+    def services_ensured_prev(self, value):
+        self._services_ensured_prev = value
 
     @property
     def services_requested(self):
@@ -94,15 +138,15 @@ class CentralizedState(State):
 
     @services_requested.setter
     def services_requested(self, value):
-        self._services_requested = np.array(value)
+        self._services_requested = value
 
     @property
     def services_ensured(self):
         return self._services_ensured
 
     @services_ensured.setter
-    def services_ensured(self, value: np.ndarray):
-        self._services_ensured = np.array(value)
+    def services_ensured(self, value):
+        self._services_ensured = value
 
     @property
     def allocated_power(self):
@@ -120,6 +164,15 @@ class CentralizedState(State):
     @supported_services.setter
     def supported_services(self, supported_array):
         self._supported_services[:, supported_array[1]] = supported_array[0]
+        # self._supported_services = supported_array
+
+    @property
+    def supported_service(self):
+        return self._supported_service
+
+    @supported_service.setter
+    def supported_service(self, value):
+        self._supported_service = value
 
     def observer_sum(self, x):
         self.accumulated_powers.append(sum(x))
@@ -129,28 +182,26 @@ class CentralizedState(State):
         x = list(map(self.filtered_powers[x[0]].__getitem__, x[1]))
         return x
 
-    def calculate_utility(self):
-        percentage_array = np.zeros(self.num_services)
-        for i in range(3):
-            if (self._services_ensured[i] - self._services_ensured_prev[i]) == 0 and (
-                    self._services_requested[i] - self._services_requested_prev[i]) == 0:
-                percentage_array[i] = 0
-            elif (self._services_ensured[i] - self._services_ensured_prev[i]) != 0 and (
-                    self._services_requested[i] - self._services_requested_prev[i]) != 0:
+    def calculate_utility(self, service_index):
+        percentage_array = 0
+        if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
+                self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
+            percentage_array = 0
+        elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
+                self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
 
-                percentage_array[i] = (self._services_ensured[i]- self._services_ensured_prev[i]) / (
-                        self._services_requested[i] - self._services_requested_prev[i])
-            else:
-                percentage_array[i] = 0
+            percentage_array = (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
+                    self._services_requested[service_index] - self._services_requested_prev[service_index])
+        else:
+            percentage_array = 0
 
         return percentage_array
 
     def resetsate(self, tower_capacity):
-        print("reset state of centralize")
-        self._services_requested = np.zeros(self.num_services)
-        self._services_ensured = np.zeros(self.num_services)
-        self._services_requested_prev = np.zeros(self.num_services)
-        self._services_ensured_prev = np.zeros(self.num_services)
+        self._services_requested = np.zeros(3)
+        self._services_ensured = np.zeros(3)
+        self._services_requested_prev = np.zeros(3)
+        self._services_ensured_prev = np.zeros(3)
         self._capacity_each_tower = tower_capacity
 
     # def calculate_state(self, binary):
@@ -174,15 +225,23 @@ class CentralizedState(State):
     #         return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     def calculate_state(self):
         final_state = []
-        final_state.extend(self.capacity_each_tower)
-        # print(" (self.supported_services[:0]): ", (self.supported_services[:0]))
+        final_state.append(self.index_outlet)
+        final_state.append(self.max_capacity_each_outlet[self.index_outlet])
+        final_state.append(self.capacity_each_tower[self.index_outlet])
+        final_state.append(self.index_service)
+        # print(" (index_outlet:>>>>>>>>>>>>>>>>>>>>>>>> ", self.index_outlet)
+        #
+        # print(" (self.max in centralize state [:0]):>>>>>>>>>>>>>>>>>>>>>>>> ", self.max_capacity_each_outlet)
+        #
+        # print(" (self.services_requested[self.index_service] ", self.services_requested[self.index_service])
         # print(" list(self.supported_services[:0]) ",list(self.supported_services[:0]))
-        final_state.extend(list(flatten(self.supported_services[:0])))
-        final_state.extend(list(flatten(self.supported_services[:1])))
-        final_state.extend(list(flatten(self.supported_services[:2])))
-        final_state.extend(self.services_requested)
-        final_state.extend(self.services_ensured)
-        final_state.extend(self.calculate_utility())
-
-
+        # final_state.append(self.supported_services[:0])  .item()
+        if isinstance(self.supported_service, np.ndarray):
+            final_state.append((self.supported_services[self.index_service][self.index_outlet]).item())
+        else:
+            final_state.append(self.supported_services[self.index_service][self.index_outlet])
+        final_state.append(self.services_requested[self.index_service])
+        final_state.append(self.services_ensured[self.index_service])
+        final_state.append(self.calculate_utility(self.index_service))
+        # print("centralize next state : .......................... ", final_state)
         return final_state

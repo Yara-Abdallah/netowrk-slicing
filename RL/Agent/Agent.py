@@ -9,7 +9,7 @@ class Agent(AbstractAgent):
     _action_value = 0
     _outlets_id = []
 
-    def __init__(self,*args):
+    def __init__(self, *args):
         super().__init__(*args)
         self._outlets_id = []
         self._grid_outlets = []
@@ -55,6 +55,8 @@ class Agent(AbstractAgent):
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
+                # print("reward : ",reward)
+                # print("model.predict(next_state, verbose=0)[0] : ",model.predict(next_state, verbose=0)[0])
                 target = reward + self.gamma * np.argmax(model.predict(next_state, verbose=0)[0])
                 # print("decentralize q value : ", target)
             state = np.array(state).reshape([1, np.array(state).shape[0]])
@@ -64,6 +66,7 @@ class Agent(AbstractAgent):
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
         return target
+
     def replay_buffer_centralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
         target = []
@@ -71,11 +74,13 @@ class Agent(AbstractAgent):
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
-                target = reward + self.gamma * (model.predict(next_state, verbose=0)[0])
+                target = reward + self.gamma * np.argmax(model.predict(next_state, verbose=0)[0])
                 # print("centralize q value : ", target)
             state = np.array(state).reshape([1, np.array(state).shape[0]])
-            target = np.array(target).reshape([1, 9])
-            model.fit(state, target, epochs=1, verbose=0)
+            target_f = np.round(model.predict(state, verbose=0))
+            target_f[0][action] = target
+            # target = np.array(target).reshape([1, 9])
+            model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
         return target

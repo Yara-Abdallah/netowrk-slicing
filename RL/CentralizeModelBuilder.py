@@ -7,7 +7,7 @@ class ModelBuilder_Centralize:
 
     def __init__(self, model=None):
         if model is None:
-            self.model = CentralizeModel(state_size=21, action_size=9,
+            self.model = CentralizeModel(state_size=8, action_size=2,
                                activation_function="relu", loss_function="mse", optimization_algorithm=Adam,
                                learning_rate=0.5, output_activation="sigmoid").build_model()
         else:

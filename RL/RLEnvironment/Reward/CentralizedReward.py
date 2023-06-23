@@ -9,6 +9,7 @@ class CentralizedReward(Reward):
 
     _services_ensured_prev: np.ndarray
     _services_requested_prev: np.ndarray
+    _reward_value = [[0] * 8 for _ in range(9)]
 
     def __init__(self):
         super().__init__()
@@ -19,7 +20,7 @@ class CentralizedReward(Reward):
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured_prev = np.zeros(self.num_services)
         self._services_requested_prev = np.zeros(self.num_services)
-        self._reward_value = 0
+        self._reward_value = [[0] * 8 for _ in range(9)]
         self._gridcell_reward_episode = 0
 
     @staticmethod
@@ -81,17 +82,18 @@ class CentralizedReward(Reward):
         self._services_requested_prev = np.zeros(self.num_services)
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured = np.zeros(self.num_services)
-    def calculate_utility(self):
-        percentage_array = np.zeros(self.num_services)
-        for i in range(3):
-            if (self._services_ensured[i] - self._services_ensured_prev[i]) == 0 and (
-                    self._services_requested[i] - self._services_requested_prev[i]) == 0:
-                percentage_array[i] = 0
-            elif (self._services_ensured[i] - self._services_ensured_prev[i]) != 0 and (
-                    self._services_requested[i] - self._services_requested_prev[i]) != 0:
-                percentage_array[i] = (self._services_ensured[i]-self._services_ensured_prev[i] )/(
-                        self._services_requested[i] - self._services_requested_prev[i])
-            else:
-                percentage_array[i] = 0
+
+    def calculate_utility(self, service_index):
+        percentage_array = 0
+        if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
+                self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
+            percentage_array = 0
+        elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
+                self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
+
+            percentage_array = (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
+                    self._services_requested[service_index] - self._services_requested_prev[service_index])
+        else:
+            percentage_array = 0
 
         return percentage_array
