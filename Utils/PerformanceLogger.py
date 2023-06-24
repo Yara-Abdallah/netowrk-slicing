@@ -33,6 +33,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
     _outlet_services_requested_number_with_action_period: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_services_ensured_number_with_action_period: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_services_power_allocation_with_action_period: Dict[Service, float] = field(default_factory=dict)
+    _outlet_services_power_allocation_without_accumilated_with_action_period: Dict[Service, List[float]] = field(default_factory=dict)
     _outlet_occupancy: Dict[Outlet, float] = field(default_factory=dict)
     _outlet_utility: Dict[Outlet, float] = field(default_factory=dict)
     _gridcell_utility: Dict[Outlet, float] = field(default_factory=dict)
@@ -178,6 +179,15 @@ class PerformanceLogger(metaclass=SingletonMeta):
         if outlet not in self._outlet_services_power_allocation_with_action_period:
             self._outlet_services_power_allocation_with_action_period[outlet] = {}
         self._outlet_services_power_allocation_with_action_period[outlet] = service
+
+    @property
+    def outlet_services_power_allocation_without_accumilated_with_action_period(self):
+        return self._outlet_services_power_allocation_without_accumilated_with_action_period
+
+    def set_outlet_services_power_allocation_without_accumilated_with_action_period(self, outlet, service):
+        if outlet not in self._outlet_services_power_allocation_without_accumilated_with_action_period:
+            self._outlet_services_power_allocation_without_accumilated_with_action_period[outlet] = {}
+        self._outlet_services_power_allocation_without_accumilated_with_action_period[outlet]=[]
 
     @property
     def service_requested(self):

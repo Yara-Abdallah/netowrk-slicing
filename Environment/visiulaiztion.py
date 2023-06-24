@@ -58,12 +58,7 @@ def plotting_Qvalue_centralize():
 
 
 
-def update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, gridcell):
-    for j, line4 in enumerate(lines_out_Qvalue_centralize):
-        x_data, y_data = line4.get_data()
-        x_data = np.append(x_data, steps)
-        y_data = np.append(y_data, gridcell.qvalue)
-        line4.set_data(x_data, y_data)
+
 
 
 def plotting_reward_decentralize():
@@ -130,5 +125,13 @@ def update_lines_reward_centralized(lines_out_reward_centralize, steps, gridcell
     for j, line4 in enumerate(lines_out_reward_centralize):
         x_data, y_data = line4.get_data()
         x_data = np.append(x_data, steps)
-        y_data = np.append(y_data, gridcells_dqn[j].environment.reward.gridcell_reward_episode)
+        y_data = np.append(y_data, gridcells_dqn[j].environment.reward.reward_value)
+        line4.set_data(x_data, y_data)
+def update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, qvalue):
+    print("befor plotting ")
+    for j, line4 in enumerate(lines_out_Qvalue_centralize):
+        print("after plotting ",qvalue)
+        x_data, y_data = line4.get_data()
+        x_data = np.append(x_data, steps)
+        y_data = np.append(y_data, qvalue)
         line4.set_data(x_data, y_data)

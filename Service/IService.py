@@ -31,18 +31,19 @@ class Service(ABC):
     #            f"service real time : {self.realtime}"
 
     def request_supported(self,outlet):
+        # print("outlet.dqn.environment.state.supported_services  : ", outlet.dqn.environment.state.supported_services)
         if self.__class__.__name__=='FactorySafety':
-            if outlet.supported_services[0] == 1 :
+            if outlet.dqn.environment.state.supported_services[0] == 1 :
                 return True
             else :
                 return False
         elif self.__class__.__name__=='FactoryEntertainment':
-            if outlet.supported_services[1] == 1 :
+            if outlet.dqn.environment.state.supported_services[1] == 1 :
                 return True
             else :
                 return False
         elif self.__class__.__name__=='FactoryAutonomous':
-            if outlet.supported_services[2] == 1 :
+            if outlet.dqn.environment.state.supported_services[2] == 1 :
                 return True
             else :
                 return False

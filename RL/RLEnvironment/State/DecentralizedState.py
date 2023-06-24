@@ -146,7 +146,7 @@ class DeCentralizedState(State):
         final_state.append(self.tower_capacity)
         if isinstance(self._action_value, np.ndarray):
            final_state.append(self._action_value.item())
-        else :
+        else:
             final_state.append(self._action_value)
         final_state.append(self._mean_power_allocated_requests)
         if isinstance(self._supported_services[0], np.ndarray):
