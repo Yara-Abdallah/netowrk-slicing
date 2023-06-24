@@ -921,13 +921,15 @@ class Environment:
                     # print("gridcell.qvalue  : ",gridcell_dqn.environment.state.qvalue)
                     update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, gridcell_dqn.environment.state)
 
+
+                    update_lines_outlet_utility(lines_out_utility, steps, temp_outlets)
+                    update_lines_outlet_requested(lines_out_requested, steps, temp_outlets)
+                    update_lines_outlet_ensured(lines_out_ensured, steps, temp_outlets)
+                    update_lines_Qvalue_decentralized(lines_out_Qvalue_decentralize, steps, temp_outlets)
+                    update_lines_reward_decentralized(lines_out_reward_decentralize, steps, temp_outlets)
+
                     for out in gridcell_dqn.agents.grid_outlets:
                         out.dqn.environment.reward.episode_reward_decentralize = out.dqn.environment.reward.reward_value
-                        update_lines_reward_decentralized(lines_out_reward_decentralize, steps, temp_outlets)
-                        update_lines_outlet_utility(lines_out_utility, steps, temp_outlets)
-                        update_lines_outlet_requested(lines_out_requested, steps, temp_outlets)
-                        update_lines_outlet_ensured(lines_out_ensured, steps, temp_outlets)
-                        update_lines_Qvalue_decentralized(lines_out_Qvalue_decentralize, steps, out)
                         # print("out.qvalue  : ", out.qvalue)
 
                         out.dqn.environment.state.resetsate(out._max_capacity)

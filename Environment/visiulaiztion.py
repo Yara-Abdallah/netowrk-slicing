@@ -47,7 +47,7 @@ def update_lines_Qvalue_decentralized(lines_out_Qvalue_decentralize, steps, outl
     for j, line3 in enumerate(lines_out_Qvalue_decentralize):
         x_data, y_data = line3.get_data()
         x_data = np.append(x_data, steps)
-        y_data = np.append(y_data, outlet.qvalue)
+        y_data = np.append(y_data, outlet[j].qvalue)
         line3.set_data(x_data, y_data)
 
 
@@ -121,7 +121,7 @@ def update_lines_reward_decentralized(lines_out_reward_decentralize, steps, outl
     for j, line3 in enumerate(lines_out_reward_decentralize):
         x_data, y_data = line3.get_data()
         x_data = np.append(x_data, steps)
-        y_data = np.append(y_data, outlets[j].dqn.environment.reward.episode_reward_decentralize)
+        y_data = np.append(y_data, outlets[j].dqn.environment.reward.reward_value)
         line3.set_data(x_data, y_data)
 
 
