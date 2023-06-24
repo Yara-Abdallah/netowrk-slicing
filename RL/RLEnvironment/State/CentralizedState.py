@@ -11,14 +11,14 @@ from RL.RLEnvironment.State.State import State
 
 class CentralizedState(State):
     allocated_power: [float]
-    supported_services: np.ndarray[int]
+    supported_services: np.ndarray
     indices = []
     accumulated_powers = []
     filtered_powers = []
-    _services_ensured: np.ndarray[int]
-    _services_requested: np.ndarray[int]
-    _services_ensured_prev: np.ndarray[int]
-    _services_requested_prev: np.ndarray[int]
+    _services_ensured: np.ndarray
+    _services_requested: np.ndarray
+    _services_ensured_prev: np.ndarray
+    _services_requested_prev: np.ndarray
     _capacity_each_tower = [0.0, 0.0, 0.0]
     _index_outlet: int
     _max_capacity_each_outlet = [0.0, 0.0, 0.0]
@@ -47,6 +47,7 @@ class CentralizedState(State):
         self._index_service = 0
         self._supported_service = 0
         self._utility_value_centralize_prev = 0.0
+        self._qvalue = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
@@ -59,6 +60,13 @@ class CentralizedState(State):
     @utility_value_centralize_prev.setter
     def utility_value_centralize_prev(self, value):
         self._utility_value_centralize_prev = value
+
+    @property
+    def qvalue(self):
+        return self._qvalue
+    @qvalue.setter
+    def qvalue(self,value):
+        self._qvalue = value
 
     @property
     def averaging_value_utility_centralize_prev(self):

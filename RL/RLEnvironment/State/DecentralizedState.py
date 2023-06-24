@@ -12,8 +12,8 @@ class DeCentralizedState(State):
     _services_ensured_prev: np.ndarray
     _services_requested_prev: np.ndarray
     _tower_capacity = 0.0
-    _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    _next_state_decentralize = [0.0] * 14
+    _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0]
+    _next_state_decentralize = [0.0] * 15
 
     def __init__(self):
         super().__init__()
@@ -28,6 +28,7 @@ class DeCentralizedState(State):
         self._services_requested_prev = np.zeros(self.num_services)
         self._tower_capacity = 0.0
         self._mean_power_allocated_requests = 0.0
+        self._action_value = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
@@ -40,7 +41,12 @@ class DeCentralizedState(State):
     @mean_power_allocated_requests.setter
     def mean_power_allocated_requests(self, value):
         self._mean_power_allocated_requests = value
-
+    @property
+    def action_value(self):
+        return self._action_value
+    @action_value.setter
+    def action_value(self,value ):
+        self._action_value = value
     @property
     def state_value_decentralize(self):
         return self._state_value_decentralize
@@ -136,7 +142,12 @@ class DeCentralizedState(State):
 
     def calculate_state(self):
         final_state = []
+
         final_state.append(self.tower_capacity)
+        if isinstance(self._action_value, np.ndarray):
+           final_state.append(self._action_value.item())
+        else :
+            final_state.append(self._action_value)
         final_state.append(self._mean_power_allocated_requests)
         if isinstance(self._supported_services[0], np.ndarray):
             final_state.extend([i.item() for i in self._supported_services])
@@ -146,7 +157,7 @@ class DeCentralizedState(State):
         final_state.extend(self._services_ensured)
         final_state.extend(self._allocated_power)
         if len(final_state) == 0:
-            final_state = [0.0] * 14
+            final_state = [0.0] * 15
         return final_state
 
     def calculate_initial_state(self):

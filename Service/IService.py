@@ -33,19 +33,19 @@ class Service(ABC):
     def request_supported(self,outlet):
         if self.__class__.__name__=='FactorySafety':
             if outlet.supported_services[0] == 1 :
-                return 1
+                return True
             else :
-                return 0
+                return False
         elif self.__class__.__name__=='FactoryEntertainment':
             if outlet.supported_services[1] == 1 :
-                return 1
+                return True
             else :
-                return 0
+                return False
         elif self.__class__.__name__=='FactoryAutonomous':
             if outlet.supported_services[2] == 1 :
-                return 1
+                return True
             else :
-                return 0
+                return False
     @property
     def service_power_allocate(self):
         return self._service_power_allocate

@@ -58,11 +58,11 @@ def plotting_Qvalue_centralize():
 
 
 
-def update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, qvalue):
+def update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, gridcell):
     for j, line4 in enumerate(lines_out_Qvalue_centralize):
         x_data, y_data = line4.get_data()
         x_data = np.append(x_data, steps)
-        y_data = np.append(y_data, qvalue)
+        y_data = np.append(y_data, gridcell.qvalue)
         line4.set_data(x_data, y_data)
 
 
