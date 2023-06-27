@@ -10,7 +10,7 @@ from RL.RLEnvironment.State.State import State
 
 
 class CentralizedState(State):
-    allocated_power: [float]
+    allocated_power: np.ndarray
     supported_services: np.ndarray
     indices = []
     accumulated_powers = []
@@ -23,8 +23,8 @@ class CentralizedState(State):
     _index_outlet: int
     _max_capacity_each_outlet = [0.0, 0.0, 0.0]
     _index_service: int
-    _state_value_centralize = [[0.0] * 8 for _ in range(9)]
-    _next_state_centralize = [[0.0] * 8 for _ in range(9)]
+    _state_value_centralize = [[0.0] * 12 for _ in range(9)]
+    _next_state_centralize = [[0.0] * 12 for _ in range(9)]
     _averaging_value_utility_centralize = 0.0
     _supported_service: int
     _utility_value_centralize_prev = 0.0
@@ -34,10 +34,13 @@ class CentralizedState(State):
         self.grid_cell = 3
         self.num_services = 3
         self.state_shape = CentralizedState.state_shape(self.num_services, self.grid_cell)
-        self._allocated_power = 0
+        self._allocated_power = np.zeros((3, 3))
+        self._average_power_allocate = np.zeros(3)
         self._supported_services = np.zeros((3, 3))
         self._services_ensured = np.zeros(3)
         self._services_requested = np.zeros(3)
+        self._services_ensured_for_outlet = np.zeros(3)
+        self._services_requested_for_outlet = np.zeros(3)
         self._services_ensured_prev = np.zeros(3)
         self._services_requested_prev = np.zeros(3)
         self._capacity_each_tower = [0.0, 0.0, 0.0]
@@ -91,6 +94,14 @@ class CentralizedState(State):
     @index_outlet.setter
     def index_outlet(self, value):
         self._index_outlet = value
+
+    @property
+    def average_power_allocate(self):
+        return self._average_power_allocate
+
+    @average_power_allocate.setter
+    def average_power_allocate(self, value):
+        self._average_power_allocate = value
 
     @property
     def index_service(self):
@@ -148,6 +159,21 @@ class CentralizedState(State):
     def services_requested(self, value):
         self._services_requested = value
 
+    @property
+    def services_requested_for_outlet(self):
+        return self._services_requested_for_outlet
+
+    @services_requested_for_outlet.setter
+    def services_requested_for_outlet(self, value):
+        self._services_requested_for_outlet = value
+
+    @property
+    def services_ensured_for_outlet(self):
+        return self._services_ensured_for_outlet
+
+    @services_ensured_for_outlet.setter
+    def services_ensured_for_outlet(self, value):
+        self._services_ensured_for_outlet = value
     @property
     def services_ensured(self):
         return self._services_ensured
@@ -237,19 +263,15 @@ class CentralizedState(State):
         final_state.append(self.max_capacity_each_outlet[self.index_outlet])
         final_state.append(self.capacity_each_tower[self.index_outlet])
         final_state.append(self.index_service)
-        # print(" (index_outlet:>>>>>>>>>>>>>>>>>>>>>>>> ", self.index_outlet)
-        #
-        # print(" (self.max in centralize state [:0]):>>>>>>>>>>>>>>>>>>>>>>>> ", self.max_capacity_each_outlet)
-        #
-        # print(" (self.services_requested[self.index_service] ", self.services_requested[self.index_service])
-        # print(" list(self.supported_services[:0]) ",list(self.supported_services[:0]))
-        # final_state.append(self.supported_services[:0])  .item()
         if isinstance(self.supported_service, np.ndarray):
             final_state.append((self.supported_services[self.index_service][self.index_outlet]).item())
         else:
             final_state.append(self.supported_services[self.index_service][self.index_outlet])
+        final_state.append(self.services_requested_for_outlet[self.index_service])
+        final_state.append(self.services_ensured_for_outlet[self.index_service])
+        final_state.append(self.allocated_power[self.index_service][self.index_outlet])
         final_state.append(self.services_requested[self.index_service])
         final_state.append(self.services_ensured[self.index_service])
+        final_state.append(self.average_power_allocate[self.index_service])
         final_state.append(self.calculate_utility(self.index_service))
-        # print("centralize next state : .......................... ", final_state)
         return final_state

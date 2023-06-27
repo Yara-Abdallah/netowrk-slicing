@@ -413,9 +413,9 @@ class Environment:
                     performance_logger.set_outlet_utility(outlet, 0.0)
 
                 outlet.distinct = gridcell_dqn.outlets_id[i]
+
                 gridcell_dqn.allocated_power = outlet.power_distinct
                 gridcell_dqn.supported_services = outlet.supported_services_distinct
-
                 gridcell_dqn.services_requested = gridcell_dqn.services_requested + outlet.services_requested
                 gridcell_dqn.services_ensured = gridcell_dqn.services_ensured + outlet.services_ensured
 

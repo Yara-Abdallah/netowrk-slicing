@@ -28,12 +28,15 @@ class PerformanceLogger(metaclass=SingletonMeta):
     handled_services: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
 
     _outlet_services_power_allocation: Dict[Outlet, List[float]] = field(default_factory=dict)
+    _outlet_services_power_allocation_current: Dict[Outlet, List[float]] = field(default_factory=dict)
+
     _outlet_services_requested_number: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_services_ensured_number: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_services_requested_number_with_action_period: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_services_ensured_number_with_action_period: Dict[Outlet, List[int]] = field(default_factory=dict)
     _outlet_services_power_allocation_with_action_period: Dict[Service, float] = field(default_factory=dict)
-    _outlet_services_power_allocation_without_accumilated_with_action_period: Dict[Service, List[float]] = field(default_factory=dict)
+    _outlet_services_power_allocation_for_all_requested: Dict[Service, List[float]] = field(default_factory=dict)
+
     _outlet_occupancy: Dict[Outlet, float] = field(default_factory=dict)
     _outlet_utility: Dict[Outlet, float] = field(default_factory=dict)
     _gridcell_utility: Dict[Outlet, float] = field(default_factory=dict)
@@ -81,6 +84,15 @@ class PerformanceLogger(metaclass=SingletonMeta):
         if outlet not in self._service_power_allocate:
             self._service_power_allocate[outlet] = {}
         self._service_power_allocate[outlet] = cost
+
+    @property
+    def outlet_services_power_allocation_current(self):
+        return self._outlet_services_power_allocation_current
+
+    def set_outlet_services_power_allocation_current(self, outlet, cost):
+        if outlet not in self._outlet_services_power_allocation_current:
+            self._outlet_services_power_allocation_current[outlet] = {}
+        self._outlet_services_power_allocation_current[outlet] = cost
 
     @property
     def centralized_reward(self):
@@ -181,13 +193,13 @@ class PerformanceLogger(metaclass=SingletonMeta):
         self._outlet_services_power_allocation_with_action_period[outlet] = service
 
     @property
-    def outlet_services_power_allocation_without_accumilated_with_action_period(self):
-        return self._outlet_services_power_allocation_without_accumilated_with_action_period
+    def outlet_services_power_allocation_for_all_requested(self):
+        return self._outlet_services_power_allocation_for_all_requested
 
-    def set_outlet_services_power_allocation_without_accumilated_with_action_period(self, outlet, service):
-        if outlet not in self._outlet_services_power_allocation_without_accumilated_with_action_period:
-            self._outlet_services_power_allocation_without_accumilated_with_action_period[outlet] = {}
-        self._outlet_services_power_allocation_without_accumilated_with_action_period[outlet]=[]
+    def set_outlet_services_power_allocation_for_all_requested(self, outlet, service):
+        if outlet not in self._outlet_services_power_allocation_for_all_requested:
+            self._outlet_services_power_allocation_for_all_requested[outlet] = {}
+        self._outlet_services_power_allocation_for_all_requested[outlet]=service
 
     @property
     def service_requested(self):
@@ -204,7 +216,9 @@ class PerformanceLogger(metaclass=SingletonMeta):
     def set_service_handled(self, outlet, car, service):
         if outlet not in self.handled_services:
             self.handled_services[outlet] = {}
-        self.handled_services[outlet][car] = service
+        new_value = {car : service}
+        self.handled_services[outlet].update(new_value)
+
 
     @property
     def request_costs(self):
