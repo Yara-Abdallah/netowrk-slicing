@@ -482,6 +482,8 @@ class Environment:
                             outlet.dqn.environment.state.supported_services = outlet.supported_services
                             outlet.dqn.environment.state.action_value = outlet.dqn.agents.action_value
                             outlet.dqn.environment.state.index_service = service_index
+                            # print("state_value_decentralize : ",outlet.dqn.environment.state.state_value_decentralize)
+
                             if step <= 10:
                                 outlet.dqn.environment.state.state_value_decentralize[service_index] = outlet.dqn.environment.state.calculate_state()
                             # print("outlet.dqn.environment.state.supported_services : ",outlet.dqn.environment.state.supported_services)
@@ -1002,10 +1004,11 @@ class Environment:
                             f"H://work_projects//network_slicing//ns//results//qvalue{i}.txt",
                             out.qvalue)
 
-                        out.dqn.environment.state.resetsate(out._max_capacity)
+                        # out.dqn.environment.state.resetsate(out._max_capacity)
                         out.dqn.environment.reward.reward_value = 0
                         out.dqn.environment.state.mean_power_allocated_requests = 0.0
-                        out.dqn.environment.state.state_value_decentralize = out.dqn.environment.state.calculate_state()
+                        # out.dqn.environment.state.state_value_decentralize = out.dqn.environment.state.calculate_state()
+                        out.dqn.environment.state.state_value_decentralize = [[0.0] * 17 for _ in range(3)]
                         out.current_capacity = out._max_capacity
                         list_.append(out._max_capacity)
 
