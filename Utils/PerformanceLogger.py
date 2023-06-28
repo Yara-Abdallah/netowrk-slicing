@@ -24,6 +24,7 @@ class SingletonMeta(type):
 @dataclass
 class PerformanceLogger(metaclass=SingletonMeta):
     _services_type: str = ""
+    _number_of_periods_until_now : int = -1
     requested_services: List[Dict[Vehicle, Service]] = field(default_factory=list)
     handled_services: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
 
@@ -58,6 +59,13 @@ class PerformanceLogger(metaclass=SingletonMeta):
             self._gridcell_utility[outlet] = {}
         self._gridcell_utility[outlet] = utility
 
+    @property
+    def number_of_periods_until_now(self):
+        return self._number_of_periods_until_now
+
+    @number_of_periods_until_now.setter
+    def number_of_periods_until_now(self,value):
+        self._number_of_periods_until_now+=1
     @property
     def decentralize_z_c(self):
         return self._decentralize_z_c

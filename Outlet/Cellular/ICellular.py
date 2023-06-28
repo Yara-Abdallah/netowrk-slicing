@@ -19,7 +19,7 @@ class Cellular(Outlet):
     """
 
     _max_capacity: float
-    _current_capacity : float
+    _current_capacity: float
 
     def __init__(
             self, tower, agent, coms: Communications, supported_services, *args, **kwargs
@@ -52,18 +52,17 @@ class Cellular(Outlet):
         self.vehicles = kwargs.get("vehicles_list", [])
         self._supported_services_distinct = []
         self._capacity: float = 0.0
-        self.max_capacity = tower
-        self._max_buffer_size = int(self._max_capacity/30)
-        self._qvalue = 0.0
+        # self.max_capacity = tower
 
+        self._qvalue = 0.0
+        self._current_capacity = self.set_max_capacity(self.__class__.__name__)
+        self._max_capacity = self.set_max_capacity(self.__class__.__name__)
+        # self._max_buffer_size = int(self._max_capacity / 30)
         # self._buffer_request = deque(maxlen=self._max_buffer_size)
         # print("int(self._max_capacity / 30) ", int(self._max_capacity / 30))
         # print("type : ", self.__class__.__name__)
 
-
-
     class BuildMaxCapacity:
-
 
         def calculate_max_capacity(
                 self,
@@ -114,23 +113,34 @@ class Cellular(Outlet):
     @property
     def qvalue(self):
         return self._qvalue
+
     @qvalue.setter
-    def qvalue(self,value):
+    def qvalue(self, value):
         self._qvalue = value
+
     @property
     def max_capacity(self):
         return self._max_capacity
 
-    @max_capacity.setter
-    def max_capacity(self, value):
-        self._max_capacity = (
-            self.BuildMaxCapacity().randomized_tower_based_max_capacity(value)
-        )
-        self._current_capacity = self._max_capacity
+    # @max_capacity.setter
+    # def max_capacity(self, value):
+    #     self._max_capacity = (
+    #         self.BuildMaxCapacity().randomized_tower_based_max_capacity(value)
+    #     )
+    #     self._current_capacity = self._max_capacity
+
+    def set_max_capacity(self, type):
+        if type == "ThreeG":
+            return 12500
+        elif type == "FourG":
+            return 25000
+        elif type == "Wifi":
+            return 4500
 
     @property
     def current_capacity(self):
         return self._current_capacity
+
     @current_capacity.setter
     def current_capacity(self, value):
         self._current_capacity = value
@@ -146,10 +156,7 @@ class Cellular(Outlet):
     @property
     def max_buffer_size(self):
         return self._max_buffer_size
+
     @max_buffer_size.setter
-    def max_buffer_size(self,value):
+    def max_buffer_size(self, value):
         self._max_buffer_size = value
-
-
-
-

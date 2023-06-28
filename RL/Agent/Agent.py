@@ -91,7 +91,7 @@ class Agent(AbstractAgent):
         handler = Exploit(action, model, state, Explore(action, FallbackHandler(action)))
         return action, np.where(handler.handle(test, epsilon) > 0.5, 1, 0)
 
-    def take_heuristic_action(self, gridcell, current_services_power_allocation, current_services_requested):
+    def take_heuristic_action(self, gridcell, current_services_power_allocation, current_services_requested,number_of_periods_until_now):
         outlets = []
         for j, outlet in enumerate(gridcell.agents.grid_outlets):
             outlets.append(outlet)
@@ -108,19 +108,31 @@ class Agent(AbstractAgent):
             dec_requested_with_index[i] = list_requested[i]
         the_sorted_current_power = dict(sorted(dic_power_with_index.items(), key=lambda x: x[1]))
         the_sorted_current_power_copy = dict(sorted(dic_power_with_index.items(), key=lambda x: x[1]))
+        for j, out in enumerate(outlets):
+            print("................................................ ",out.current_capacity)
+
         outlets.reverse()
+        # print("outlets: ",outlets)
         for j, out in enumerate(outlets):
             out.supported_services = [0, 0, 0]
             count_zero = 0
             copy_current = out.current_capacity
-            # print(" out.current_capacity  >>>>>>>>>>>  ",out.current_capacity)
+            # print("outlet name : ", out.__class__.__name__)
+            # print("current capacity : >>>>>>>>> ", copy_current)
             for i in range(3):
                 key = list(the_sorted_current_power_copy.keys())[i]
                 power = the_sorted_current_power_copy[key]
                 requested = dec_requested_with_index[key]
                 average = 0
-                if power > 0.0 and requested > 0:
-                    average = power / requested
+
+                # print("the_sorted_current_power_copy  : ",the_sorted_current_power_copy)
+                # print("power : >>>>>>>>>>>>>>>",power)
+                # print("counter : ",number_of_periods_until_now)
+                # print("current capacity : >>>>>>>>> ",copy_current)
+                if number_of_periods_until_now > 0:
+                    average = power / number_of_periods_until_now
+                # print("average : >>>>>>>>>>>  ",average)
+
                 if copy_current >= average and average > 0.0:
                     out.supported_services[key] = 1
                     copy_current = out.current_capacity - average
