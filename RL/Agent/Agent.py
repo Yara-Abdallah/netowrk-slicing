@@ -71,10 +71,13 @@ class Agent(AbstractAgent):
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
-                target = reward + self.gamma * np.argmax(model.predict(next_state, verbose=0)[0])
+                model_qvalue = model.predict(next_state, verbose=0)[0]
+                # print("model_qvalue :  " ,model_qvalue)
+                target = reward + self.gamma * model_qvalue
             state = np.array(state).reshape([1, np.array(state).shape[0]])
-            target_f = np.round(model.predict(state, verbose=0))
-            target_f[0][action] = target
+            target_f = np.round(model_qvalue)
+            # print("target f is  : ", target_f)
+            #target_f[0][action] = target
             model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
@@ -108,30 +111,20 @@ class Agent(AbstractAgent):
             dec_requested_with_index[i] = list_requested[i]
         the_sorted_current_power = dict(sorted(dic_power_with_index.items(), key=lambda x: x[1]))
         the_sorted_current_power_copy = dict(sorted(dic_power_with_index.items(), key=lambda x: x[1]))
-        for j, out in enumerate(outlets):
-            print("................................................ ",out.current_capacity)
 
         outlets.reverse()
-        # print("outlets: ",outlets)
         for j, out in enumerate(outlets):
             out.supported_services = [0, 0, 0]
             count_zero = 0
             copy_current = out.current_capacity
-            # print("outlet name : ", out.__class__.__name__)
-            # print("current capacity : >>>>>>>>> ", copy_current)
             for i in range(3):
                 key = list(the_sorted_current_power_copy.keys())[i]
                 power = the_sorted_current_power_copy[key]
                 requested = dec_requested_with_index[key]
                 average = 0
 
-                # print("the_sorted_current_power_copy  : ",the_sorted_current_power_copy)
-                # print("power : >>>>>>>>>>>>>>>",power)
-                # print("counter : ",number_of_periods_until_now)
-                # print("current capacity : >>>>>>>>> ",copy_current)
                 if number_of_periods_until_now > 0:
                     average = power / number_of_periods_until_now
-                # print("average : >>>>>>>>>>>  ",average)
 
                 if copy_current >= average and average > 0.0:
                     out.supported_services[key] = 1
@@ -147,4 +140,4 @@ class Agent(AbstractAgent):
                         the_sorted_current_power_copy[key] = abs(the_sorted_current_power_copy[key] - copy_current)
                         copy_current = 0
                         break
-            # print(f"out {out.supported_services}")
+            print(f"out {out.supported_services}")
