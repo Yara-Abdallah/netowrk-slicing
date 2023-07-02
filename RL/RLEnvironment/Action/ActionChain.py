@@ -8,12 +8,13 @@ class IHandler(ABC):
     def __init__(self, action: Action, successor: Optional["IHandler"] = None):
         self.successor = successor
         self.action = action
+        self.flag = 0
 
     def handle(self, test, epsilon):
         self.action = self.check_epsilon(test, epsilon)
         if not hasattr(self.action, 'all'):
-            self.action = self.successor.handle(test, epsilon)
-        return self.action
+            self.action, self.flag = self.successor.handle(test, epsilon)
+        return self.action, self.flag
 
     @abstractmethod
     def check_epsilon(self, test, epsilon) -> Optional[bool]:
@@ -22,9 +23,10 @@ class IHandler(ABC):
 
 class Explore(IHandler):
     "A Concrete Handler"
-    def check_epsilon(self, test, epsilon):
 
+    def check_epsilon(self, test, epsilon):
         if 1 > epsilon >= test > 0:
+            self.flag = 0
             # action = Action.explore()
             # print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
             explore_val = self.action.explore()
@@ -33,6 +35,7 @@ class Explore(IHandler):
 
 class Exploit(IHandler):
     "A Concrete Handler"
+
     def __init__(self, action, model, state, successor):
         super().__init__(action, successor)
         self.model = model
@@ -40,6 +43,7 @@ class Exploit(IHandler):
 
     def check_epsilon(self, test, epsilon):
         if 0 < epsilon < test < 1:
+            self.flag = 1
             # action = Action.exploit()
 
             # print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')

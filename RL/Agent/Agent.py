@@ -51,14 +51,24 @@ class Agent(AbstractAgent):
     def replay_buffer_decentralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
         target = 0
-        for state, action, reward, next_state in minibatch:
+
+        for exploitation,state, action, reward, next_state in minibatch:
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
-                target = reward + self.gamma * np.argmax(model.predict(next_state, verbose=0)[0])
+                if exploitation == 1:
+                    # print("exploitaion : decentralize ")
+                    target = reward + self.gamma * np.argmax(model.predict(next_state, verbose=0)[0])
+                if exploitation == 0:
+                    # print("exploration : decentralize ")
+
+                    qvalue = model.predict(next_state, verbose=0)[0]
+                    target = reward + self.gamma * qvalue[action]
             state = np.array(state).reshape([1, np.array(state).shape[0]])
             target_f = np.round(model.predict(state, verbose=0))
+
             target_f[0][action] = target
+            # print("target_f , decentralize : ", target_f)
             model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
@@ -67,24 +77,32 @@ class Agent(AbstractAgent):
     def replay_buffer_centralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
         target = []
-        for state, action, reward, next_state in minibatch:
+        for exploitation , state, action, reward, next_state in minibatch:
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
                 model_qvalue = model.predict(next_state, verbose=0)[0]
-                # print("model_qvalue :  " ,model_qvalue)
-                target = reward + self.gamma * model_qvalue
+                if exploitation == 0:
+                    # print("exploration : centralize ")
+
+                    target = reward + self.gamma * model_qvalue[action]
+                elif exploitation == 1:
+                    # print("exploitaion : centralize ")
+
+                    target = reward + self.gamma * np.argmax(model_qvalue)
+
             state = np.array(state).reshape([1, np.array(state).shape[0]])
-            target_f = np.round(model_qvalue)
-            # print("target f is  : ", target_f)
-            #target_f[0][action] = target
+            target_f = np.round(model.predict(state, verbose=0))
+
+            target_f[0][action] = target
+            # print("target f centralize is  : ", target_f)
             model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon *= self.epsilon_decay
         return target
 
-    def remember(self, state, action, reward, next_state):
-        self.memory.append((state, action, reward, next_state))
+    def remember(self,flag,  state, action, reward, next_state):
+        self.memory.append((flag,state, action, reward, next_state))
 
     def chain(self, model, state, epsilon):
         "A chain with a default first successor"
@@ -92,10 +110,18 @@ class Agent(AbstractAgent):
         "Setting the first successor that will modify the payload"
         action = self.action
         handler = Exploit(action, model, state, Explore(action, FallbackHandler(action)))
-        return action, np.where(handler.handle(test, epsilon) > 0.5, 1, 0)
+        action_Value , flag = handler.handle(test, epsilon)
+        return action, np.where( action_Value> 0.5, 1, 0) , flag
 
-    def take_heuristic_action(self, gridcell, current_services_power_allocation, current_services_requested,number_of_periods_until_now):
+    def exploitation(self, model,state):
+        action = self.action
+        action_value  = self.action.exploit(model, state)
+        flag = 1
+        return action, np.where(action_value > 0.5, 1, 0) , flag
+
+    def heuristic_action(self, gridcell, current_services_power_allocation, current_services_requested,number_of_periods_until_now):
         outlets = []
+        flags = np.zeros(3)
         for j, outlet in enumerate(gridcell.agents.grid_outlets):
             outlets.append(outlet)
         list_power = [0, 0, 0]
@@ -141,3 +167,4 @@ class Agent(AbstractAgent):
                         copy_current = 0
                         break
             print(f"out {out.supported_services}")
+        return flags

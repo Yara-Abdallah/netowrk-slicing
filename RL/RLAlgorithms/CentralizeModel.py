@@ -6,7 +6,7 @@ from keras.optimizers import Adam
 
 
 class CentralizeModel():
-    def __init__(self, state_size=8, action_size=1, activation_function="relu", loss_function="mse",
+    def __init__(self, state_size=8, action_size=2, activation_function="relu", loss_function="mse",
                  optimization_algorithm=Adam,
                  learning_rate=0.5, output_activation="sigmoid", **kwargs):
         self.state_size = state_size

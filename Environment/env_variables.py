@@ -52,11 +52,8 @@ Threshold_of_utility = 0.2
 Threshold_of_utility_acc = 0.5
 
 requests = []
-period1 = 320
-period2 = 160
-period3 = 160
-period4 = 160
-period5 = 160
+episode_steps = 320
+
 
 ENTERTAINMENT_RATIO = 0
 SAFETY_RATIO = 0
@@ -64,7 +61,12 @@ AUTONOMOUS_RATIO = 0
 
 number_of_days = 3
 episodes = 5 * number_of_days
-TIME = 40 * period1
+number_of_episodes_for_each_period =  15
+advisor_period = [2, number_of_episodes_for_each_period * episode_steps]
+exploitation_exploration_period = [number_of_episodes_for_each_period * episode_steps , number_of_episodes_for_each_period * episode_steps*2]
+last_exploitation_period = [ 2 * number_of_episodes_for_each_period * episode_steps , number_of_episodes_for_each_period * episode_steps * 3]
+
+TIME = 45 * episode_steps
 day_time = 1280
 
 decentralized_replay_buffer = 30

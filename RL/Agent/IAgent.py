@@ -49,8 +49,10 @@ class AbstractAgent():
         pass
 
     @abstractmethod
-    def remember(self, state, action, reward, next_state):
+    def remember(self,flag, state, action, reward, next_state):
         pass
+
+
 
     @abstractmethod
     def train(self, builder, **kwargs):

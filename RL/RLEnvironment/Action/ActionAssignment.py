@@ -8,14 +8,22 @@ class ActionAssignment:
     def __init__(self):
         self.grid_cell = 3
         self.num_services = 3
-        self._action_value_centralize = [[0] * 8 for _ in range(9)]
-        self._action_objects = [[0] * 8 for _ in range(9)]
+        self._action_value_centralize = [0 for _ in range(9)]
+        self._action_objects = [0 for _ in range(9)]
+        self._action_flags = [0 for _ in range(9)]
     @property
-    def action_objects (self):
+    def action_objects(self):
         return self._action_objects
     @action_objects.setter
     def action_objects(self,value):
         self._action_objects = value
+
+    @property
+    def action_flags(self):
+        return self._action_flags
+    @action_flags.setter
+    def action_flags(self,value):
+        self._action_flags = value
     @property
     def action_value_centralize(self):
         return self._action_value_centralize

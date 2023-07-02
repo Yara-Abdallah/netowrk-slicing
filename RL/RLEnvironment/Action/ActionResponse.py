@@ -7,7 +7,15 @@ class ActionResponse:
         self.grid_cell = 3
         self.num_services = 3
         self._action_value_decentralize = 0
+        self._action_flags = []
 
+    @property
+    def action_flags(self):
+        return self._action_flags
+
+    @action_flags.setter
+    def action_flags(self, value):
+        self._action_flags = value
     @property
     def action_value_decentralize(self):
         return self._action_value_decentralize
