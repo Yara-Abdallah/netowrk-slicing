@@ -51,7 +51,6 @@ class Agent(AbstractAgent):
     def replay_buffer_decentralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
         target = 0
-
         for exploitation,state, action, reward, next_state in minibatch:
             target = reward
             if next_state is not None:
@@ -101,6 +100,23 @@ class Agent(AbstractAgent):
             self.epsilon *= self.epsilon_decay
         return target
 
+    def free_up_memory(self, deque, filename):
+        with open(filename, 'w') as file:
+            for item in deque:
+                file.write(str(item) + '\n')
+
+        deque.clear()
+
+    def fill_memory(self,deque,filename):
+        with open(filename, 'r') as file:
+            # Read each line from the file
+            for line in file:
+                # Remove leading and trailing whitespace from the line
+                line = line.strip()
+
+                # Append the line to the deque
+                deque.append(line)
+
     def remember(self,flag,  state, action, reward, next_state):
         self.memory.append((flag,state, action, reward, next_state))
 
@@ -121,7 +137,7 @@ class Agent(AbstractAgent):
 
     def heuristic_action(self, gridcell, current_services_power_allocation, current_services_requested,number_of_periods_until_now):
         outlets = []
-        flags = np.zeros(3)
+        flags = np.zeros(9)
         for j, outlet in enumerate(gridcell.agents.grid_outlets):
             outlets.append(outlet)
         list_power = [0, 0, 0]
@@ -166,5 +182,5 @@ class Agent(AbstractAgent):
                         the_sorted_current_power_copy[key] = abs(the_sorted_current_power_copy[key] - copy_current)
                         copy_current = 0
                         break
-            print(f"out {out.supported_services}")
+            # print(f"out {out.supported_services}")
         return flags

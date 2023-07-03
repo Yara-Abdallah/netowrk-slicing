@@ -36,6 +36,8 @@ import matplotlib
 results_dir = os.path.join(sys.path[0], 'results')
 path6 = os.path.join(results_dir, 'centralized_weights')
 path7 = os.path.join(results_dir, 'decentralized_weights')
+path_memory_centralize =  os.path.join(results_dir,'centralize_memory')
+path_memory_decentralize =  os.path.join(results_dir,'decentralize_memory')
 
 p1 = os.path.join(results_dir, 'utility_requested_ensured')
 p2 = os.path.join(results_dir, 'reward_decentralized')
@@ -50,6 +52,8 @@ os.makedirs(p4, exist_ok=True)
 os.makedirs(p5, exist_ok=True)
 os.makedirs(path6, exist_ok=True)
 os.makedirs(path7, exist_ok=True)
+os.makedirs(path_memory_centralize, exist_ok=True)
+os.makedirs(path_memory_decentralize, exist_ok=True)
 
 matplotlib.use('agg')
 
@@ -592,6 +596,8 @@ class Environment:
                             # print("dec ",outlet.dqn.agents.action.command.action_value_decentralize)
                             # print("dec ",outlet.dqn.environment.reward.reward_value)
                             # print("dec ",outlet.dqn.environment.state.next_state_decentralize[service_index])
+                            if isinstance(outlet.dqn.agents.action.command.action_value_decentralize , np.ndarray):
+                                outlet.dqn.agents.action.command.action_value_decentralize = outlet.dqn.agents.action.command.action_value_decentralize.item()
                             outlet.dqn.agents.remember(flag,
                                 outlet.dqn.environment.state.state_value_decentralize[service_index],
                                 outlet.dqn.agents.action.command.action_value_decentralize,
@@ -707,9 +713,16 @@ class Environment:
             actions = []
             actions_objects = []
             list_flags = []
+
+            if step > 2:
+                if step > env_variables.advisor_period[0] and step <= env_variables.advisor_period[1]:
+                    flags = gridcell.agents.heuristic_action(gridcell,
+                                                             performance_logger.outlet_services_power_allocation_for_all_requested,
+                                                             performance_logger.outlet_services_requested_number,
+                                                             performance_logger.number_of_periods_until_now)
+                    list_flags.extend(flags)
             for j, outlet in enumerate(gridcell.agents.grid_outlets):
                 supported = []
-
 
                 for i in range(number_of_services):
                     gridcell.environment.state.index_outlet = j
@@ -743,12 +756,13 @@ class Environment:
 
                 if step > 2:
 
-                    if step > env_variables.advisor_period[0]  and  step <= env_variables.advisor_period[1] :
-                        flags = gridcell.agents.heuristic_action(gridcell,
-                                                              performance_logger.outlet_services_power_allocation_for_all_requested,
-                                                              performance_logger.outlet_services_requested_number,
-                                                              performance_logger.number_of_periods_until_now)
-                        list_flags.extend(flags)
+                    # if step > env_variables.advisor_period[0]  and  step <= env_variables.advisor_period[1] :
+                    #     flags = gridcell.agents.heuristic_action(gridcell,
+                    #                                           performance_logger.outlet_services_power_allocation_for_all_requested,
+                    #                                           performance_logger.outlet_services_requested_number,
+                    #                                           performance_logger.number_of_periods_until_now)
+                    #     list_flags.extend(flags)
+
 
                     if env_variables.exploitation_exploration_period[0] < step <= env_variables.exploitation_exploration_period[1]:
                         outlet.supported_services = []
@@ -778,6 +792,7 @@ class Environment:
                                 action = action.item()
                             outlet.supported_services.append(action)
                             list_flags.append(flag)
+
                     actions.extend(outlet.supported_services)
                 # print("outlet.supported_services : ", outlet.supported_services)
                 outlet.dqn.environment.state.supported_services = outlet.supported_services
@@ -1036,7 +1051,7 @@ class Environment:
                 for ind, gridcell_dqn in enumerate(gridcells_dqn):
                     for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
                         if len(outlet.dqn.agents.memory) > 31:
-                            print("replay buffer of decentralize ")
+                            # print("replay buffer of decentralize ")
                             outlet.qvalue = outlet.dqn.agents.replay_buffer_decentralize(30,
                                                                                          outlet.dqn.model)
                             qvalue.append(outlet.qvalue)
@@ -1045,7 +1060,7 @@ class Environment:
                 previous_steps_centralize = steps
                 for ind, gridcell_dqn in enumerate(gridcells_dqn):
                     if len(gridcell_dqn.agents.memory) >= 64:
-                        print("replay buffer of centralize ")
+                        # print("replay buffer of centralize ")
                         average_qvalue_centralize.append(gridcell_dqn.agents.replay_buffer_centralize(32,
                                                                                                       gridcell_dqn.model))
 
@@ -1104,9 +1119,11 @@ class Environment:
             if step == env_variables.TIME:
                 for i in range(1):
                     gridcells_dqn[i].model.save(os.path.join(path6, f'weights_{i}.hdf5'))
+                    gridcells_dqn[i].agents.free_up_memory(gridcells_dqn[i].agents.memory,os.path.join(path_memory_centralize, f'centralize_buffer.txt'))
 
                 for index, g in enumerate(temp_outlets):
                     g.dqn.model.save(os.path.join(path7, f'weights_{index}.hdf5'))
+                    g.dqn.agents.free_up_memory(g.dqn.agents.memory,os.path.join(path_memory_centralize, f'decentralize_buffer{index}.txt'))
 
         plt.close()
         traci.close()
