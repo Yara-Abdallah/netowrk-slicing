@@ -44,6 +44,10 @@ p2 = os.path.join(results_dir, 'reward_decentralized')
 p3 = os.path.join(results_dir, 'reward_centralized')
 p4 = os.path.join(results_dir, 'qvalue_decentralized')
 p5 = os.path.join(results_dir, 'qvalue_centralized')
+centralize_qvalue_path = os.path.join(results_dir, 'qvalue_centralized_for_plotting')
+decentralize_qvalue_path = os.path.join(results_dir, 'qvalue_decentralized_for_plotting')
+
+
 
 os.makedirs(p1, exist_ok=True)
 os.makedirs(p2, exist_ok=True)
@@ -54,6 +58,9 @@ os.makedirs(path6, exist_ok=True)
 os.makedirs(path7, exist_ok=True)
 os.makedirs(path_memory_centralize, exist_ok=True)
 os.makedirs(path_memory_decentralize, exist_ok=True)
+os.makedirs(centralize_qvalue_path, exist_ok=True)
+os.makedirs(decentralize_qvalue_path, exist_ok=True)
+
 
 matplotlib.use('agg')
 
@@ -379,16 +386,16 @@ class Environment:
 
             if not lines:  # Check if lines is empty
                 file.write(str(value))
-                file.write(" ")
-            else:
-                line = lines[-1]
-                if line != "":
-                    values = line.strip().split()
-                    if len(values) == 320:
-                        file.write("\n")
-                    else:
-                        file.write(" ")
-                        file.write(str(value))
+                file.write("\n")
+            # else:
+            #     line = lines[-1]
+            #     if line != "":
+            #         values = line.strip().split()
+            #         if len(values) == 320:
+            #             file.write("\n")
+            #         else:
+            #             file.write(" ")
+            #             file.write(str(value))
 
     def accumulate_until_sum_limit(self, lst, target_sum):
         accumulated_values = []
@@ -1077,6 +1084,9 @@ class Environment:
                     update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, avg_qvalue
                                                     )
 
+                    self.add_value_to_text(
+                            os.path.join(centralize_qvalue_path, f'qvalue.txt'),
+                            avg_qvalue)
                     update_lines_outlet_utility(lines_out_utility, steps, temp_outlets)
                     update_lines_outlet_requested(lines_out_requested, steps, temp_outlets)
                     update_lines_outlet_ensured(lines_out_ensured, steps, temp_outlets)
@@ -1084,6 +1094,9 @@ class Environment:
                     update_lines_reward_decentralized(lines_out_reward_decentralize, steps, temp_outlets)
 
                     for i, out in enumerate(gridcell_dqn.agents.grid_outlets):
+                        self.add_value_to_text(
+                            os.path.join(decentralize_qvalue_path, f'qvalue{i}.txt'),
+                            out.qvalue)
                         out.dqn.environment.reward.episode_reward_decentralize = out.dqn.environment.reward.reward_value
                         # print("out.qvalue  : ", out.qvalue)
                         # self.add_value_to_text(
@@ -1118,11 +1131,11 @@ class Environment:
 
             if step == env_variables.TIME:
                 for i in range(1):
-                    gridcells_dqn[i].model.save(os.path.join(path6, f'weights_{i}.hdf5'))
+                    gridcells_dqn[i].model.save_weights(os.path.join(path6, f'weights_{i}.hdf5'))
                     gridcells_dqn[i].agents.free_up_memory(gridcells_dqn[i].agents.memory,os.path.join(path_memory_centralize, f'centralize_buffer.txt'))
 
                 for index, g in enumerate(temp_outlets):
-                    g.dqn.model.save(os.path.join(path7, f'weights_{index}.hdf5'))
+                    g.dqn.model.save_weights(os.path.join(path7, f'weights_{index}.hdf5'))
                     g.dqn.agents.free_up_memory(g.dqn.agents.memory,os.path.join(path_memory_centralize, f'decentralize_buffer{index}.txt'))
 
         plt.close()
