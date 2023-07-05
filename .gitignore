@@ -9,6 +9,7 @@ dist/
 venv/
 htmlcov/
 results/
+prev_results/
 # Compiled Java class files
 *.class
 
