@@ -1,8 +1,10 @@
+import os
+
 import numpy as np
 import random
 from RL.Agent.IAgent import AbstractAgent
 from RL.RLEnvironment.Action.ActionChain import Exploit, Explore, FallbackHandler
-
+import pickle
 
 class Agent(AbstractAgent):
     _grid_outlets = []
@@ -51,7 +53,10 @@ class Agent(AbstractAgent):
     def replay_buffer_decentralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
         target = 0
-        for exploitation,state, action, reward, next_state in minibatch:
+        for exploitation, state, action, reward, next_state in minibatch:
+            # print("exploitation, state, action, reward, next_state : ", exploitation, " ", state, " ", action, " ",
+            #       reward, " ", next_state)
+
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
@@ -76,7 +81,7 @@ class Agent(AbstractAgent):
     def replay_buffer_centralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
         target = []
-        for exploitation , state, action, reward, next_state in minibatch:
+        for exploitation, state, action, reward, next_state in minibatch:
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
@@ -101,24 +106,24 @@ class Agent(AbstractAgent):
         return target
 
     def free_up_memory(self, deque, filename):
-        with open(filename, 'w') as file:
+        mode = 'wb' if not os.path.exists(filename) else 'ab'
+        with open(filename, mode) as file:
             for item in deque:
-                file.write(str(item) + '\n')
-
+                pickle.dump(item, file)
         deque.clear()
 
-    def fill_memory(self,deque,filename):
-        with open(filename, 'r') as file:
-            # Read each line from the file
-            for line in file:
-                # Remove leading and trailing whitespace from the line
-                line = line.strip()
 
-                # Append the line to the deque
-                deque.append(line)
+    def fill_memory(self, deque, filename):
+        with open(filename, 'rb') as file:
+            try:
+                while True:
+                    loaded_value = pickle.load(file)
+                    deque.append(loaded_value)
+            except EOFError:
+                pass
 
-    def remember(self,flag,  state, action, reward, next_state):
-        self.memory.append((flag,state, action, reward, next_state))
+    def remember(self, flag, state, action, reward, next_state):
+        self.memory.append((flag, state, action, reward, next_state))
 
     def chain(self, model, state, epsilon):
         "A chain with a default first successor"
@@ -126,16 +131,17 @@ class Agent(AbstractAgent):
         "Setting the first successor that will modify the payload"
         action = self.action
         handler = Exploit(action, model, state, Explore(action, FallbackHandler(action)))
-        action_Value , flag = handler.handle(test, epsilon)
-        return action, np.where( action_Value> 0.5, 1, 0) , flag
+        action_Value, flag = handler.handle(test, epsilon)
+        return action, np.where(action_Value > 0.5, 1, 0), flag
 
-    def exploitation(self, model,state):
+    def exploitation(self, model, state):
         action = self.action
-        action_value  = self.action.exploit(model, state)
+        action_value = self.action.exploit(model, state)
         flag = 1
-        return action, np.where(action_value > 0.5, 1, 0) , flag
+        return action, np.where(action_value > 0.5, 1, 0), flag
 
-    def heuristic_action(self, gridcell, current_services_power_allocation, current_services_requested,number_of_periods_until_now):
+    def heuristic_action(self, gridcell, current_services_power_allocation, current_services_requested,
+                         number_of_periods_until_now):
         outlets = []
         flags = np.zeros(9)
         for j, outlet in enumerate(gridcell.agents.grid_outlets):

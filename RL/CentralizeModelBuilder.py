@@ -10,6 +10,7 @@ class ModelBuilder_Centralize:
             self.model = CentralizeModel(state_size=12, action_size=2,
                                activation_function="relu", loss_function="mse", optimization_algorithm=Adam,
                                learning_rate=0.5, output_activation="sigmoid").build_model()
+                # .load_weights("sH://work_projects//network_slicing//ns//results//results//centralized_weight//weights_0.hdf5")
         else:
             self.model = model
 

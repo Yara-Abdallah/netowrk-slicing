@@ -2,7 +2,9 @@ import copy
 import gc
 import math
 import os
+import pickle
 import sys
+import shutil
 
 import numpy
 import numpy as np
@@ -36,9 +38,9 @@ import matplotlib
 results_dir = os.path.join(sys.path[0], 'results')
 path6 = os.path.join(results_dir, 'centralized_weights')
 path7 = os.path.join(results_dir, 'decentralized_weights')
-path_memory_centralize =  os.path.join(results_dir,'centralize_memory')
-path_memory_decentralize =  os.path.join(results_dir,'decentralize_memory')
-
+path_memory_centralize = os.path.join(results_dir,'centralize_memory')
+path_memory_decentralize = os.path.join(results_dir,'decentralize_memory')
+prev_results_dir = os.path.join(sys.path[0],"prev_results")
 p1 = os.path.join(results_dir, 'utility_requested_ensured')
 p2 = os.path.join(results_dir, 'reward_decentralized')
 p3 = os.path.join(results_dir, 'reward_centralized')
@@ -47,6 +49,12 @@ p5 = os.path.join(results_dir, 'qvalue_centralized')
 centralize_qvalue_path = os.path.join(results_dir, 'qvalue_centralized_for_plotting')
 decentralize_qvalue_path = os.path.join(results_dir, 'qvalue_decentralized_for_plotting')
 
+prev_centralize_weights_path = ".//prev_results//centralized_weights//"
+prev_decentralize_weights_path = ".//prev_results//decentralized_weights//"
+prev_centralize_memory_path = ".//prev_results//centralize_memory//"
+prev_decentralize_memory_path = ".//prev_results//decentralize_memory//"
+prev_centralize_qvalue_path = ".//prev_results//qvalue_centralized//"
+prev_decentralize_qvalue_path = ".//prev_results//qvalue_decentralized//"
 
 
 os.makedirs(p1, exist_ok=True)
@@ -380,14 +388,21 @@ class Environment:
                 outlet_services_power_allocation[outlet][2] = float(x) - float(
                     service.service_power_allocate)
 
-    def add_value_to_text(self, path, value):
-        with open(path, "a+") as file:
-            lines = file.readlines()
+    def add_value_to_pickle(self, path, value):
+        mode = 'wb' if not os.path.exists(path) else 'ab'
+        with open(path, mode) as file:
+            pickle.dump(value, file)
 
-            if not lines:  # Check if lines is empty
-                file.write(str(value))
-                file.write("\n")
-            # else:
+        # with open(path, "a+") as file:
+        #
+        #     lines = file.readlines()
+        #
+        #     if not lines:  # Check if lines is empty
+        #         file.write(str(value))
+        #         file.write("\n")
+        #     else:
+        #         file.write("\n")
+        #         file.write(str(value))
             #     line = lines[-1]
             #     if line != "":
             #         values = line.strip().split()
@@ -905,11 +920,16 @@ class Environment:
                 build[i].agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
                                                                                      CentralizedState()).model_.build_model(
                     "centralized", 12, 2).build())
+            print(" path6  : ",path6)
+            # gridcells_dqn[i].model.load_weights(os.path.join(prev_centralize_weights_path, f'weights_{i}.hdf5'))
+            # gridcells_dqn[i].agents.fill_memory(gridcells_dqn[i].agents.memory , os.path.join(prev_centralize_memory_path, f'centralize_buffer.pkl'))
             gridcells_dqn[i].agents.grid_outlets = self.Grids.get(f"grid{i + 1}")
             gridcells_dqn[i].agents.outlets_id = list(range(len(gridcells_dqn[i].agents.grid_outlets)))
 
         for i in range(1):
             for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
+                # outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
+                # outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
                 temp_outlets.append(outlet)
                 # print("outlet : ", outlet.__class__.__name__)
 
@@ -1084,8 +1104,8 @@ class Environment:
                     update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, avg_qvalue
                                                     )
 
-                    self.add_value_to_text(
-                            os.path.join(centralize_qvalue_path, f'qvalue.txt'),
+                    self.add_value_to_pickle(
+                            os.path.join(centralize_qvalue_path, f'qvalue.pkl'),
                             avg_qvalue)
                     update_lines_outlet_utility(lines_out_utility, steps, temp_outlets)
                     update_lines_outlet_requested(lines_out_requested, steps, temp_outlets)
@@ -1094,8 +1114,8 @@ class Environment:
                     update_lines_reward_decentralized(lines_out_reward_decentralize, steps, temp_outlets)
 
                     for i, out in enumerate(gridcell_dqn.agents.grid_outlets):
-                        self.add_value_to_text(
-                            os.path.join(decentralize_qvalue_path, f'qvalue{i}.txt'),
+                        self.add_value_to_pickle(
+                            os.path.join(decentralize_qvalue_path, f'qvalue{i}.pkl'),
                             out.qvalue)
                         out.dqn.environment.reward.episode_reward_decentralize = out.dqn.environment.reward.reward_value
                         # print("out.qvalue  : ", out.qvalue)
@@ -1132,11 +1152,18 @@ class Environment:
             if step == env_variables.TIME:
                 for i in range(1):
                     gridcells_dqn[i].model.save_weights(os.path.join(path6, f'weights_{i}.hdf5'))
-                    gridcells_dqn[i].agents.free_up_memory(gridcells_dqn[i].agents.memory,os.path.join(path_memory_centralize, f'centralize_buffer.txt'))
+                    gridcells_dqn[i].agents.free_up_memory(gridcells_dqn[i].agents.memory , os.path.join(path_memory_centralize, f'centralize_buffer.pkl'))
 
                 for index, g in enumerate(temp_outlets):
                     g.dqn.model.save_weights(os.path.join(path7, f'weights_{index}.hdf5'))
-                    g.dqn.agents.free_up_memory(g.dqn.agents.memory,os.path.join(path_memory_centralize, f'decentralize_buffer{index}.txt'))
+                    g.dqn.agents.free_up_memory(g.dqn.agents.memory,os.path.join(path_memory_decentralize, f'decentralize_buffer{index}.pkl'))
+
+
+                shutil.copytree(results_dir, prev_results_dir)
+                print("Folder contents copied successfully.")
+
+
+
 
         plt.close()
         traci.close()
