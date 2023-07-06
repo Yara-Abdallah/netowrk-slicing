@@ -8,9 +8,12 @@ class ActionAssignment:
     def __init__(self):
         self.grid_cell = 3
         self.num_services = 3
-        self._action_value_centralize = [0 for _ in range(9)]
-        self._action_objects = [0 for _ in range(9)]
-        self._action_flags = [0 for _ in range(9)]
+        # self._action_value_centralize = [0 for _ in range(9)]
+        # self._action_objects = [0 for _ in range(9)]
+        # self._action_flags = [0 for _ in range(9)]
+        self._action_value_centralize = 0
+        self._action_objects = None
+        self._action_flags = 0
     @property
     def action_objects(self):
         return self._action_objects

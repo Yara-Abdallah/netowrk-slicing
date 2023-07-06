@@ -143,7 +143,8 @@ class Agent(AbstractAgent):
     def heuristic_action(self, gridcell, current_services_power_allocation, current_services_requested,
                          number_of_periods_until_now):
         outlets = []
-        flags = np.zeros(9)
+        # flags = np.zeros(9)
+        flags = 0
         for j, outlet in enumerate(gridcell.agents.grid_outlets):
             outlets.append(outlet)
         list_power = [0, 0, 0]
