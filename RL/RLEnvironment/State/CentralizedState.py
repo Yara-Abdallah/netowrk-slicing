@@ -23,10 +23,10 @@ class CentralizedState(State):
     _index_outlet: int
     _max_capacity_each_outlet = [0.0, 0.0, 0.0]
     _index_service: int
-    # _state_value_centralize = [[0.0] * 12 for _ in range(9)]
-    # _next_state_centralize = [[0.0] * 12 for _ in range(9)]
-    _state_value_centralize = [0.0] * 12
-    _next_state_centralize = [0.0] * 12
+    _state_value_centralize = [[0.0] * 12 for _ in range(9)]
+    _next_state_centralize = [[0.0] * 12 for _ in range(9)]
+    # _state_value_centralize = [0.0] * 12
+    # _next_state_centralize = [0.0] * 12
     _averaging_value_utility_centralize = 0.0
     _supported_service: int
     _utility_value_centralize_prev = 0.0

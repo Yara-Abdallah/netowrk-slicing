@@ -20,8 +20,8 @@ class CentralizedReward(Reward):
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured_prev = np.zeros(self.num_services)
         self._services_requested_prev = np.zeros(self.num_services)
-        # self._reward_value = [[0] * 8 for _ in range(9)]
-        self._reward_value = 0
+        self._reward_value = [[0] * 8 for _ in range(9)]
+        # self._reward_value = 0
         self._gridcell_reward_episode = 0
 
     @staticmethod

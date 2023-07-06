@@ -35,7 +35,7 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 import matplotlib.pyplot as plt
 import matplotlib
 
-results_dir = os.path.join(sys.path[0], 'results3_')
+results_dir = os.path.join(sys.path[0], 'results1_tanh')
 path6 = os.path.join(results_dir, 'centralized_weights')
 path7 = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir, 'centralize_memory')
@@ -735,13 +735,14 @@ class Environment:
             actions_objects = []
             list_flags = []
 
-            # if step > 2:
-            #     if step > env_variables.advisor_period[0] and step <= env_variables.advisor_period[1]:
-            #         flags = gridcell.agents.heuristic_action(gridcell,
-            #                                                  performance_logger.outlet_services_power_allocation_for_all_requested,
-            #                                                  performance_logger.outlet_services_requested_number,
-            #                                                  performance_logger.number_of_periods_until_now)
-            #         list_flags.extend(flags)
+            if step > 2:
+                if step > env_variables.advisor_period[0] and step <= env_variables.advisor_period[1]:
+                    flags = gridcell.agents.heuristic_action(gridcell,
+                                                             performance_logger.outlet_services_power_allocation_for_all_requested,
+                                                             performance_logger.outlet_services_requested_number,
+                                                             performance_logger.number_of_periods_until_now)
+                    list_flags.extend(flags)
+
             for j, outlet in enumerate(gridcell.agents.grid_outlets):
                 supported = []
 
@@ -776,12 +777,12 @@ class Environment:
 
                 if step > 2:
 
-                    if step > env_variables.advisor_period[0]  and  step <= env_variables.advisor_period[1] :
-                        flags = gridcell.agents.heuristic_action(gridcell,
-                                                              performance_logger.outlet_services_power_allocation_for_all_requested,
-                                                              performance_logger.outlet_services_requested_number,
-                                                              performance_logger.number_of_periods_until_now)
-                        list_flags.extend(flags)
+                    # if step > env_variables.advisor_period[0]  and  step <= env_variables.advisor_period[1] :
+                    #     flags = gridcell.agents.heuristic_action(gridcell,
+                    #                                           performance_logger.outlet_services_power_allocation_for_all_requested,
+                    #                                           performance_logger.outlet_services_requested_number,
+                    #                                           performance_logger.number_of_periods_until_now)
+                    #     list_flags.extend(flags)
 
                     if step > env_variables.exploitation_exploration_period[0] and step <= env_variables.exploitation_exploration_period[1]:
                         outlet.supported_services = []
