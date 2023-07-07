@@ -35,26 +35,26 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 import matplotlib.pyplot as plt
 import matplotlib
 
-results_dir = os.path.join(sys.path[0], 'results2_tanh')
+results_dir = os.path.join(sys.path[0], 'results3_tanh')
 path6 = os.path.join(results_dir, 'centralized_weights')
 path7 = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
 path_memory_decentralize = os.path.join(results_dir,'decentralize_memory')
-prev_results_dir = "derive for old qvalue"
+# prev_results_dir = "//content//drive//MyDrive//network_slicing//prev_results//"
 p1 = os.path.join(results_dir, 'utility_requested_ensured')
 p2 = os.path.join(results_dir, 'reward_decentralized')
 p3 = os.path.join(results_dir, 'reward_centralized')
 p4 = os.path.join(results_dir, 'qvalue_decentralized')
 p5 = os.path.join(results_dir, 'qvalue_centralized')
-centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
-decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
-prev_results_1tanh_dir = "from drive"
-prev_centralize_weights_path = os.path.join(prev_results_1tanh_dir,"centralized_weights//")
-prev_decentralize_weights_path = os.path.join(prev_results_1tanh_dir,"decentralized_weights//")
-prev_centralize_memory_path = os.path.join(prev_results_1tanh_dir,"centralize_memory//")
-prev_decentralize_memory_path = os.path.join(prev_results_1tanh_dir,"decentralize_memory//")
-# prev_centralize_qvalue_path = os.path.join(prev_results_1tanh_dir,"qvalue_centralized//")
-# prev_decentralize_qvalue_path = os.path.join(prev_results_1tanh_dir,"qvalue_decentralized//")
+# centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
+# decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
+prev_results_2tanh_dir = "//content//drive//MyDrive//network_slicing//results2_tanh//"
+prev_centralize_weights_path = os.path.join(prev_results_2tanh_dir,"centralized_weights//")
+prev_decentralize_weights_path = os.path.join(prev_results_2tanh_dir,"decentralized_weights//")
+prev_centralize_memory_path = os.path.join(prev_results_2tanh_dir,"centralize_memory//")
+prev_decentralize_memory_path = os.path.join(prev_results_2tanh_dir,"decentralize_memory//")
+centralize_qvalue_path = os.path.join(results_dir,"qvalue_centralized_for_plotting//")
+decentralize_qvalue_path = os.path.join(results_dir,"qvalue_decentralized_for_plotting//")
 
 
 os.makedirs(p1, exist_ok=True)
@@ -786,7 +786,7 @@ class Environment:
                     #     list_flags.extend(flags)
 
 
-                    if step > env_variables.advisor_period[0]  and  step <= env_variables.advisor_period[1] :
+                    if step > env_variables.exploitation_exploration_period[0]  and  step <= env_variables.exploitation_exploration_period[1] :
                         outlet.supported_services = []
                         for serv_index in range(number_of_services):
                             action_centralize, action, flag = gridcell.agents.chain(
@@ -799,7 +799,7 @@ class Environment:
                             outlet.supported_services.append(action)
                             list_flags.append(flag)
 
-                    if env_variables.last_exploitation_period[0] < step <= env_variables.last_exploitation_period[1]:
+                    if env_variables.advisor_period[0] < step <= env_variables.advisor_period[1]:
                         # if step > env_variables.advisor_period[0]  and  step <= env_variables.advisor_period[1]:
                         outlet.supported_services = []
 
@@ -1159,7 +1159,7 @@ class Environment:
                     g.dqn.agents.free_up_memory(g.dqn.agents.memory,os.path.join(path_memory_decentralize, f'decentralize_buffer{index}.pkl'))
 
 
-                shutil.copytree(results_dir, prev_results_dir)
+                # shutil.copytree(results_dir, prev_results_dir)
                 print("Folder contents copied successfully.")
 
 
