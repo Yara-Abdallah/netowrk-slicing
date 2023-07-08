@@ -55,9 +55,6 @@ class Agent(AbstractAgent):
         minibatch = random.sample(self.memory, batch_size)
         target = 0
         for exploitation, state, action, reward, next_state in minibatch:
-            # print("exploitation, state, action, reward, next_state : ", exploitation, " ", state, " ", action, " ",
-            #       reward, " ", next_state)
-
             target = reward
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])

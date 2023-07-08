@@ -1098,9 +1098,9 @@ class Environment:
                 avg_qvalue = (sum(average_qvalue_centralize) / len(average_qvalue_centralize))
                 # print("avg_qvalue : ", avg_qvalue)
                 for ind, gridcell_dqn in enumerate(gridcells_dqn):
-                    gridcell_dqn.environment.reward.gridcell_reward_episode = sum(
-                        gridcell_dqn.environment.reward.reward_value)
-                    update_lines_reward_centralized(lines_out_reward_centralize, steps, gridcells_dqn)
+                    # gridcell_dqn.environment.reward.gridcell_reward_episode = sum(
+                    #     gridcell_dqn.environment.reward.reward_value)
+                    # update_lines_reward_centralized(lines_out_reward_centralize, steps, gridcells_dqn)
                     update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, avg_qvalue
                                                     )
 
