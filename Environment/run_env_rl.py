@@ -35,7 +35,7 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 import matplotlib.pyplot as plt
 import matplotlib
 
-results_dir = os.path.join(sys.path[0], 'results1_explor_decentralize')
+results_dir = os.path.join(sys.path[0], 'results2_explor_decentralize')
 path6 = os.path.join(results_dir, 'centralized_weights')
 path7 = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
@@ -49,12 +49,12 @@ p5 = os.path.join(results_dir, 'qvalue_centralized')
 # centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
 # decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
 prev_results_3tanh_dir = "//content//drive//MyDrive//network_slicing//results3_tanh//"
-# prev_results_4tanh_dir = "//content//drive//MyDrive//network_slicing//results1_explor_decentralize//"
+results1_explor_decentralize = "//content//drive//MyDrive//network_slicing//results1_explor_decentralize//"
 
 prev_centralize_weights_path = os.path.join(prev_results_3tanh_dir,"centralized_weights//")
-# prev_decentralize_weights_path = os.path.join(prev_results_4tanh_dir,"decentralized_weights//")
+prev_decentralize_weights_path = os.path.join(results1_explor_decentralize,"decentralized_weights//")
 # prev_centralize_memory_path = os.path.join(prev_results_4tanh_dir,"centralize_memory//")
-# prev_decentralize_memory_path = os.path.join(prev_results_4tanh_dir,"decentralize_memory//")
+prev_decentralize_memory_path = os.path.join(results1_explor_decentralize,"decentralize_memory//")
 centralize_qvalue_path = os.path.join(results_dir,"qvalue_centralized_for_plotting//")
 decentralize_qvalue_path = os.path.join(results_dir,"qvalue_decentralized_for_plotting//")
 
@@ -668,6 +668,8 @@ class Environment:
             utility_value_centralize = 0
             index_of_service = 0
             outlets = gridcell.agents.grid_outlets
+            for ind in outlets :
+                print("type : ",ind.__class__.__name__,"  current capacity : ",ind.current_capacity)
             index_of_outlet = -1
             for i in range(9):
                 index_of_service = i % 3
@@ -818,7 +820,7 @@ class Environment:
                             list_flags.append(flag)
 
                     actions.extend(outlet.supported_services)
-                # print("outlet.supported_services : ", outlet.supported_services)
+                print("outlet.supported_services : ", outlet.supported_services)
                 outlet.dqn.environment.state.supported_services = outlet.supported_services
 
             # gridcell.agents.action.command.action_objects = actions_objects
@@ -930,8 +932,8 @@ class Environment:
 
         for i in range(1):
             for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
-                # outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
-                # outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
+                outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
+                outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
                 temp_outlets.append(outlet)
                 # print("outlet : ", outlet.__class__.__name__)
 
@@ -1020,13 +1022,16 @@ class Environment:
                     performance_logger.outlet_services_power_allocation_with_action_period[outlet] = [0, 0, 0]
                     # performance_logger.outlet_services_power_allocation_without_accumilated_with_action_period[
                     #     outlet] = []
+                list(map(lambda veh: self.terminate_service(veh, outlets, performance_logger),
+                         env_variables.vehicles.values()))
+
             if steps - previous_steps_centralize_action >= 40:
                 previous_steps_centralize_action = steps
                 self.centralize_nextstate_reward( gridcells_dqn)
                 self.centralize_state_action(gridcells_dqn, step, performance_logger)
 
-            list(map(lambda veh: self.terminate_service(veh, outlets, performance_logger),
-                     env_variables.vehicles.values()))
+
+
             for axs_ in [axs, axs_Qvalue_centralize,
                          axs_Qvalue_decentralize]:
                 if hasattr(axs_, 'flatten'):
