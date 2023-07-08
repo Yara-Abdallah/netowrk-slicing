@@ -51,7 +51,7 @@ class Agent(AbstractAgent):
         self._action_value = a
 
     def replay_buffer_decentralize(self, batch_size, model):
-        print("epsilon in decentralize : ", self.epsilon)
+        # print("epsilon in decentralize : ", self.epsilon)
         minibatch = random.sample(self.memory, batch_size)
         target = 0
         for exploitation, state, action, reward, next_state in minibatch:
