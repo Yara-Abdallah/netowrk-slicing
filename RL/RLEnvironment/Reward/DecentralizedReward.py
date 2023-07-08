@@ -142,9 +142,9 @@ class DeCentralizedReward(Reward):
             reward = -1 * action * math.pow(alpha,2) * math.pow(x, 2)
             # print("reward is : ", reward)
             return reward
-        elif x == 0:
-            # print("reward is : ", reward)
-            return 1
+        # elif x == 0:
+        #     # print("reward is : ", reward)
+        #     return 1
 
 
     def coefficient(self, max_capacity, power_allocated_service, action, request_supported):
