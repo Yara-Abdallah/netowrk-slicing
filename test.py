@@ -13,19 +13,19 @@ filename = "C://Users//Windows dunya//Downloads//prev_results-20230706T103052Z-0
 filename2 = "C://Users//Windows dunya//Downloads//results2_tanh-20230707T111436Z-001//results2_tanh//qvalue_centralized_for_plotting//qvalue.pkl"
 filename3 ="C://Users//Windows dunya//Downloads//results3_tanh-20230707T142928Z-001//results3_tanh//qvalue_centralized_for_plotting//qvalue.pkl"
 
-filename_decentralize0 = "C://Users//Windows dunya//Downloads//prev_results-20230706T103052Z-001//prev_results//qvalue_decentralized_for_plotting//qvalue0.pkl"
-filename2_decentralize0 = "C://Users//Windows dunya//Downloads//results2_tanh-20230707T111436Z-001//results2_tanh//qvalue_decentralized_for_plotting//qvalue0.pkl"
-filename3_decentralize0 = "C://Users//Windows dunya//Downloads//results3_tanh-20230707T111436Z-001//results2_tanh//qvalue_decentralized_for_plotting//qvalue0.pkl"
+filename_decentralize0 = "C://Users//Windows dunya//Downloads//results1_explor_decentralize-20230708T145616Z-001//results1_explor_decentralize//qvalue_decentralized_for_plotting//qvalue0.pkl"
+filename2_decentralize0 = "C://Users//Windows dunya//Downloads//results2_explor_decentralize-20230708T145618Z-001//results2_explor_decentralize//qvalue_decentralized_for_plotting//qvalue0.pkl"
+filename3_decentralize0 = "C://Users//Windows dunya//Downloads//results3_explor_decentralize-20230708T145622Z-001//results3_explor_decentralize//qvalue_decentralized_for_plotting//qvalue0.pkl"
 
 
-filename_decentralize1 = "C://Users//Windows dunya//Downloads//prev_results-20230706T103052Z-001//prev_results//qvalue_decentralized_for_plotting//qvalue1.pkl"
-filename2_decentralize1 = "C://Users//Windows dunya//Downloads//results2_tanh-20230707T111436Z-001//results2_tanh//qvalue_decentralized_for_plotting//qvalue1.pkl"
-filename3_decentralize1 = "C://Users//Windows dunya//Downloads//results3_tanh-20230707T111436Z-001//results2_tanh//qvalue_decentralized_for_plotting//qvalue1.pkl"
+filename_decentralize1 = "C://Users//Windows dunya//Downloads//results1_explor_decentralize-20230708T145616Z-001//results1_explor_decentralize//qvalue_decentralized_for_plotting//qvalue1.pkl"
+filename2_decentralize1 = "C://Users//Windows dunya//Downloads//results2_explor_decentralize-20230708T145618Z-001//results2_explor_decentralize//qvalue_decentralized_for_plotting//qvalue1.pkl"
+filename3_decentralize1 = "C://Users//Windows dunya//Downloads//results3_explor_decentralize-20230708T145622Z-001//results3_explor_decentralize//qvalue_decentralized_for_plotting//qvalue1.pkl"
 
 
-filename_decentralize2 = "C://Users//Windows dunya//Downloads//prev_results-20230706T103052Z-001//prev_results//qvalue_decentralized_for_plotting//qvalue2.pkl"
-filename2_decentralize2 = "C://Users//Windows dunya//Downloads//results2_tanh-20230707T111436Z-001//results2_tanh//qvalue_decentralized_for_plotting//qvalue2.pkl"
-filename3_decentralize2 = "C://Users//Windows dunya//Downloads//results3_tanh-20230707T111436Z-001//results2_tanh//qvalue_decentralized_for_plotting//qvalue2.pkl"
+filename_decentralize2 = "C://Users//Windows dunya//Downloads//results1_explor_decentralize-20230708T145616Z-001//results1_explor_decentralize//qvalue_decentralized_for_plotting//qvalue2.pkl"
+filename2_decentralize2 = "C://Users//Windows dunya//Downloads//results2_explor_decentralize-20230708T145618Z-001//results2_explor_decentralize//qvalue_decentralized_for_plotting//qvalue2.pkl"
+filename3_decentralize2 = "C://Users//Windows dunya//Downloads//results3_explor_decentralize-20230708T145622Z-001//results3_explor_decentralize//qvalue_decentralized_for_plotting//qvalue2.pkl"
 
 
 with open(filename, 'rb') as file:
@@ -65,7 +65,7 @@ with open(filename2_decentralize2, 'rb') as file:
     except EOFError:
         pass
 
-with open(filename2_decentralize2, 'rb') as file:
+with open(filename3_decentralize2, 'rb') as file:
     try:
         while True:
             loaded_value = pickle.load(file)
@@ -108,7 +108,7 @@ plt.plot(x, deque_decentralize2)
 plt.xlabel('X-axis')
 plt.ylabel('Y-axis')
 plt.title('Plot of Every 320th Value')
-plt.savefig('plot_decentralize2.svg', format='svg')
+plt.savefig('plot_decentralize_phase3.svg', format='svg')
 
 # Display the plot
 plt.show()

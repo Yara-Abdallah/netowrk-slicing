@@ -523,10 +523,11 @@ class Environment:
                                     service_index] = outlet.dqn.environment.state.calculate_state()
                             # print("outlet.dqn.environment.state.supported_services : ",outlet.dqn.environment.state.supported_services)
                             # print("decentralize state : ",outlet.dqn.environment.state.state_value_decentralize[service_index])
-                            action_decentralize, outlet.dqn.agents.action.command.action_value_decentralize , flag = outlet.dqn.agents.chain(
-                                outlet.dqn.model,
-                                outlet.dqn.environment.state.state_value_decentralize[service_index],
-                                outlet.dqn.agents.epsilon)
+                            action_decentralize, outlet.dqn.agents.action.command.action_value_decentralize , flag = outlet.dqn.agents.exploitation(outlet.dqn.model,outlet.dqn.environment.state.state_value_decentralize[service_index])
+                                # outlet.dqn.agents.chain(
+                                # outlet.dqn.model,
+                                # outlet.dqn.environment.state.state_value_decentralize[service_index],
+                                # outlet.dqn.agents.epsilon)
                             outlet.dqn.agents.action_value = outlet.dqn.agents.action.command.action_value_decentralize
                             x = 0
                             outlet.dqn.environment.state.action_value = outlet.dqn.agents.action_value
