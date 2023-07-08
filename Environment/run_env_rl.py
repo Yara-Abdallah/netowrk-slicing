@@ -35,7 +35,7 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 import matplotlib.pyplot as plt
 import matplotlib
 
-results_dir = os.path.join(sys.path[0], 'results2_explor_decentralize')
+results_dir = os.path.join(sys.path[0], 'results3_exploit_decentralize')
 path6 = os.path.join(results_dir, 'centralized_weights')
 path7 = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
@@ -49,7 +49,7 @@ p5 = os.path.join(results_dir, 'qvalue_centralized')
 # centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
 # decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
 prev_results_3tanh_dir = "//content//drive//MyDrive//network_slicing//results3_tanh//"
-results1_explor_decentralize = "//content//drive//MyDrive//network_slicing//results1_explor_decentralize//"
+results1_explor_decentralize = "//content//drive//MyDrive//network_slicing//results2_explor_decentralize//"
 
 prev_centralize_weights_path = os.path.join(prev_results_3tanh_dir,"centralized_weights//")
 prev_decentralize_weights_path = os.path.join(results1_explor_decentralize,"decentralized_weights//")
@@ -523,10 +523,9 @@ class Environment:
                                     service_index] = outlet.dqn.environment.state.calculate_state()
                             # print("outlet.dqn.environment.state.supported_services : ",outlet.dqn.environment.state.supported_services)
                             # print("decentralize state : ",outlet.dqn.environment.state.state_value_decentralize[service_index])
-                            action_decentralize, outlet.dqn.agents.action.command.action_value_decentralize , flag = outlet.dqn.agents.chain(
+                            action_decentralize, outlet.dqn.agents.action.command.action_value_decentralize , flag = outlet.dqn.agents.exploitation(
                                 outlet.dqn.model,
-                                outlet.dqn.environment.state.state_value_decentralize[service_index],
-                                outlet.dqn.agents.epsilon)
+                                outlet.dqn.environment.state.state_value_decentralize[service_index])
                             outlet.dqn.agents.action_value = outlet.dqn.agents.action.command.action_value_decentralize
                             x = 0
                             outlet.dqn.environment.state.action_value = outlet.dqn.agents.action_value

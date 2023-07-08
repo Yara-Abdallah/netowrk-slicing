@@ -51,7 +51,7 @@ class Agent(AbstractAgent):
         self._action_value = a
 
     def replay_buffer_decentralize(self, batch_size, model):
-        print("epsilon in decentralize : ", self.epsilon)
+        # print("epsilon in decentralize : ", self.epsilon)
         minibatch = random.sample(self.memory, batch_size)
         target = 0
         for exploitation, state, action, reward, next_state in minibatch:
@@ -72,8 +72,8 @@ class Agent(AbstractAgent):
             target_f[0][action] = target
             # print("target_f , decentralize : ", target_f)
             model.fit(state, target_f, epochs=1, verbose=0)
-        if self.epsilon > self.min_epsilon:
-            self.epsilon -= self.epsilon * self.epsilon_decay
+        # if self.epsilon > self.min_epsilon:
+        #     self.epsilon -= self.epsilon * self.epsilon_decay
         return target
 
     def replay_buffer_centralize(self, batch_size, model):
