@@ -35,7 +35,7 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 import matplotlib.pyplot as plt
 import matplotlib
 
-results_dir = os.path.join(sys.path[0], 'results4_tanh')
+results_dir = os.path.join(sys.path[0], 'results5_tanh')
 path6 = os.path.join(results_dir, 'centralized_weights')
 path7 = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
@@ -48,11 +48,13 @@ p4 = os.path.join(results_dir, 'qvalue_decentralized')
 p5 = os.path.join(results_dir, 'qvalue_centralized')
 # centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
 # decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
-prev_results_2tanh_dir = "//content//drive//MyDrive//network_slicing//results3_tanh//"
-prev_centralize_weights_path = os.path.join(prev_results_2tanh_dir,"centralized_weights//")
-# prev_decentralize_weights_path = os.path.join(prev_results_2tanh_dir,"decentralized_weights//")
-# prev_centralize_memory_path = os.path.join(prev_results_2tanh_dir,"centralize_memory//")
-# prev_decentralize_memory_path = os.path.join(prev_results_2tanh_dir,"decentralize_memory//")
+prev_results_3tanh_dir = "//content//drive//MyDrive//network_slicing//results3_tanh//"
+prev_results_4tanh_dir = "//content//drive//MyDrive//network_slicing//results4_tanh//"
+
+prev_centralize_weights_path = os.path.join(prev_results_3tanh_dir,"centralized_weights//")
+prev_decentralize_weights_path = os.path.join(prev_results_4tanh_dir,"decentralized_weights//")
+# prev_centralize_memory_path = os.path.join(prev_results_4tanh_dir,"centralize_memory//")
+prev_decentralize_memory_path = os.path.join(prev_results_4tanh_dir,"decentralize_memory//")
 centralize_qvalue_path = os.path.join(results_dir,"qvalue_centralized_for_plotting//")
 decentralize_qvalue_path = os.path.join(results_dir,"qvalue_decentralized_for_plotting//")
 
@@ -1095,18 +1097,18 @@ class Environment:
                 # print("reset the environment : ")
                 previouse_steps_reseting = steps
                 list_ = []
-                avg_qvalue = (sum(average_qvalue_centralize) / len(average_qvalue_centralize))
+                # avg_qvalue = (sum(average_qvalue_centralize) / len(average_qvalue_centralize))
                 # print("avg_qvalue : ", avg_qvalue)
                 for ind, gridcell_dqn in enumerate(gridcells_dqn):
                     # gridcell_dqn.environment.reward.gridcell_reward_episode = sum(
                     #     gridcell_dqn.environment.reward.reward_value)
                     # update_lines_reward_centralized(lines_out_reward_centralize, steps, gridcells_dqn)
-                    update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, avg_qvalue
-                                                    )
+                    # update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, avg_qvalue
+                    #                                 )
 
-                    self.add_value_to_pickle(
-                            os.path.join(centralize_qvalue_path, f'qvalue.pkl'),
-                            avg_qvalue)
+                    # self.add_value_to_pickle(
+                    #         os.path.join(centralize_qvalue_path, f'qvalue.pkl'),
+                    #         avg_qvalue)
                     update_lines_outlet_utility(lines_out_utility, steps, temp_outlets)
                     update_lines_outlet_requested(lines_out_requested, steps, temp_outlets)
                     update_lines_outlet_ensured(lines_out_ensured, steps, temp_outlets)
@@ -1150,9 +1152,10 @@ class Environment:
             step += 1
 
             if step == env_variables.TIME:
-                for i in range(1):
-                    gridcells_dqn[i].model.save_weights(os.path.join(path6, f'weights_{i}.hdf5'))
-                    gridcells_dqn[i].agents.free_up_memory(gridcells_dqn[i].agents.memory , os.path.join(path_memory_centralize, f'centralize_buffer.pkl'))
+                # for i in range(1):
+                #     print()
+                    # gridcells_dqn[i].model.save_weights(os.path.join(path6, f'weights_{i}.hdf5'))
+                    # gridcells_dqn[i].agents.free_up_memory(gridcells_dqn[i].agents.memory , os.path.join(path_memory_centralize, f'centralize_buffer.pkl'))
 
                 for index, g in enumerate(temp_outlets):
                     g.dqn.model.save_weights(os.path.join(path7, f'weights_{index}.hdf5'))
