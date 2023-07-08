@@ -51,6 +51,7 @@ class Agent(AbstractAgent):
         self._action_value = a
 
     def replay_buffer_decentralize(self, batch_size, model):
+        print("epsilon in decentralize : ", self.epsilon)
         minibatch = random.sample(self.memory, batch_size)
         target = 0
         for exploitation, state, action, reward, next_state in minibatch:
@@ -75,10 +76,11 @@ class Agent(AbstractAgent):
             # print("target_f , decentralize : ", target_f)
             model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
-            self.epsilon *= self.epsilon_decay
+            self.epsilon -= self.epsilon * self.epsilon_decay
         return target
 
     def replay_buffer_centralize(self, batch_size, model):
+
         minibatch = random.sample(self.memory, batch_size)
         target = []
         for exploitation, state, action, reward, next_state in minibatch:
@@ -102,7 +104,7 @@ class Agent(AbstractAgent):
             # print("target f centralize is  : ", target_f)
             model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
-            self.epsilon *= self.epsilon_decay
+            self.epsilon -= self.epsilon * self.epsilon_decay
         return target
 
     def free_up_memory(self, deque, filename):

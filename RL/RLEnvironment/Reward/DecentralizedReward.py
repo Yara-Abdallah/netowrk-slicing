@@ -127,9 +127,6 @@ class DeCentralizedReward(Reward):
             action = -1
         reward = 0
 
-        # print("x: .................  (z - c)  : ", x)
-        # print("c: .................   (c) : ",c)
-        # print("max capacity .......    (max capacity) : ",max_capacity)
         if x > 0:
             if action == 1:
                 reward = action * math.pow(math.sqrt(x/max_capacity), -1 * action)

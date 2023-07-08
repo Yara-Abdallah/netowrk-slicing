@@ -35,7 +35,7 @@ from Vehicle.VehicleOutletObserver import ConcreteObserver
 import matplotlib.pyplot as plt
 import matplotlib
 
-results_dir = os.path.join(sys.path[0], 'results3_tanh')
+results_dir = os.path.join(sys.path[0], 'results4_tanh')
 path6 = os.path.join(results_dir, 'centralized_weights')
 path7 = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
@@ -48,11 +48,11 @@ p4 = os.path.join(results_dir, 'qvalue_decentralized')
 p5 = os.path.join(results_dir, 'qvalue_centralized')
 # centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
 # decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
-prev_results_2tanh_dir = "//content//drive//MyDrive//network_slicing//results2_tanh//"
+prev_results_2tanh_dir = "//content//drive//MyDrive//network_slicing//results3_tanh//"
 prev_centralize_weights_path = os.path.join(prev_results_2tanh_dir,"centralized_weights//")
-prev_decentralize_weights_path = os.path.join(prev_results_2tanh_dir,"decentralized_weights//")
-prev_centralize_memory_path = os.path.join(prev_results_2tanh_dir,"centralize_memory//")
-prev_decentralize_memory_path = os.path.join(prev_results_2tanh_dir,"decentralize_memory//")
+# prev_decentralize_weights_path = os.path.join(prev_results_2tanh_dir,"decentralized_weights//")
+# prev_centralize_memory_path = os.path.join(prev_results_2tanh_dir,"centralize_memory//")
+# prev_decentralize_memory_path = os.path.join(prev_results_2tanh_dir,"decentralize_memory//")
 centralize_qvalue_path = os.path.join(results_dir,"qvalue_centralized_for_plotting//")
 decentralize_qvalue_path = os.path.join(results_dir,"qvalue_decentralized_for_plotting//")
 
@@ -922,14 +922,14 @@ class Environment:
                     "centralized", 12, 2).build())
             print(" path6  : ",path6)
             gridcells_dqn[i].model.load_weights(os.path.join(prev_centralize_weights_path, f'weights_{i}.hdf5'))
-            gridcells_dqn[i].agents.fill_memory(gridcells_dqn[i].agents.memory , os.path.join(prev_centralize_memory_path, f'centralize_buffer.pkl'))
+            # gridcells_dqn[i].agents.fill_memory(gridcells_dqn[i].agents.memory , os.path.join(prev_centralize_memory_path, f'centralize_buffer.pkl'))
             gridcells_dqn[i].agents.grid_outlets = self.Grids.get(f"grid{i + 1}")
             gridcells_dqn[i].agents.outlets_id = list(range(len(gridcells_dqn[i].agents.grid_outlets)))
 
         for i in range(1):
             for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
-                outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
-                outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
+                # outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
+                # outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
                 temp_outlets.append(outlet)
                 # print("outlet : ", outlet.__class__.__name__)
 
@@ -1083,13 +1083,13 @@ class Environment:
                                                                                          outlet.dqn.model)
                             qvalue.append(outlet.qvalue)
 
-            if steps - previous_steps_centralize >= env_variables.centralized_replay_buffer:
-                previous_steps_centralize = steps
-                for ind, gridcell_dqn in enumerate(gridcells_dqn):
-                    if len(gridcell_dqn.agents.memory) >= 64:
-                        # print("replay buffer of centralize ")
-                        average_qvalue_centralize.append(gridcell_dqn.agents.replay_buffer_centralize(32,
-                                                                                                      gridcell_dqn.model))
+            # if steps - previous_steps_centralize >= env_variables.centralized_replay_buffer:
+            #     previous_steps_centralize = steps
+            #     for ind, gridcell_dqn in enumerate(gridcells_dqn):
+            #         if len(gridcell_dqn.agents.memory) >= 64:
+            #             # print("replay buffer of centralize ")
+            #             average_qvalue_centralize.append(gridcell_dqn.agents.replay_buffer_centralize(32,
+            #                                                                                           gridcell_dqn.model))
 
             if steps - previouse_steps_reseting >= env_variables.episode_steps:
                 # print("reset the environment : ")
