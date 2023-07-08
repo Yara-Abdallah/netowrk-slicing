@@ -72,9 +72,9 @@ class Agent(AbstractAgent):
             target_f[0][action] = target
             # print("target_f , decentralize : ", target_f)
             model.fit(state, target_f, epochs=1, verbose=0)
-        # if self.epsilon > self.min_epsilon:
-        #     self.epsilon -= self.epsilon * self.epsilon_decay
-        # return target
+        if self.epsilon > self.min_epsilon:
+            self.epsilon -= self.epsilon * self.epsilon_decay
+        return target
 
     def replay_buffer_centralize(self, batch_size, model):
 
