@@ -57,8 +57,23 @@ prev_decentralize_weights_path = os.path.join(results1_explor_decentralize,"dece
 prev_decentralize_memory_path = os.path.join(results1_explor_decentralize,"decentralize_memory//")
 centralize_qvalue_path = os.path.join(results_dir,"qvalue_centralized_for_plotting//")
 decentralize_qvalue_path = os.path.join(results_dir,"qvalue_decentralized_for_plotting//")
+#
+# if type_poi == '3G':
+#                     val = 850
+#                 elif type_poi == '4G':
+#                     val = 1250
+#                 elif type_poi == '5G':
+#                     val = 10000
+#                 elif type_poi == 'wifi':
+#                     val = 550
 
-
+# def set_max_capacity(self, type):
+#     if type == "ThreeG":
+#         return 25000
+#     elif type == "FourG":
+#         return 45000
+#     elif type == "Wifi":
+#         return 10500
 os.makedirs(p1, exist_ok=True)
 os.makedirs(p2, exist_ok=True)
 os.makedirs(p3, exist_ok=True)
@@ -525,7 +540,8 @@ class Environment:
                             # print("decentralize state : ",outlet.dqn.environment.state.state_value_decentralize[service_index])
                             action_decentralize, outlet.dqn.agents.action.command.action_value_decentralize , flag = outlet.dqn.agents.exploitation(
                                 outlet.dqn.model,
-                                outlet.dqn.environment.state.state_value_decentralize[service_index])
+                                outlet.dqn.environment.state.state_value_decentralize[service_index],
+                                )
                             outlet.dqn.agents.action_value = outlet.dqn.agents.action.command.action_value_decentralize
                             x = 0
                             outlet.dqn.environment.state.action_value = outlet.dqn.agents.action_value
