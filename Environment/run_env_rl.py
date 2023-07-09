@@ -731,12 +731,12 @@ class Environment:
 
             gridcell.environment.state.next_state_centralize = next_states
             gridcell.environment.reward.reward_value = rewards * 3
-            for index in range(9):
-                gridcell.agents.remember(gridcell.agents.action.command.action_flags[index],
-                                         gridcell.environment.state.state_value_centralize[index],
-                                         gridcell.agents.action.command.action_value_centralize[index],
-                                         gridcell.environment.reward.reward_value[index],
-                                         gridcell.environment.state.next_state_centralize[index])
+            # for index in range(9):
+            #     gridcell.agents.remember(gridcell.agents.action.command.action_flags[index],
+            #                              gridcell.environment.state.state_value_centralize[index],
+            #                              gridcell.agents.action.command.action_value_centralize[index],
+            #                              gridcell.environment.reward.reward_value[index],
+            #                              gridcell.environment.state.next_state_centralize[index])
 
             gridcell.environment.state.state_value_centralize = gridcell.environment.state.next_state_centralize
             gridcell.environment.state.services_requested_prev = gridcell.environment.state.services_requested
