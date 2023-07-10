@@ -15,7 +15,7 @@ def main():
 
     # ... some code you want to investigate ...
 
-    env = run_env_rl.Environment()
+    env = run_env_rl.Environment('period3')
     env.run()
 
 

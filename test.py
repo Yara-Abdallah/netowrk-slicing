@@ -102,13 +102,13 @@ print(len(x))
 # y = [deque[i] for i in range(len(deque)) if i % 320 == 0]
 # print(len(y))
 # Plot the values
-plt.plot(x, deque_decentralize2)
+plt.plot(x, deque)
 
 # Add labels and title
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.title('Plot of Every 320th Value')
-plt.savefig('plot_decentralize_phase3_fixed.svg', format='svg')
+plt.xlabel('Time steps')
+plt.ylabel('Q-value')
+plt.title('Average Q-value each episode : { 320 Time step }')
+plt.savefig('centralize.svg', format='svg')
 
 # Display the plot
 plt.show()

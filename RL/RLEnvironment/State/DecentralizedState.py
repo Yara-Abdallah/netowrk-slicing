@@ -15,8 +15,8 @@ class DeCentralizedState(State):
     _max_tower_capacity = 0.0
     # _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0]
     # _next_state_decentralize = [0.0] * 17
-    _state_value_decentralize = [[0.0] * 17 for _ in range(3)]
-    _next_state_decentralize = [[0.0] * 17 for _ in range(3)]
+    _state_value_decentralize = [[0.0] * 9 for _ in range(3)]
+    _next_state_decentralize = [[0.0] * 9 for _ in range(3)]
 
     def __init__(self):
         super().__init__()
@@ -170,15 +170,15 @@ class DeCentralizedState(State):
             final_state.append(self._action_value)
         final_state.append(self._mean_power_allocated_requests)
         final_state.append(self.index_service)
-        if isinstance(self._supported_services[0], np.ndarray):
-            final_state.extend([i.item() for i in self._supported_services])
+        if isinstance(self._supported_services[self.index_service], np.ndarray):
+            final_state.append(self._supported_services[self.index_service])
         else:
-            final_state.extend(self._supported_services)
-        final_state.extend(self._services_requested)
-        final_state.extend(self._services_ensured)
-        final_state.extend(self._allocated_power)
+            final_state.append(self._supported_services[self.index_service])
+        final_state.append(self._services_requested[self.index_service])
+        final_state.append(self._services_ensured[self.index_service])
+        final_state.append(self._allocated_power[self.index_service])
         if len(final_state) == 0:
-            final_state = [0.0] * 17
+            final_state = [0.0] * 9
         return final_state
 
     def calculate_initial_state(self):

@@ -1,99 +1,5 @@
-import copy
-import gc
-import math
-import os
-import pickle
-import sys
-import shutil
-
-import numpy
-import numpy as np
-import psutil
-import traci
-from Environment import env_variables
-import xml.etree.ElementTree as ET
-import random as ra
-from uuid import uuid4
-from numpy import random as nump_rand
-from Environment.visiulaiztion import plotting_reward_decentralize, plotting_reward_centralize, \
-    plotting_Utility_Requested_Ensured, update_lines_outlet_utility, update_lines_outlet_requested, \
-    update_lines_outlet_ensured, update_lines_reward_decentralized, update_lines_reward_centralized, \
-    plotting_Qvalue_decentralize, plotting_Qvalue_centralize, update_lines_Qvalue_decentralized, \
-    update_lines_Qvalue_centralized
-
-from RL.RLBuilder import RLBuilder
-from RL.RLEnvironment.Action.ActionAssignment import ActionAssignment
-from RL.RLEnvironment.Reward.CentralizedReward import CentralizedReward
-from RL.RLEnvironment.State.CentralizedState import CentralizedState
-from Utils.Bandwidth import Bandwidth
-from Utils.Cost import TowerCost, RequestCost
-from Utils.PerformanceLogger import PerformanceLogger
-from Utils.config import outlet_types
-from Vehicle.Car import Car
-from Outlet.Cellular.FactoryCellular import FactoryCellular
-from Vehicle.VehicleOutletObserver import ConcreteObserver
-import matplotlib.pyplot as plt
-import matplotlib
-
-results_dir = os.path.join(sys.path[0], 'results3_exploit_decentralize')
-path6 = os.path.join(results_dir, 'centralized_weights')
-path7 = os.path.join(results_dir, 'decentralized_weights')
-path_memory_centralize = os.path.join(results_dir,'centralize_memory')
-path_memory_decentralize = os.path.join(results_dir,'decentralize_memory')
-# prev_results_dir = "//content//drive//MyDrive//network_slicing//prev_results//"
-p1 = os.path.join(results_dir, 'utility_requested_ensured')
-p2 = os.path.join(results_dir, 'reward_decentralized')
-p3 = os.path.join(results_dir, 'reward_centralized')
-p4 = os.path.join(results_dir, 'qvalue_decentralized')
-p5 = os.path.join(results_dir, 'qvalue_centralized')
-# centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
-# decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
-prev_results_3tanh_dir = "//content//drive//MyDrive//network_slicing//results3_tanh//"
-results1_explor_decentralize = "//content//drive//MyDrive//network_slicing//results2_explor_decentralize//"
-
-prev_centralize_weights_path = os.path.join(prev_results_3tanh_dir,"centralized_weights//")
-prev_decentralize_weights_path = os.path.join(results1_explor_decentralize,"decentralized_weights//")
-# prev_centralize_memory_path = os.path.join(prev_results_4tanh_dir,"centralize_memory//")
-prev_decentralize_memory_path = os.path.join(results1_explor_decentralize,"decentralize_memory//")
-centralize_qvalue_path = os.path.join(results_dir,"qvalue_centralized_for_plotting//")
-decentralize_qvalue_path = os.path.join(results_dir,"qvalue_decentralized_for_plotting//")
-#
-# if type_poi == '3G':
-#                     val = 850
-#                 elif type_poi == '4G':
-#                     val = 1250
-#                 elif type_poi == '5G':
-#                     val = 10000
-#                 elif type_poi == 'wifi':
-#                     val = 550
-
-# def set_max_capacity(self, type):
-#     if type == "ThreeG":
-#         return 25000
-#     elif type == "FourG":
-#         return 45000
-#     elif type == "Wifi":
-#         return 10500
-os.makedirs(p1, exist_ok=True)
-os.makedirs(p2, exist_ok=True)
-os.makedirs(p3, exist_ok=True)
-os.makedirs(p4, exist_ok=True)
-os.makedirs(p5, exist_ok=True)
-os.makedirs(path6, exist_ok=True)
-os.makedirs(path7, exist_ok=True)
-os.makedirs(path_memory_centralize, exist_ok=True)
-os.makedirs(path_memory_decentralize, exist_ok=True)
-os.makedirs(centralize_qvalue_path, exist_ok=True)
-os.makedirs(decentralize_qvalue_path, exist_ok=True)
-
-
-matplotlib.use('agg')
-
-fig_reward_decentralize, axs_reward_decentralize, lines_out_reward_decentralize = plotting_reward_decentralize()
-fig_reward_centralize, axs_reward_centralize, lines_out_reward_centralize = plotting_reward_centralize()
-fig, axs, lines_out_utility, lines_out_requested, lines_out_ensured = plotting_Utility_Requested_Ensured()
-fig_Qvalue_decentralize, axs_Qvalue_decentralize, lines_out_Qvalue_decentralize = plotting_Qvalue_decentralize()
-fig_Qvalue_centralize, axs_Qvalue_centralize, lines_out_Qvalue_centralize = plotting_Qvalue_centralize()
+from .utils.imports import *
+from .utils.period import Period
 
 
 class Environment:
@@ -101,7 +7,8 @@ class Environment:
     data = {}
     Grids = {}
 
-    def __init__(self):
+    def __init__(self, period: str):
+        Period(period)
         self.polygon = traci.polygon
         self.route = traci.route
         self.vehicle = traci.vehicle
@@ -167,9 +74,9 @@ class Environment:
                 env_variables.outlets[type_poi].append((id_, position_))
                 val = 0
                 if type_poi == '3G':
-                    val = 1000
+                    val = 850
                 elif type_poi == '4G':
-                    val = 2250
+                    val = 1250
                 elif type_poi == '5G':
                     val = 10000
                 elif type_poi == 'wifi':
@@ -410,24 +317,6 @@ class Environment:
         with open(path, mode) as file:
             pickle.dump(value, file)
 
-        # with open(path, "a+") as file:
-        #
-        #     lines = file.readlines()
-        #
-        #     if not lines:  # Check if lines is empty
-        #         file.write(str(value))
-        #         file.write("\n")
-        #     else:
-        #         file.write("\n")
-        #         file.write(str(value))
-            #     line = lines[-1]
-            #     if line != "":
-            #         values = line.strip().split()
-            #         if len(values) == 320:
-            #             file.write("\n")
-            #         else:
-            #             file.write(" ")
-            #             file.write(str(value))
 
     def accumulate_until_sum_limit(self, lst, target_sum):
         accumulated_values = []
@@ -537,11 +426,13 @@ class Environment:
                                 outlet.dqn.environment.state.state_value_decentralize[
                                     service_index] = outlet.dqn.environment.state.calculate_state()
                             # print("outlet.dqn.environment.state.supported_services : ",outlet.dqn.environment.state.supported_services)
-                            # print("decentralize state : ",outlet.dqn.environment.state.state_value_decentralize[service_index])
-                            action_decentralize, outlet.dqn.agents.action.command.action_value_decentralize , flag = outlet.dqn.agents.exploitation(
+                            print("decentralize state : ",
+                                  outlet.dqn.environment.state.state_value_decentralize[service_index])
+                            action_decentralize, outlet.dqn.agents.action.command.action_value_decentralize, flag = outlet.dqn.agents.chain(
                                 outlet.dqn.model,
                                 outlet.dqn.environment.state.state_value_decentralize[service_index],
-                                )
+                                outlet.dqn.agents.epsilon)
+
                             outlet.dqn.agents.action_value = outlet.dqn.agents.action.command.action_value_decentralize
                             x = 0
                             outlet.dqn.environment.state.action_value = outlet.dqn.agents.action_value
@@ -557,10 +448,18 @@ class Environment:
                                 # print(" z in action 1 : ", Z)
                                 # print(" c in action 1 : ", C)
                                 x = Z - C
-                                number_of_requests_in_this_period = sum(
-                                    performance_logger.outlet_services_requested_number_with_action_period[outlet])
+
+                                number_of_requests_in_this_period = \
+                                    performance_logger.outlet_services_requested_number_with_action_period[outlet][
+                                        service_index]
+                                sum_power_allocation = \
+                                    performance_logger.outlet_services_power_allocation_with_action_period[outlet][
+                                        service_index]
+                                print("number_of_requests_in_this_period ", number_of_requests_in_this_period)
+                                print("sum_power_allocation ", sum_power_allocation)
+                                print("service_index  ", service_index)
                                 if number_of_requests_in_this_period != 0:
-                                    outlet.dqn.environment.state.mean_power_allocated_requests = C / number_of_requests_in_this_period
+                                    outlet.dqn.environment.state.mean_power_allocated_requests = sum_power_allocation / number_of_requests_in_this_period
                                 else:
                                     outlet.dqn.environment.state.mean_power_allocated_requests = 0
 
@@ -596,10 +495,19 @@ class Environment:
                                 # print(" z in action 0 : ",Z)
                                 # print(" c in action 0 : ",C)
                                 x = Z - C
-                                number_of_requests_in_this_period = sum(
-                                    performance_logger.outlet_services_requested_number_with_action_period[outlet])
+                                number_of_requests_in_this_period = \
+                                    performance_logger.outlet_services_requested_number_with_action_period[outlet][
+                                        service_index]
+                                sum_power_allocation = \
+                                    performance_logger.outlet_services_power_allocation_with_action_period[outlet][
+                                        service_index]
+
+                                print("number_of_requests_in_this_period ", number_of_requests_in_this_period)
+                                print("sum_power_allocation ", sum_power_allocation)
+                                print("service_index  ", service_index)
+
                                 if number_of_requests_in_this_period != 0:
-                                    outlet.dqn.environment.state.mean_power_allocated_requests = C / number_of_requests_in_this_period
+                                    outlet.dqn.environment.state.mean_power_allocated_requests = sum_power_allocation / number_of_requests_in_this_period
                                 else:
                                     outlet.dqn.environment.state.mean_power_allocated_requests = 0
 
@@ -618,7 +526,8 @@ class Environment:
                                 service_index] = action_decentralize.execute(
                                 outlet.dqn.environment.state,
                                 outlet.dqn.agents.action.command.action_value_decentralize)
-                            # print("decenlraize next state value :   ",outlet.dqn.environment.state.next_state_decentralize[service_index] )
+                            print("decenlraize next state value :   ",
+                                  outlet.dqn.environment.state.next_state_decentralize[service_index])
 
                             outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward(
                                 x, outlet.dqn.agents.action.command.action_value_decentralize,
@@ -635,16 +544,18 @@ class Environment:
                             # print("dec ",outlet.dqn.agents.action.command.action_value_decentralize)
                             # print("dec ",outlet.dqn.environment.reward.reward_value)
                             # print("dec ",outlet.dqn.environment.state.next_state_decentralize[service_index])
-                            if isinstance(outlet.dqn.agents.action.command.action_value_decentralize , np.ndarray):
+                            if isinstance(outlet.dqn.agents.action.command.action_value_decentralize, np.ndarray):
                                 outlet.dqn.agents.action.command.action_value_decentralize = outlet.dqn.agents.action.command.action_value_decentralize.item()
                             outlet.dqn.agents.remember(flag,
-                                outlet.dqn.environment.state.state_value_decentralize[service_index],
-                                outlet.dqn.agents.action.command.action_value_decentralize,
-                                outlet.dqn.environment.reward.reward_value,
-                                outlet.dqn.environment.state.next_state_decentralize[service_index])
+                                                       outlet.dqn.environment.state.state_value_decentralize[
+                                                           service_index],
+                                                       outlet.dqn.agents.action.command.action_value_decentralize,
+                                                       outlet.dqn.environment.reward.reward_value,
+                                                       outlet.dqn.environment.state.next_state_decentralize[
+                                                           service_index])
 
                             outlet.dqn.environment.state.state_value_decentralize[service_index] = \
-                            outlet.dqn.environment.state.next_state_decentralize[service_index]
+                                outlet.dqn.environment.state.next_state_decentralize[service_index]
 
                             if len(outlet.power_distinct[0]) == 0:
                                 outlet.power = [0.0, 0.0, 0.0]
@@ -683,8 +594,8 @@ class Environment:
             utility_value_centralize = 0
             index_of_service = 0
             outlets = gridcell.agents.grid_outlets
-            for ind in outlets :
-                print("type : ",ind.__class__.__name__,"  current capacity : ",ind.current_capacity)
+            for ind in outlets:
+                print("type : ", ind.__class__.__name__, "  current capacity : ", ind.current_capacity)
             index_of_outlet = -1
             for i in range(9):
                 index_of_service = i % 3
@@ -706,31 +617,10 @@ class Environment:
                 next_states.append(next)
                 # print("next state value centralize : ", next)
 
-            for i in range(3):
-                utility_value_centralize = gridcell.environment.reward.calculate_utility(i)
-
-                dx = utility_value_centralize - gridcell.environment.state.utility_value_centralize_prev
-
-                if dx > 0 and utility_value_centralize >= env_variables.Threshold_of_utility:
-                    rewards.append(utility_value_centralize * 10)
-
-                elif dx < 0 and utility_value_centralize < env_variables.Threshold_of_utility:
-                    rewards.append(utility_value_centralize * -10)
-
-                elif dx > 0 and utility_value_centralize <= env_variables.Threshold_of_utility:
-                    rewards.append(dx)
-                elif dx < 0 and utility_value_centralize > env_variables.Threshold_of_utility:
-                    rewards.append(dx)
-
-                elif dx == 0 and utility_value_centralize <= env_variables.Threshold_of_utility:
-                    rewards.append(dx * 0.2)
-                elif dx == 0 and utility_value_centralize > env_variables.Threshold_of_utility:
-                    rewards.append(dx * 0.2)
-            for i in range(len(rewards)):
-                rewards[i] = 1 / (1 + math.pow(math.e, -1 * rewards[i]))
+            rewards = gridcell.environment.reward.calculate_reward()
 
             gridcell.environment.state.next_state_centralize = next_states
-            gridcell.environment.reward.reward_value = rewards * 3
+            gridcell.environment.reward.reward_value = rewards
             # for index in range(9):
             #     gridcell.agents.remember(gridcell.agents.action.command.action_flags[index],
             #                              gridcell.environment.state.state_value_centralize[index],
@@ -744,6 +634,8 @@ class Environment:
             gridcell.environment.state.services_ensured_prev = gridcell.environment.state.services_ensured
             gridcell.environment.reward.services_ensured_prev = gridcell.environment.reward.services_ensured
             gridcell.environment.state.utility_value_centralize_prev = utility_value_centralize
+            gridcell.environment.reward.utility_value_centralize_prev = utility_value_centralize
+
 
     def centralize_state_action(self, gridcells_dqn, step, performance_logger):
         number_of_services = 3
@@ -785,7 +677,6 @@ class Environment:
                         gridcell.environment.state.supported_service = action
                         supported.append(action)
 
-
                 count_zero = 0
                 if step <= 2:
                     for ind in range(3):
@@ -797,15 +688,8 @@ class Environment:
 
                 if step > 2:
 
-                    # if step > env_variables.advisor_period[0]  and  step <= env_variables.advisor_period[1] :
-                    #     flags = gridcell.agents.heuristic_action(gridcell,
-                    #                                           performance_logger.outlet_services_power_allocation_for_all_requested,
-                    #                                           performance_logger.outlet_services_requested_number,
-                    #                                           performance_logger.number_of_periods_until_now)
-                    #     list_flags.extend(flags)
-
-
-                    if step > env_variables.exploitation_exploration_period[0]  and  step <= env_variables.exploitation_exploration_period[1] :
+                    if step > env_variables.exploitation_exploration_period[0] and step <= \
+                            env_variables.exploitation_exploration_period[1]:
                         outlet.supported_services = []
                         for serv_index in range(number_of_services):
                             action_centralize, action, flag = gridcell.agents.chain(
@@ -813,7 +697,7 @@ class Environment:
                                 gridcell.environment.state.state_value_centralize[j],
                                 gridcell.agents.epsilon)
 
-                            if isinstance(action,np.ndarray):
+                            if isinstance(action, np.ndarray):
                                 action = action.item()
                             outlet.supported_services.append(action)
                             list_flags.append(flag)
@@ -827,9 +711,8 @@ class Environment:
                                 gridcell.model,
                                 gridcell.environment.state.state_value_centralize[j],
                             )
-                            # print("flag  exploitaion : ",flag)
                             # actions_objects.append(action_centralize)
-                            if isinstance(action,np.ndarray):
+                            if isinstance(action, np.ndarray):
                                 action = action.item()
                             outlet.supported_services.append(action)
                             list_flags.append(flag)
@@ -841,41 +724,12 @@ class Environment:
             # gridcell.agents.action.command.action_objects = actions_objects
             gridcell.agents.action.command.action_value_centralize = actions
             gridcell.agents.action.command.action_flags = list_flags
-            # print("gridcell.agents.action.command.action_objects :  ", gridcell.agents.action.command.action_objects)
-            # print("gridcell.agents.action.command.action_value_centralize : ", gridcell.agents.action.command.action_value_centralize)
-            # print("lists of flags  : ", gridcell.agents.action.command.action_flags)
-            # del actions_objects
+
             if step <= 2:
                 gridcell.environment.state.state_value_centralize = states
 
-
-
-
-
     def terminate_service(self, veh, outlets, performance_logger):
         for out in outlets:
-            # if out in performance_logger.handled_services:
-            #     if veh in performance_logger.handled_services[out] and veh not in env_variables.vehicles:
-            #         print("terminate first condition ")
-            #         serv = performance_logger.handled_services[out][veh]
-            #         self.services_aggregation(performance_logger.outlet_services_requested_number, out,
-            #                                   serv.__class__.__name__, -1)
-            #
-            #         self.ensured_service_aggrigation(performance_logger.outlet_services_ensured_number, out,
-            #                                          serv.__class__.__name__,
-            #                                          -1)
-            #         self.power_aggregation(performance_logger.outlet_services_power_allocation,
-            #                                out,
-            #                                serv.__class__.__name__, serv, -1)
-            #         # print("free on request 1 out of route ")
-            #         if out.current_capacity + serv.service_power_allocate < out._max_capacity :
-            #             out.current_capacity = out.current_capacity + serv.service_power_allocate
-            #             removed_value = performance_logger.handled_services[out].pop(veh)
-            #             del removed_value
-            #             del serv
-            # else:
-            #     out.current_capacity = out.current_capacity
-
             if out not in veh.outlets_serve:
                 if out in performance_logger.handled_services:
                     if veh in performance_logger.handled_services[out]:
@@ -926,7 +780,6 @@ class Environment:
         outlets_pos = self.get_positions_of_outlets(outlets)
         observer = ConcreteObserver(outlets_pos, outlets)
         performance_logger = PerformanceLogger()
-
         # set the maximum amount of memory that the garbage collector is allowed to use to 1 GB
         max_size = 273741824
 
@@ -939,7 +792,7 @@ class Environment:
                 build[i].agent.build_agent(ActionAssignment()).environment.build_env(CentralizedReward(),
                                                                                      CentralizedState()).model_.build_model(
                     "centralized", 12, 2).build())
-            print(" path6  : ",path6)
+            print(" path6  : ", path6)
             gridcells_dqn[i].model.load_weights(os.path.join(prev_centralize_weights_path, f'weights_{i}.hdf5'))
             # gridcells_dqn[i].agents.fill_memory(gridcells_dqn[i].agents.memory , os.path.join(prev_centralize_memory_path, f'centralize_buffer.pkl'))
             gridcells_dqn[i].agents.grid_outlets = self.Grids.get(f"grid{i + 1}")
@@ -947,8 +800,8 @@ class Environment:
 
         for i in range(1):
             for index, outlet in enumerate(gridcells_dqn[i].agents.grid_outlets):
-                outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
-                outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
+                # outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
+                # outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
                 temp_outlets.append(outlet)
                 # print("outlet : ", outlet.__class__.__name__)
 
@@ -978,47 +831,6 @@ class Environment:
             self.get_current_vehicles()
             print("step is ....................................... ", step)
 
-            # night time
-            # if 0 <= step <= env_variables.period1:
-            #     env_variables.number_cars_mean_std['mean'] = 85
-            #     env_variables.number_cars_mean_std['std'] = 2
-            #     env_variables.threashold_number_veh = 25
-            #     env_variables.ENTERTAINMENT_RATIO = 0.2
-            #     env_variables.AUTONOMOUS_RATIO = 0.3
-            #     env_variables.SAFETY_RATIO = 0.5
-            # day time
-            # elif env_variables.period1 + 10 < step <= env_variables.period2:
-            #     env_variables.number_cars_mean_std['mean'] = 100
-            #     env_variables.number_cars_mean_std['std'] = 2
-            #     env_variables.threashold_number_veh = 50
-            #     env_variables.ENTERTAINMENT_RATIO = 0.3
-            #     env_variables.AUTONOMOUS_RATIO = 0.3
-            #     env_variables.SAFETY_RATIO = 0.4
-
-            # elif env_variables.period2 + 10 < step <= env_variables.period3:
-            env_variables.number_cars_mean_std['mean'] = 150
-            env_variables.number_cars_mean_std['std'] = 2
-            env_variables.threashold_number_veh = 85
-            env_variables.ENTERTAINMENT_RATIO = 0.6
-            env_variables.AUTONOMOUS_RATIO = 0.2
-            env_variables.SAFETY_RATIO = 0.2
-
-            # elif env_variables.period3 + 10 < step <= env_variables.period4:
-            #     env_variables.number_cars_mean_std['mean'] = 100
-            #     env_variables.number_cars_mean_std['std'] = 2
-            #     env_variables.threashold_number_veh = 50
-            #     env_variables.ENTERTAINMENT_RATIO = 0.3
-            #     env_variables.AUTONOMOUS_RATIO = 0.3
-            #     env_variables.SAFETY_RATIO = 0.4
-            #
-            # elif env_variables.period4 + 10 < step <= env_variables.period5:
-            #     env_variables.number_cars_mean_std['mean'] = 85
-            #     env_variables.number_cars_mean_std['std'] = 2
-            #     env_variables.threashold_number_veh = 25
-            #     env_variables.ENTERTAINMENT_RATIO = 0.2
-            #     env_variables.AUTONOMOUS_RATIO = 0.3
-            #     env_variables.SAFETY_RATIO = 0.5
-
             # if steps - previous_steps_sending == frame_rate_for_sending_requests:
             #     previous_steps_sending = steps
             number_of_cars_will_send_requests = round(len(list(env_variables.vehicles.values())) * 0.1)
@@ -1042,57 +854,16 @@ class Environment:
 
             if steps - previous_steps_centralize_action >= 40:
                 previous_steps_centralize_action = steps
-                self.centralize_nextstate_reward( gridcells_dqn)
+                self.centralize_nextstate_reward(gridcells_dqn)
                 self.centralize_state_action(gridcells_dqn, step, performance_logger)
 
 
-
-            for axs_ in [axs, axs_Qvalue_centralize,
-                         axs_Qvalue_decentralize]:
-                if hasattr(axs_, 'flatten'):
-                    for ax in axs_.flatten():
-                        ax.legend()
-                        ax.relim()
-                        ax.autoscale_view()
-                else:
-                    axs_.legend()
-                    axs_.relim()
-                    axs_.autoscale_view()
-
-            if axs is axs:
-                fig.canvas.draw()
-            # elif axs is axs_reward_decentralize:
-            #     fig_reward_decentralize.canvas.draw()
-            # elif axs is axs_reward_centralize:
-            #     fig_reward_centralize.canvas.draw()
-            elif axs is axs_Qvalue_centralize:
-                axs_Qvalue_centralize.canvas.draw()
-            elif axs is axs_Qvalue_decentralize:
-                axs_Qvalue_decentralize.canvas.draw()
-
             if steps - prev == snapshot_time:
                 prev = steps
-                path1 = os.path.join(p1, f'snapshot')
-                path2 = os.path.join(p2, f'snapshot')
-                path3 = os.path.join(p3, f'snapshot')
-                path4 = os.path.join(p4, f'snapshot')
-                path5 = os.path.join(p5, f'snapshot')
-                fig.set_size_inches(10, 8)
-                fig_reward_centralize.set_size_inches(15, 10)
-                fig_reward_decentralize.set_size_inches(30, 20)  # set physical size of plot in inches
-                fig_Qvalue_centralize.set_size_inches(15, 10)
-                fig_Qvalue_decentralize.set_size_inches(30, 20)
-                fig.savefig(path1 + '.svg', dpi=300)
-                # fig_reward_decentralize.savefig(path2 + '.svg', dpi=300)
-                # fig_reward_centralize.savefig(path3 + '.svg', dpi=300)
-                fig_Qvalue_decentralize.savefig(path4 + '.svg', dpi=300)
-                fig_Qvalue_centralize.savefig(path5 + '.svg', dpi=300)
-            else:
-                plt.close(fig)
-                # plt.close(fig_reward_decentralize)
-                # plt.close(fig_reward_centralize)
-                plt.close(fig_Qvalue_centralize)
-                plt.close(fig_Qvalue_decentralize)
+                take_snapshot_figures()
+
+            else :
+                close_figures()
 
             if steps - previous_steps >= env_variables.decentralized_replay_buffer:
                 previous_steps = steps
@@ -1129,11 +900,8 @@ class Environment:
                     # self.add_value_to_pickle(
                     #         os.path.join(centralize_qvalue_path, f'qvalue.pkl'),
                     #         avg_qvalue)
-                    update_lines_outlet_utility(lines_out_utility, steps, temp_outlets)
-                    update_lines_outlet_requested(lines_out_requested, steps, temp_outlets)
-                    update_lines_outlet_ensured(lines_out_ensured, steps, temp_outlets)
-                    update_lines_Qvalue_decentralized(lines_out_Qvalue_decentralize, steps, temp_outlets)
-                    update_lines_reward_decentralized(lines_out_reward_decentralize, steps, temp_outlets)
+
+                    update_figures(steps, temp_outlets)
 
                     for i, out in enumerate(gridcell_dqn.agents.grid_outlets):
                         self.add_value_to_pickle(
@@ -1149,7 +917,7 @@ class Environment:
                         out.dqn.environment.reward.reward_value = 0
                         out.dqn.environment.state.mean_power_allocated_requests = 0.0
                         # out.dqn.environment.state.state_value_decentralize = out.dqn.environment.state.calculate_state()
-                        out.dqn.environment.state.state_value_decentralize = [[0.0] * 17 for _ in range(3)]
+                        out.dqn.environment.state.state_value_decentralize = [[0.0] * 9 for _ in range(3)]
                         out.current_capacity = out._max_capacity
                         # print("the max : ", out._max_capacity)
                         # print("reset capacity : ", out.current_capacity)
@@ -1172,21 +940,22 @@ class Environment:
             step += 1
 
             if step == env_variables.TIME:
-                # for i in range(1):
-                #     print()
-                    # gridcells_dqn[i].model.save_weights(os.path.join(path6, f'weights_{i}.hdf5'))
-                    # gridcells_dqn[i].agents.free_up_memory(gridcells_dqn[i].agents.memory , os.path.join(path_memory_centralize, f'centralize_buffer.pkl'))
+                self.save(temp_outlets)
 
-                for index, g in enumerate(temp_outlets):
-                    g.dqn.model.save_weights(os.path.join(path7, f'weights_{index}.hdf5'))
-                    g.dqn.agents.free_up_memory(g.dqn.agents.memory,os.path.join(path_memory_decentralize, f'decentralize_buffer{index}.pkl'))
+        self.close()
 
-
-                # shutil.copytree(results_dir, prev_results_dir)
-                print("Folder contents copied successfully.")
-
-
-
-
+    def close(self):
         plt.close()
         traci.close()
+
+    def save(self, temp_outlets):
+        for index, g in enumerate(temp_outlets):
+            g.dqn.model.save_weights(os.path.join(path7, f'weights_{index}.hdf5'))
+            g.dqn.agents.free_up_memory(g.dqn.agents.memory, os.path.join(path_memory_decentralize,
+                                                                          f'decentralize_buffer{index}.pkl'))
+            # for i in range(1):
+            #     print()
+            # gridcells_dqn[i].model.save_weights(os.path.join(path6, f'weights_{i}.hdf5'))
+            # gridcells_dqn[i].agents.free_up_memory(gridcells_dqn[i].agents.memory , os.path.join(path_memory_centralize, f'centralize_buffer.pkl'))
+
+            # shutil.copytree(results_dir, prev_results_dir)

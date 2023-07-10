@@ -1,6 +1,9 @@
+import os
+
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
+from .paths import utility_requested_ensured_path,reward_decentralized_path,reward_centralized_path,qvalue_decentralized_path,qvalue_centralized_path
 
 matplotlib.use('agg')
 
@@ -138,3 +141,61 @@ def update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, qvalue):
         x_data = np.append(x_data, steps)
         y_data = np.append(y_data, qvalue)
         line4.set_data(x_data, y_data)
+
+
+
+fig_reward_decentralize, axs_reward_decentralize, lines_out_reward_decentralize = plotting_reward_decentralize()
+fig_reward_centralize, axs_reward_centralize, lines_out_reward_centralize = plotting_reward_centralize()
+fig, axs, lines_out_utility, lines_out_requested, lines_out_ensured = plotting_Utility_Requested_Ensured()
+fig_Qvalue_decentralize, axs_Qvalue_decentralize, lines_out_Qvalue_decentralize = plotting_Qvalue_decentralize()
+fig_Qvalue_centralize, axs_Qvalue_centralize, lines_out_Qvalue_centralize = plotting_Qvalue_centralize()
+
+
+
+def take_snapshot_figures():
+    for axs_ in [axs, axs_Qvalue_centralize,
+                 axs_Qvalue_decentralize]:
+        if hasattr(axs_, 'flatten'):
+            for ax in axs_.flatten():
+                ax.legend()
+                ax.relim()
+                ax.autoscale_view()
+        else:
+            axs_.legend()
+            axs_.relim()
+            axs_.autoscale_view()
+
+    if axs is axs:
+        fig.canvas.draw()
+
+    elif axs is axs_Qvalue_centralize:
+        axs_Qvalue_centralize.canvas.draw()
+    elif axs is axs_Qvalue_decentralize:
+        axs_Qvalue_decentralize.canvas.draw()
+    print("yes .... ")
+    path1 = os.path.join(utility_requested_ensured_path, f'snapshot')
+    path2 = os.path.join(reward_decentralized_path, f'snapshot')
+    path3 = os.path.join(reward_centralized_path, f'snapshot')
+    path4 = os.path.join(qvalue_decentralized_path, f'snapshot')
+    path5 = os.path.join(qvalue_centralized_path, f'snapshot')
+    fig.set_size_inches(10, 8)
+    fig_reward_centralize.set_size_inches(15, 10)
+    fig_reward_decentralize.set_size_inches(30, 20)  # set physical size of plot in inches
+    fig_Qvalue_centralize.set_size_inches(15, 10)
+    fig_Qvalue_decentralize.set_size_inches(30, 20)
+    fig.savefig(path1 + '.svg', dpi=300)
+    fig_Qvalue_decentralize.savefig(path4 + '.svg', dpi=300)
+    fig_Qvalue_centralize.savefig(path5 + '.svg', dpi=300)
+
+def update_figures(steps,temp_outlets):
+    update_lines_outlet_utility(lines_out_utility, steps, temp_outlets)
+    update_lines_outlet_requested(lines_out_requested, steps, temp_outlets)
+    update_lines_outlet_ensured(lines_out_ensured, steps, temp_outlets)
+    update_lines_Qvalue_decentralized(lines_out_Qvalue_decentralize, steps, temp_outlets)
+    update_lines_reward_decentralized(lines_out_reward_decentralize, steps, temp_outlets)
+
+
+def close_figures():
+    plt.close(fig)
+    plt.close(fig_Qvalue_centralize)
+    plt.close(fig_Qvalue_decentralize)

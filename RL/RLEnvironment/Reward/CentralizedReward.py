@@ -1,5 +1,8 @@
+import math
+
 import numpy as np
 
+from Environment import env_variables
 from RL.RLEnvironment.Reward.Reward import Reward
 
 
@@ -23,10 +26,19 @@ class CentralizedReward(Reward):
         self._reward_value = [[0] * 8 for _ in range(9)]
         # self._reward_value = 0
         self._gridcell_reward_episode = 0
+        self._utility_value_centralize_prev = 0.0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
+    @property
+    def utility_value_centralize_prev(self):
+        return self._utility_value_centralize_prev
+
+    @utility_value_centralize_prev.setter
+    def utility_value_centralize_prev(self, value):
+        self._utility_value_centralize_prev = value
 
     @property
     def reward_value(self):
@@ -98,3 +110,31 @@ class CentralizedReward(Reward):
             percentage_array = 0
 
         return percentage_array
+
+    def calculate_reward(self):
+        rewards = []
+        for i in range(3):
+
+            utility_value_centralize = self.calculate_utility(i)
+
+            dx = utility_value_centralize - self.utility_value_centralize_prev
+
+            if dx > 0 and utility_value_centralize >= env_variables.Threshold_of_utility:
+                rewards.append(utility_value_centralize * 10)
+
+            elif dx < 0 and utility_value_centralize < env_variables.Threshold_of_utility:
+                rewards.append(utility_value_centralize * -10)
+
+            elif dx > 0 and utility_value_centralize <= env_variables.Threshold_of_utility:
+                rewards.append(dx)
+            elif dx < 0 and utility_value_centralize > env_variables.Threshold_of_utility:
+                rewards.append(dx)
+
+            elif dx == 0 and utility_value_centralize <= env_variables.Threshold_of_utility:
+                rewards.append(dx * 0.2)
+            elif dx == 0 and utility_value_centralize > env_variables.Threshold_of_utility:
+                rewards.append(dx * 0.2)
+
+        for i in range(len(rewards)):
+            rewards[i] = 1 / (1 + math.pow(math.e, -1 * rewards[i]))
+        return rewards*3

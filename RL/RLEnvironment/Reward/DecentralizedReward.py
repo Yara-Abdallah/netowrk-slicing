@@ -102,18 +102,18 @@ class DeCentralizedReward(Reward):
     def reward_value(self, r):
         self._reward_value = r
 
-    def calculate_utility(self):
-        percentage_array = np.zeros(self.num_services)
-        for i in range(3):
-            if (self._services_ensured[i]) == 0 and (
-                    self._services_requested[i]) == 0:
-                percentage_array[i] = 0
-            elif (self._services_ensured[i]) != 0 and (
-                    self._services_requested[i]) != 0:
-                percentage_array[i] = (self._services_ensured[i]) / (
-                    self._services_requested[i])
-            else:
-                percentage_array[i] = 0
+    def calculate_utility(self, service_index):
+        percentage_array = 0
+        if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
+                self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
+            percentage_array = 0
+        elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
+                self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
+
+            percentage_array = (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
+                    self._services_requested[service_index] - self._services_requested_prev[service_index])
+        else:
+            percentage_array = 0
 
         return percentage_array
 
@@ -122,30 +122,29 @@ class DeCentralizedReward(Reward):
         # self._services_requested = np.zeros(self.num_services)
         # self._services_ensured = np.zeros(self.num_services)
 
-    def calculate_reward(self, x, action, c , max_capacity):
+    def calculate_reward(self, x, action, c, max_capacity):
         if action == 0:
             action = -1
         reward = 0
 
         if x > 0:
             if action == 1:
-                reward = action * math.pow(math.sqrt(x/max_capacity), -1 * action)
+                reward = action * math.pow(math.sqrt(x / max_capacity), -1 * action)
                 # print("reward is : ", reward)
                 return reward
             elif action == -1:
-                reward = action * math.pow(math.sqrt(x/max_capacity), -1 * action)
+                reward = action * math.pow(math.sqrt(x / max_capacity), -1 * action)
                 # print("reward is : ", reward)
                 return reward
         elif x < 0:
             # print(" x is smaller : ..................  ",)
             alpha = 1 / c
-            reward = -1 * action * math.pow(alpha,2) * math.pow(x, 2)
+            reward = -1 * action * math.pow(alpha, 2) * math.pow(x, 2)
             # print("reward is : ", reward)
             return reward
         # elif x == 0:
         #     # print("reward is : ", reward)
         #     return 1
-
 
     def coefficient(self, max_capacity, power_allocated_service, action, request_supported):
         if max_capacity > power_allocated_service and action == 1 and request_supported == 1:

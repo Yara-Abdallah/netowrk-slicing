@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from RL.RLEnvironment.Action.Action import Action
 
@@ -26,7 +28,8 @@ class ActionResponse:
 
     def explore(self):
         c = np.random.randint(2, size=(1,2))
-        return np.argmax(c[0])
+        # return np.argmax(c[0])
+        return np.random.choice([0, 1])
 
     def exploit(self, model, state):
 
