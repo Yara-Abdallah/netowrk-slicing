@@ -18,7 +18,9 @@ class CentralizedReward(Reward):
         super().__init__()
         self.grid_cell = 3
         self.num_services = 3
-        self.state_shape = CentralizedReward.state_shape(self.num_services, self.grid_cell)
+        self.state_shape = CentralizedReward.state_shape(
+            self.num_services, self.grid_cell
+        )
         self._services_ensured = np.zeros(self.num_services)
         self._services_requested = np.zeros(self.num_services)
         self._services_ensured_prev = np.zeros(self.num_services)
@@ -88,7 +90,6 @@ class CentralizedReward(Reward):
     def services_ensured_prev(self, value: np.ndarray):
         self._services_ensured_prev = np.array(value)
 
-
     def resetreward(self):
         print("reset reward of centralize")
         self._services_ensured_prev = np.zeros(self.num_services)
@@ -98,14 +99,28 @@ class CentralizedReward(Reward):
 
     def calculate_utility(self, service_index):
         percentage_array = 0
-        if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
-                self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
+        if (
+            self._services_ensured[service_index]
+            - self._services_ensured_prev[service_index]
+        ) == 0 and (
+            self._services_requested[service_index]
+            - self._services_requested_prev[service_index]
+        ) == 0:
             percentage_array = 0
-        elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
-                self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
-
-            percentage_array = (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
-                    self._services_requested[service_index] - self._services_requested_prev[service_index])
+        elif (
+            self._services_ensured[service_index]
+            - self._services_ensured_prev[service_index]
+        ) != 0 and (
+            self._services_requested[service_index]
+            - self._services_requested_prev[service_index]
+        ) != 0:
+            percentage_array = (
+                self._services_ensured[service_index]
+                - self._services_ensured_prev[service_index]
+            ) / (
+                self._services_requested[service_index]
+                - self._services_requested_prev[service_index]
+            )
         else:
             percentage_array = 0
 
@@ -114,27 +129,44 @@ class CentralizedReward(Reward):
     def calculate_reward(self):
         rewards = []
         for i in range(3):
-
             utility_value_centralize = self.calculate_utility(i)
 
             dx = utility_value_centralize - self.utility_value_centralize_prev
 
-            if dx > 0 and utility_value_centralize >= env_variables.Threshold_of_utility:
+            if (
+                dx > 0
+                and utility_value_centralize >= env_variables.Threshold_of_utility
+            ):
                 rewards.append(utility_value_centralize * 10)
 
-            elif dx < 0 and utility_value_centralize < env_variables.Threshold_of_utility:
+            elif (
+                dx < 0 and utility_value_centralize < env_variables.Threshold_of_utility
+            ):
                 rewards.append(utility_value_centralize * -10)
 
-            elif dx > 0 and utility_value_centralize <= env_variables.Threshold_of_utility:
+            elif (
+                dx > 0
+                and utility_value_centralize <= env_variables.Threshold_of_utility
+            ):
                 rewards.append(dx)
-            elif dx < 0 and utility_value_centralize > env_variables.Threshold_of_utility:
+            elif (
+                dx < 0 and utility_value_centralize > env_variables.Threshold_of_utility
+            ):
                 rewards.append(dx)
 
-            elif dx == 0 and utility_value_centralize <= env_variables.Threshold_of_utility:
+            elif (
+                dx == 0
+                and utility_value_centralize <= env_variables.Threshold_of_utility
+            ):
                 rewards.append(dx * 0.2)
-            elif dx == 0 and utility_value_centralize > env_variables.Threshold_of_utility:
+            elif (
+                dx == 0
+                and utility_value_centralize > env_variables.Threshold_of_utility
+            ):
                 rewards.append(dx * 0.2)
 
         for i in range(len(rewards)):
             rewards[i] = 1 / (1 + math.pow(math.e, -1 * rewards[i]))
-        return rewards*3
+        return rewards * 3
+
+
