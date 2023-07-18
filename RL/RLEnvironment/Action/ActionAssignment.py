@@ -36,13 +36,14 @@ class ActionAssignment:
 
     def explore(self):
         c = np.random.randint(2, size=(1,2))
-        print("choose explore")
+        # print("choose explore")
         #c = random.randint(0, 1)
         return np.argmax(c[0])
 
-    def exploit(self, model, state):
+    def exploit(self, model, state ):
         #return np.array(model.predict(state, verbose=0).reshape(3, 3), )
-        print("choose exploit")
+        # print("choose exploit")
+        # print("state shape : ", np.array(state).shape)
         state = np.array(state).reshape([1, np.array(state).shape[0]])
         c = np.array(model.predict(state, verbose=0)).reshape(1, 2)
         return np.argmax(c[0])

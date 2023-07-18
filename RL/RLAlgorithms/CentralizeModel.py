@@ -5,6 +5,7 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 
 
+
 class CentralizeModel():
     def __init__(self, state_size=8, action_size=2, activation_function="relu", loss_function="mse",
                  optimization_algorithm=Adam,
@@ -16,6 +17,7 @@ class CentralizeModel():
         self.optimization_algorithm = optimization_algorithm
         self.learning_rate = learning_rate
         self.output_activation = output_activation
+
 
     def build_model(self) -> Sequential:
         model_ = Sequential()

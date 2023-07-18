@@ -131,7 +131,7 @@ def update_lines_reward_centralized(lines_out_reward_centralize, steps, gridcell
     for j, line4 in enumerate(lines_out_reward_centralize):
         x_data, y_data = line4.get_data()
         x_data = np.append(x_data, steps)
-        y_data = np.append(y_data, gridcells_dqn[j].environment.reward.reward_value)
+        y_data = np.append(y_data, gridcells_dqn.environment.reward.reward_value)
         line4.set_data(x_data, y_data)
 def update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, qvalue):
     # print("befor plotting ")
@@ -172,7 +172,6 @@ def take_snapshot_figures():
         axs_Qvalue_centralize.canvas.draw()
     elif axs is axs_Qvalue_decentralize:
         axs_Qvalue_decentralize.canvas.draw()
-    print("yes .... ")
     path1 = os.path.join(utility_requested_ensured_path, f'snapshot')
     path2 = os.path.join(reward_decentralized_path, f'snapshot')
     path3 = os.path.join(reward_centralized_path, f'snapshot')
@@ -187,13 +186,15 @@ def take_snapshot_figures():
     fig_Qvalue_decentralize.savefig(path4 + '.svg', dpi=300)
     fig_Qvalue_centralize.savefig(path5 + '.svg', dpi=300)
 
-def update_figures(steps,temp_outlets):
+def update_figures(steps,temp_outlets,gridcells_dqn):
     update_lines_outlet_utility(lines_out_utility, steps, temp_outlets)
     update_lines_outlet_requested(lines_out_requested, steps, temp_outlets)
     update_lines_outlet_ensured(lines_out_ensured, steps, temp_outlets)
     update_lines_Qvalue_decentralized(lines_out_Qvalue_decentralize, steps, temp_outlets)
     update_lines_reward_decentralized(lines_out_reward_decentralize, steps, temp_outlets)
-
+    # update_lines_reward_centralized(lines_out_reward_centralize, steps, gridcells_dqn[0])
+    update_lines_Qvalue_centralized(lines_out_Qvalue_centralize, steps, gridcells_dqn[0].agents.qvalue
+                                    )
 
 def close_figures():
     plt.close(fig)

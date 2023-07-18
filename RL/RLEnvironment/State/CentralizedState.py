@@ -233,12 +233,21 @@ class CentralizedState(State):
 
         return percentage_array
 
-    def resetsate(self, tower_capacity):
+    def resetsate(self, outlets):
         self._services_requested = np.zeros(3)
         self._services_ensured = np.zeros(3)
         self._services_requested_prev = np.zeros(3)
         self._services_ensured_prev = np.zeros(3)
-        self._capacity_each_tower = tower_capacity
+        self._capacity_each_tower = self.max_capacity_each_outlet
+        states = []
+
+        for j , outlet in enumerate(outlets):
+            for i in range(3):
+                self.index_outlet = j
+                self.index_service = i
+                state = self.calculate_state()
+                states.append(state)
+        self.state_value_centralize = states
 
     # def calculate_state(self, binary):
     #     temp = list(numpy.concatenate(binary).flat)

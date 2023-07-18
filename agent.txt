@@ -1,6 +1,5 @@
 import os
 
-import keras
 import numpy as np
 import random
 from RL.Agent.IAgent import AbstractAgent
@@ -14,6 +13,9 @@ class Agent(AbstractAgent):
     _grid_outlets = []
     _action_value = 0
     _outlets_id = []
+    permutations = list(product([0, 1], repeat=3))
+    action_space = 8
+    action_permutations_dectionary = {permutations[i]: i for i in range(action_space)}
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -21,9 +23,6 @@ class Agent(AbstractAgent):
         self._grid_outlets = []
         self._action_value = 0
         self._qvalue = 0.0
-        self.permutations = list(product([0, 1], repeat=3))
-        self.action_space = 8
-        self.action_permutations_dectionary = {self.permutations[i]: i for i in range(self.action_space)}
 
     @property
     def outlets_id(self):
@@ -81,53 +80,34 @@ class Agent(AbstractAgent):
             for j, val in enumerate(available_mapped_actions):
                 if action_mask[val] == 0:
                     action_mask[val] = 1
-        action_mask = np.array(action_mask).reshape([1, np.array(action_mask).shape[0]])
         return action_mask
     def replay_buffer_decentralize(self, batch_size, model):
         # print("epsilon in decentralize : ", self.epsilon)
         minibatch = random.sample(self.memory, batch_size)
         target = 0
-        # print("minibatch : ", minibatch)
         for supported_service,exploitation, state, action, reward, next_state in minibatch:
             target = reward
-            # print("supported services : ", supported_service)
             action_mask = self.action_masking(supported_service)
-            # print("action mask : ", action_mask)
+
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
-                # print(model.summary())
-                logit_model2 = keras.Model(inputs=model.input, outputs=model.layers[-2].output)
-                logit_model1 = keras.Model(inputs=model.input, outputs=model.layers[-1].output)
-
-                logit_model4 = keras.Model(inputs=model.input, outputs=model.layers[-4].output)
-                # print("......................")
-                # print(logit_model4.predict([next_state, action_mask], verbose=0)[0])
-                # print("  2  ")
-
-                # print(logit_model2.predict([next_state, action_mask], verbose=0)[0])
-                # print("last :",logit_model1.predict([next_state, action_mask], verbose=0)[0])
-
                 logit_value = model.predict([next_state, action_mask], verbose=0)[0]
-
+                print("logit_value : ", logit_value)
                 # if exploitation == 1:
-                print("reward : ", reward )
-                print("np.amax(logit_value)  : ", np.amax(logit_value))
                 target = reward + self.gamma * np.amax(logit_value)
                 # if exploitation == 0:
                     # print("exploration : decentralize ")
                     # qvalue = model.predict([next_state, action_mask], verbose=0)[0]
                     # target = reward + self.gamma * qvalue[action]
-            # print("target  : ", target)
+            print("target  : ", target)
             state = np.array(state).reshape([1, np.array(state).shape[0]])
-
-            target_f =  model.predict([state,action_mask], verbose=0)
-
-            # print(" target_f befor : ",target_f)
+            target_f = np.round(model.predict([state,action_mask], verbose=0))
+            print(" target_f : ",target_f)
             target_f[0][action] = target
-            # print("target_f , decentralize : ", target_f)
+            print("target_f , decentralize : ", target_f)
             model.fit([state,action_mask], target_f, epochs=1, verbose=0)
-        if self.epsilon > self.min_epsilon:
-            self.epsilon -= self.epsilon * self.epsilon_decay
+        # if self.epsilon > self.min_epsilon:
+        #     self.epsilon -= self.epsilon * self.epsilon_decay
         return target
 
     def replay_buffer_centralize(self, batch_size, model):
@@ -148,7 +128,7 @@ class Agent(AbstractAgent):
 
             state = np.array(state).reshape([1, np.array(state).shape[0]])
             target_f = np.round(model.predict(state, verbose=0))
-            ########################################### note for rounding
+
             target_f[0][action] = target
             # print("target f centralize is  : ", target_f)
             model.fit(state, target_f, epochs=1, verbose=0)
@@ -176,17 +156,7 @@ class Agent(AbstractAgent):
     def remember(self, flag, state, action, reward, next_state):
         self.memory.append((flag, state, action, reward, next_state))
     def remember_decentralize(self, supported_services ,flag, state, action, reward, next_state):
-        self.memory.append((supported_services ,flag, state, action, reward, next_state))
-
-    def chain_dec(self, model, state, mask, epsilon):
-        "A chain with a default first successor"
-        test = np.random.rand()
-        "Setting the first successor that will modify the payload"
-        action = self.action
-        handler = Exploit(action, model, state,mask, Explore(action, FallbackHandler(action)))
-        action_Value, flag = handler.handle(test, epsilon)
-        print("action value inside chain : ",action_Value )
-        return action, action_Value , flag
+        self.memory.append((flag, state, action, reward, next_state))
 
     def chain(self, model, state, epsilon):
         "A chain with a default first successor"

@@ -6,6 +6,7 @@ from RL.Agent.Agent import Agent
 from Vehicle.IVehicle import Vehicle
 from Service.IService import Service
 from Outlet.IOutlet import Outlet
+from collections import deque
 
 
 class SingletonMeta(type):
@@ -24,9 +25,11 @@ class SingletonMeta(type):
 @dataclass
 class PerformanceLogger(metaclass=SingletonMeta):
     _services_type: str = ""
-    _number_of_periods_until_now : int = -1
+    _number_of_periods_until_now: int = -1
     requested_services: List[Dict[Vehicle, Service]] = field(default_factory=list)
     handled_services: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
+    _queue_requested_buffer = Dict[Outlet, deque(maxlen=200)]
+    _queue_ensured_buffer = Dict[Outlet, deque(maxlen=200)]
 
     _outlet_services_power_allocation: Dict[Outlet, List[float]] = field(default_factory=dict)
     _outlet_services_power_allocation_current: Dict[Outlet, List[float]] = field(default_factory=dict)
@@ -51,6 +54,24 @@ class PerformanceLogger(metaclass=SingletonMeta):
     served_ratio: List[float] = field(default_factory=list)
 
     @property
+    def queue_requested_buffer(self):
+        return self._queue_requested_buffer
+
+    def set_queue_requested_buffer(self, outlet, req):
+        if outlet not in self._queue_requested_buffer:
+            self._queue_requested_buffer = {}
+        self._queue_requested_buffer[outlet].append(req)
+
+    @property
+    def queue_ensured_buffer(self):
+        return self._queue_ensured_buffer
+
+    def set_queue_ensured_buffer(self, outlet, req):
+        if outlet not in self._queue_ensured_buffer:
+            self._queue_ensured_buffer = {}
+        self._queue_ensured_buffer[outlet].append(req)
+
+    @property
     def gridcell_utility(self):
         return self._gridcell_utility
 
@@ -64,8 +85,9 @@ class PerformanceLogger(metaclass=SingletonMeta):
         return self._number_of_periods_until_now
 
     @number_of_periods_until_now.setter
-    def number_of_periods_until_now(self,value):
-        self._number_of_periods_until_now+=1
+    def number_of_periods_until_now(self, value):
+        self._number_of_periods_until_now += 1
+
     @property
     def decentralize_z_c(self):
         return self._decentralize_z_c
@@ -207,7 +229,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
     def set_outlet_services_power_allocation_for_all_requested(self, outlet, service):
         if outlet not in self._outlet_services_power_allocation_for_all_requested:
             self._outlet_services_power_allocation_for_all_requested[outlet] = {}
-        self._outlet_services_power_allocation_for_all_requested[outlet]=service
+        self._outlet_services_power_allocation_for_all_requested[outlet] = service
 
     @property
     def service_requested(self):
@@ -224,9 +246,8 @@ class PerformanceLogger(metaclass=SingletonMeta):
     def set_service_handled(self, outlet, car, service):
         if outlet not in self.handled_services:
             self.handled_services[outlet] = {}
-        new_value = {car : service}
+        new_value = {car: service}
         self.handled_services[outlet].update(new_value)
-
 
     @property
     def request_costs(self):

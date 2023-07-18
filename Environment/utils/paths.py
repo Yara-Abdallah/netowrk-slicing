@@ -3,8 +3,8 @@ import sys
 
 
 results_dir = os.path.join(sys.path[0], 'results3_exploit_decentralize')
-path6 = os.path.join(results_dir, 'centralized_weights')
-path7 = os.path.join(results_dir, 'decentralized_weights')
+centralized_weights = os.path.join(results_dir, 'centralized_weights')
+decentralized_weights = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
 path_memory_decentralize = os.path.join(results_dir,'decentralize_memory')
 # prev_results_dir = "//content//drive//MyDrive//network_slicing//prev_results//"
@@ -32,8 +32,8 @@ os.makedirs(reward_decentralized_path, exist_ok=True)
 os.makedirs(reward_centralized_path, exist_ok=True)
 os.makedirs(qvalue_decentralized_path, exist_ok=True)
 os.makedirs(qvalue_centralized_path, exist_ok=True)
-os.makedirs(path6, exist_ok=True)
-os.makedirs(path7, exist_ok=True)
+os.makedirs(centralized_weights, exist_ok=True)
+os.makedirs(decentralized_weights, exist_ok=True)
 os.makedirs(path_memory_centralize, exist_ok=True)
 os.makedirs(path_memory_decentralize, exist_ok=True)
 os.makedirs(centralize_qvalue_path, exist_ok=True)

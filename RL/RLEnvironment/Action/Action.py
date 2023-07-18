@@ -8,5 +8,5 @@ class Action(Protocol):
     def explore(self):
         ...
 
-    def exploit(self, model, state):
+    def exploit(self, model, state,mask):
         ...

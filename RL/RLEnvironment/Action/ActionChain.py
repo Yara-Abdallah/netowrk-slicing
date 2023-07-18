@@ -35,19 +35,18 @@ class Explore(IHandler):
 
 class Exploit(IHandler):
     "A Concrete Handler"
-
-    def __init__(self, action, model, state, successor):
+    def __init__(self, action, model, state,mask, successor):
         super().__init__(action, successor)
         self.model = model
         self.state = state
-
+        self.mask = mask
     def check_epsilon(self, test, epsilon):
         if 0 < epsilon < test < 1:
             self.flag = 1
             # action = Action.exploit()
-
             # print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
-            return self.action.exploit(self.model, self.state)
+            exploit = self.action.exploit(self.model, self.state,self.mask)
+            return exploit
 
 
 class FallbackHandler(IHandler):

@@ -310,7 +310,8 @@ class Environment:
 
         for i in range(1):
             for index, outlet in enumerate(self.gridcells_dqn[i].agents.grid_outlets):
-                self.temp_outlets.append(outlet)
+                if str(outlet.__class__.__name__) == "ThreeG":
+                    self.temp_outlets.append(outlet)
 
         load_weigths_buffer(self.gridcells_dqn[0])
 
@@ -329,18 +330,22 @@ class Environment:
 
             # if self.steps - previous_steps_sending == frame_rate_for_sending_requests:
             #     previous_steps_sending = self.steps
-
             number_of_cars_will_send_requests = round(
                 len(list(env_variables.vehicles.values())) * 0.1
             )
             vehicles = ra.sample(
                 list(env_variables.vehicles.values()), number_of_cars_will_send_requests
             )
-            list(map(lambda veh: requests_buffering(veh, observer, performance_logger),vehicles,))
-
+            list(
+                map(
+                    lambda veh: requests_buffering(
+                        veh, observer, performance_logger, self.steps, self.previous_period
+                    ),
+                    vehicles,
+                )
+            )
             if self.steps == 2:
                 centralize_state_action(self.gridcells_dqn, self.steps, performance_logger)
-                decentralize_period(performance_logger, self.gridcells_dqn, step)
 
             if self.steps - self.previous_period >= 10:
                 self.previous_period = self.steps
@@ -376,19 +381,20 @@ class Environment:
                 self.previous_steps = self.steps
                 for ind, gridcell_dqn in enumerate(self.gridcells_dqn):
                     for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
-                        if len(outlet.dqn.agents.memory) > 31:
-                            # print("replay buffer of decentralize ")
-                            outlet.dqn.agents.qvalue = (
-                                outlet.dqn.agents.replay_buffer_decentralize(
-                                    30, outlet.dqn.model
+                        for j in range(3):
+                            if len(outlet.dqn[j].agents.memory) > 31:
+                                # print("replay buffer of decentralize ")
+                                outlet.dqn[j].agents.qvalue = (
+                                    outlet.dqn[j].agents.replay_buffer_decentralize(
+                                        30, outlet.dqn[j].model
+                                    )
                                 )
-                            )
 
             # if self.steps - self.previous_steps_centralize >= env_variables.centralized_replay_buffer:
             #     self.previous_steps_centralize = self.steps
             #     for ind, gridcell_dqn in enumerate(self.gridcells_dqn):
             #         if len(gridcell_dqn.agents.memory) >= 64:
-            #             # print("replay buffer of centralize ")
+            #             print("replay buffer of centralize ")
             #             self.average_qvalue_centralize.append(gridcell_dqn.agents.replay_buffer_centralize(32,
             #                                                                                           gridcell_dqn.model))
 
@@ -399,8 +405,8 @@ class Environment:
                     gridcell_dqn.environment.reward.gridcell_reward_episode = sum(
                         gridcell_dqn.environment.reward.reward_value)
 
-                    # gridcell_dqn.agents.qvalue = (
-                    #             sum(self.average_qvalue_centralize) / len(self.average_qvalue_centralize))
+                    gridcell_dqn.agents.qvalue = (
+                                sum(self.average_qvalue_centralize) / len(self.average_qvalue_centralize))
 
                     add_value_to_pickle(
                             os.path.join(centralize_qvalue_path, f'qvalue.pkl'),
@@ -409,16 +415,19 @@ class Environment:
                     update_figures(self.steps, self.temp_outlets,self.gridcells_dqn)
 
                     for i, out in enumerate(gridcell_dqn.agents.grid_outlets):
-                        add_value_to_pickle(
-                            os.path.join(decentralize_qvalue_path, f"qvalue{i}.pkl"),
-                            out.dqn.agents.qvalue,
-                        )
-                        out.dqn.environment.reward.episode_reward_decentralize = (
-                            out.dqn.environment.reward.reward_value
-                        )
 
-                        out.dqn.environment.state.resetsate()
-                        out.dqn.environment.reward.resetreward()
+                        for j in range(3):
+
+                            add_value_to_pickle(
+                                os.path.join(decentralize_qvalue_path, f"qvalue{i}_{j}.pkl"),
+                                out.dqn[j].agents.qvalue,
+                            )
+                            out.dqn[j].environment.reward.episode_reward_decentralize = (
+                                out.dqn[j].environment.reward.reward_value
+                            )
+
+                            out.dqn[j].environment.state.resetsate()
+                            out.dqn[j].environment.reward.resetreward()
 
                     gridcell_dqn.environment.reward.resetreward()
                     gridcell_dqn.environment.state.resetsate(self.temp_outlets)

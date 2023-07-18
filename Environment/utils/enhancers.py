@@ -8,7 +8,7 @@ from .aggregators import *
 from .. import env_variables
 
 
-def requests_buffering(car, observer, performance_logger, steps, previous_period):
+def requests_buffering(car, observer, performance_logger):
     car.attach(observer)
     car.set_state(
         float(round(traci.vehicle.getPosition(car.id)[0], 4)),
@@ -22,6 +22,7 @@ def requests_buffering(car, observer, performance_logger, steps, previous_period
         outlet = info[0]
         # print("outlet type is 1 --> : ", outlet.__class__.__name__)
         if service.request_supported(outlet):
+
             if outlet not in performance_logger.handled_services:
                 performance_logger.set_service_handled(outlet, car, service)
             if outlet in performance_logger.handled_services:
@@ -207,13 +208,14 @@ def centralize_state_action(gridcells_dqn, step, performance_logger):
                 ):
                     # if step > env_variables.advisor_period[0]  and  step <= env_variables.advisor_period[1]:
                     outlet.supported_services = []
-
+                    mask = []
                     for serv_index in range(number_of_services):
                         (
                             action_centralize,
                             action,
                             flag,
                         ) = gridcell.agents.exploitation(
+
                             gridcell.model,
                             gridcell.environment.state.state_value_centralize[j],
                         )
@@ -224,7 +226,7 @@ def centralize_state_action(gridcells_dqn, step, performance_logger):
                         list_flags.append(flag)
 
                 actions.extend(outlet.supported_services)
-            print("outlet.supported_services : ", outlet.supported_services)
+            # print("outlet.supported_services : ", outlet.supported_services)
             outlet.dqn.environment.state.supported_services = outlet.supported_services
 
         # gridcell.agents.action.command.action_objects = actions_objects
@@ -243,13 +245,13 @@ def centralize_nextstate_reward(gridcells_dqn):
         utility_value_centralize = 0
         index_of_service = 0
         outlets = gridcell.agents.grid_outlets
-        for ind in outlets:
-            print(
-                "type : ",
-                ind.__class__.__name__,
-                "  current capacity : ",
-                ind.current_capacity,
-            )
+        # for ind in outlets:
+            # print(
+            #     "type : ",
+            #     ind.__class__.__name__,
+            #     "  current capacity : ",
+            #     ind.current_capacity,
+            # )
         index_of_outlet = -1
         for i in range(9):
             index_of_service = i % 3
@@ -317,303 +319,237 @@ def decentralize_period(performance_logger, gridcells_dqn, step):
         ens1 = np.zeros(3)
         power = np.zeros(3)
         for i, outlet in enumerate(gridcell.agents.grid_outlets):
-            for service_index in range(3):
-                if outlet.dqn.environment.state.supported_services[service_index] == 1:
-                    if outlet in performance_logger.handled_services:
-                        # flag = True
+            print("outlet.dqn.environment.state.supported_services[service_index] : ",outlet.dqn.environment.state.supported_services)
+            if outlet in performance_logger.handled_services:
+                outlet._max_capacity = outlet.set_max_capacity(outlet.__class__.__name__)
+                gridcell.environment.state._max_capacity_each_outlet[i] = outlet._max_capacity
+                gridcell.environment.state._capacity_each_tower[i] = outlet.current_capacity
 
-                        # outlet._max_capacity = outlet.set_max_capacity(outlet.__class__.__name__)
-                        gridcell.environment.state._max_capacity_each_outlet[
-                            i
-                        ] = outlet._max_capacity
-                        # print("max capacity : ",outlet._max_capacity )
-                        # print("outlet._current_capacity : ", outlet.current_capacity)
-                        gridcell.environment.state._capacity_each_tower[
-                            i
-                        ] = outlet.current_capacity
-                        outlet.dqn.environment.state.state_value_decentralize[
+                outlet.dqn.environment.state.state_value_decentralize[0] = outlet.current_capacity
+                outlet.dqn.environment.state.tower_capacity = outlet.current_capacity
+                outlet.dqn.environment.state.max_tower_capacity = outlet._max_capacity
+
+                outlet.dqn.environment.state.supported_services = outlet.supported_services
+                outlet.dqn.environment.state.action_value = outlet.dqn.agents.action_value
+
+                if step <= 10:
+                    outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.calculate_state()
+                # print("outlet.dqn.environment.state.supported_services : ",outlet.dqn.environment.state.supported_services)
+                print("decentralize state : ",outlet.dqn.environment.state.state_value_decentralize)
+
+
+                action_decentralize,outlet.dqn.agents.action.command.action_value_decentralize,flag = \
+                    outlet.dqn.agents.chain_dec(
+                    outlet.dqn.model,
+                    outlet.dqn.environment.state.state_value_decentralize,
+                    outlet.dqn.agents.action_masking(outlet.dqn.environment.state.supported_services),
+
+                    outlet.dqn.agents.epsilon,
+                )
+
+                mapped_action = 0
+                for key, val in outlet.dqn.agents.action_permutations_dectionary.items():
+                    if val == outlet.dqn.agents.action.command.action_value_decentralize:
+                        print("the key : ", key)
+                        mapped_action =  key
+
+
+                print("action decentralize from chain  : ", outlet.dqn.agents.action.command.action_value_decentralize)
+
+                outlet.dqn.agents.action_value = (
+                    outlet.dqn.agents.action.command.action_value_decentralize
+                )
+
+                outlet.dqn.environment.state.action_value = (
+                    outlet.dqn.agents.action_value
+                )
+                x = 0
+                for service_index,services_actions in enumerate(mapped_action) :
+
+                    if services_actions == 1:
+                        Z = outlet.current_capacity
+                        C = performance_logger.outlet_services_power_allocation_with_action_period[
+                                outlet][service_index]
+
+                        print("c is : ",C)
+                        print("what sum from  : ", performance_logger.outlet_services_power_allocation_with_action_period[
+                                outlet
+                            ][service_index])
+                        if outlet.current_capacity - C <= 0:
+                            outlet.current_capacity = 0
+                        else:
+                            outlet.current_capacity = outlet.current_capacity - C
+
+
+                        x = Z - C
+
+                        number_of_requests_in_this_period = performance_logger.outlet_services_requested_number_with_action_period[
+                            outlet
+                        ][
                             service_index
-                        ][0] = outlet.current_capacity
-                        outlet.dqn.environment.state.tower_capacity = (
-                            outlet.current_capacity
-                        )
-                        outlet.dqn.environment.state.max_tower_capacity = (
-                            outlet._max_capacity
-                        )
-                        outlet.dqn.environment.state.supported_services = (
-                            outlet.supported_services
-                        )
-                        outlet.dqn.environment.state.action_value = (
-                            outlet.dqn.agents.action_value
-                        )
-                        outlet.dqn.environment.state.index_service = service_index
-                        # print("state_value_decentralize : ",outlet.dqn.environment.state.state_value_decentralize)
-
-                        if step <= 10:
-                            outlet.dqn.environment.state.state_value_decentralize[
-                                service_index
-                            ] = outlet.dqn.environment.state.calculate_state()
-                        # print("outlet.dqn.environment.state.supported_services : ",outlet.dqn.environment.state.supported_services)
-                        print(
-                            "decentralize state : ",
-                            outlet.dqn.environment.state.state_value_decentralize[
-                                service_index
-                            ],
-                        )
-                        (
-                            action_decentralize,
-                            outlet.dqn.agents.action.command.action_value_decentralize,
-                            flag,
-                        ) = outlet.dqn.agents.chain(
-                            outlet.dqn.model,
-                            outlet.dqn.environment.state.state_value_decentralize[
-                                service_index
-                            ],
-                            outlet.dqn.agents.epsilon,
-                        )
-
-                        outlet.dqn.agents.action_value = (
-                            outlet.dqn.agents.action.command.action_value_decentralize
-                        )
-                        x = 0
-                        outlet.dqn.environment.state.action_value = (
-                            outlet.dqn.agents.action_value
-                        )
-
-                        if outlet.dqn.agents.action_value == 1:
-                            Z = outlet.current_capacity
-                            C = sum(
-                                performance_logger.outlet_services_power_allocation_with_action_period[
-                                    outlet
-                                ]
-                            )
-                            if outlet.current_capacity - C <= 0:
-                                outlet.current_capacity = 0
-                            else:
-                                outlet.current_capacity = outlet.current_capacity - C
-                            # print(" z in action 1 : ", Z)
-                            # print(" c in action 1 : ", C)
-                            x = Z - C
-
-                            number_of_requests_in_this_period = performance_logger.outlet_services_requested_number_with_action_period[
-                                outlet
-                            ][
-                                service_index
-                            ]
-                            sum_power_allocation = performance_logger.outlet_services_power_allocation_with_action_period[
-                                outlet
-                            ][
-                                service_index
-                            ]
-                            print(
-                                "number_of_requests_in_this_period ",
-                                number_of_requests_in_this_period,
-                            )
-                            print("sum_power_allocation ", sum_power_allocation)
-                            print("service_index  ", service_index)
-                            if number_of_requests_in_this_period != 0:
-                                outlet.dqn.environment.state.mean_power_allocated_requests = (
-                                    sum_power_allocation
-                                    / number_of_requests_in_this_period
-                                )
-                            else:
-                                outlet.dqn.environment.state.mean_power_allocated_requests = (
-                                    0
-                                )
-
-                            outlet.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number_with_action_period[
-                                outlet
-                            ]
-
-                            outlet.power = performance_logger.outlet_services_power_allocation_with_action_period[
-                                outlet
-                            ]
-
-                            outlet.dqn.environment.state.allocated_power = outlet.power
-                            outlet.dqn.environment.state.tower_capacity = (
-                                outlet.current_capacity
-                            )
-
-                            outlet.dqn.environment.state.services_ensured = performance_logger.outlet_services_ensured_number_with_action_period[
-                                outlet
-                            ]
-
-                            # for ind in range(3):
-                            performance_logger.outlet_services_ensured_number[outlet][
-                                service_index
-                            ] = (
-                                performance_logger.outlet_services_ensured_number[
-                                    outlet
-                                ][service_index]
-                                + outlet.dqn.environment.state.services_ensured[
-                                    service_index
-                                ]
-                            )
-
-                            performance_logger.outlet_services_power_allocation[outlet][
-                                service_index
-                            ] = (
-                                performance_logger.outlet_services_power_allocation[
-                                    outlet
-                                ][service_index]
-                                + outlet.dqn.environment.state.allocated_power[
-                                    service_index
-                                ]
-                            )
-
-                        elif outlet.dqn.agents.action_value == 0:
-                            Z = outlet.current_capacity
-                            C = sum(
-                                performance_logger.outlet_services_power_allocation_with_action_period[
-                                    outlet
-                                ]
-                            )
-                            # print(" z in action 0 : ",Z)
-                            # print(" c in action 0 : ",C)
-                            x = Z - C
-                            number_of_requests_in_this_period = performance_logger.outlet_services_requested_number_with_action_period[
-                                outlet
-                            ][
-                                service_index
-                            ]
-                            sum_power_allocation = performance_logger.outlet_services_power_allocation_with_action_period[
-                                outlet
-                            ][
-                                service_index
-                            ]
-
-                            print(
-                                "number_of_requests_in_this_period ",
-                                number_of_requests_in_this_period,
-                            )
-                            print("sum_power_allocation ", sum_power_allocation)
-                            print("service_index  ", service_index)
-
-                            if number_of_requests_in_this_period != 0:
-                                outlet.dqn.environment.state.mean_power_allocated_requests = (
-                                    sum_power_allocation
-                                    / number_of_requests_in_this_period
-                                )
-                            else:
-                                outlet.dqn.environment.state.mean_power_allocated_requests = (
-                                    0
-                                )
-
-                            outlet.power = performance_logger.outlet_services_power_allocation_with_action_period[
-                                outlet
-                            ]
-
-                            outlet.dqn.environment.state.allocated_power = outlet.power
-
-                            outlet.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number_with_action_period[
-                                outlet
-                            ]
-                            outlet.dqn.environment.state.services_ensured = [
-                                0,
-                                0,
-                                0,
-                            ]
-                            performance_logger.set_outlet_services_ensured_number_with_action_period(
-                                outlet, [0, 0, 0]
-                            )
-                        outlet.dqn.environment.state.action_value = (
-                            outlet.dqn.agents.action.command.action_value_decentralize
-                        )
-                        outlet.dqn.environment.state.next_state_decentralize[
-                            service_index
-                        ] = action_decentralize.execute(
-                            outlet.dqn.environment.state,
-                            outlet.dqn.agents.action.command.action_value_decentralize,
-                        )
-                        print(
-                            "decenlraize next state value :   ",
-                            outlet.dqn.environment.state.next_state_decentralize[
-                                service_index
-                            ],
-                        )
-
-                        outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward(
-                            x,
-                            outlet.dqn.agents.action.command.action_value_decentralize,
-                            sum(
-                                performance_logger.outlet_services_power_allocation_with_action_period[
-                                    outlet
-                                ]
-                            ),
-                            outlet._max_capacity,
-                        )
-                        # self.add_value_to_text(
-                        #     f"H://work_projects//network_slicing//ns//results//reward_decentralize{i}.txt",
-                        #     outlet.dqn.environment.reward.reward_value)
-                        # self.add_value_to_text(
-                        #     f"H://work_projects//network_slicing//ns//results//action_decentralize{i}.txt",
-                        #     outlet.dqn.agents.action_value)
-                        # print("decentralize flag : ",flag)
-                        # print("dec ",outlet.dqn.environment.state.state_value_decentralize[service_index])
-                        # print("dec ",outlet.dqn.agents.action.command.action_value_decentralize)
-                        # print("dec ",outlet.dqn.environment.reward.reward_value)
-                        # print("dec ",outlet.dqn.environment.state.next_state_decentralize[service_index])
-                        if isinstance(
-                            outlet.dqn.agents.action.command.action_value_decentralize,
-                            np.ndarray,
-                        ):
-                            outlet.dqn.agents.action.command.action_value_decentralize = (
-                                outlet.dqn.agents.action.command.action_value_decentralize.item()
-                            )
-                        outlet.dqn.agents.remember(
-                            flag,
-                            outlet.dqn.environment.state.state_value_decentralize[
-                                service_index
-                            ],
-                            outlet.dqn.agents.action.command.action_value_decentralize,
-                            outlet.dqn.environment.reward.reward_value,
-                            outlet.dqn.environment.state.next_state_decentralize[
-                                service_index
-                            ],
-                        )
-
-                        outlet.dqn.environment.state.state_value_decentralize[
-                            service_index
-                        ] = outlet.dqn.environment.state.next_state_decentralize[
+                        ]
+                        sum_power_allocation = performance_logger.outlet_services_power_allocation_with_action_period[
+                            outlet
+                        ][
                             service_index
                         ]
 
-                        if len(outlet.power_distinct[0]) == 0:
-                            outlet.power = [0.0, 0.0, 0.0]
 
-                        outlet.distinct = gridcell.agents.outlets_id[i]
-                        # gridcell.environment.state.allocated_power = outlet.power_distinct
-                        gridcell.environment.state.supported_services = (
-                            outlet.supported_services_distinct
+                        if number_of_requests_in_this_period != 0:
+                            outlet.dqn.environment.state.mean_power_allocated_requests = (
+                                sum_power_allocation
+                                / number_of_requests_in_this_period
+                            )
+                        else:
+                            outlet.dqn.environment.state.mean_power_allocated_requests = (
+                                0
+                            )
+
+                        outlet.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number_with_action_period[
+                            outlet
+                        ]
+
+                        outlet.power = performance_logger.outlet_services_power_allocation_with_action_period[
+                            outlet
+                        ]
+
+                        outlet.dqn.environment.state.allocated_power = outlet.power
+                        print("outlet.dqn.environment.state.allocated_power  : ", outlet.dqn.environment.state.allocated_power)
+                        outlet.dqn.environment.state.tower_capacity = (
+                            outlet.current_capacity
                         )
+
+                        outlet.dqn.environment.state.services_ensured = performance_logger.outlet_services_ensured_number_with_action_period[
+                            outlet
+                        ]
+
                         # for ind in range(3):
-                        req1[service_index] = (
-                            req1[service_index]
-                            + performance_logger.outlet_services_requested_number[
-                                outlet
-                            ][service_index]
+                        performance_logger.outlet_services_ensured_number[outlet][service_index] = (
+                            performance_logger.outlet_services_ensured_number[outlet][service_index]
+                            + outlet.dqn.environment.state.services_ensured[service_index]
                         )
-                        ens1[service_index] = (
-                            ens1[service_index]
-                            + performance_logger.outlet_services_ensured_number[outlet][
-                                service_index
-                            ]
+
+                        performance_logger.outlet_services_power_allocation[outlet][service_index] = (
+                            performance_logger.outlet_services_power_allocation[outlet][service_index]
+                            + outlet.dqn.environment.state.allocated_power[service_index]
                         )
-                        power[service_index] = (
-                            power[service_index]
-                            + performance_logger.outlet_services_power_allocation[
-                                outlet
-                            ][service_index]
+
+                    elif services_actions == 0:
+                        Z = outlet.current_capacity
+                        C = performance_logger.outlet_services_power_allocation_with_action_period[outlet][service_index]
+
+
+                        print("c is : ", C)
+                        print("what sum from  : ",
+                              performance_logger.outlet_services_power_allocation_with_action_period[outlet][service_index])
+
+                        x = Z - C
+                        number_of_requests_in_this_period = performance_logger.outlet_services_requested_number_with_action_period[outlet][service_index]
+                        sum_power_allocation = performance_logger.outlet_services_power_allocation_with_action_period[
+                            outlet][service_index]
+
+
+
+                        if number_of_requests_in_this_period != 0:
+                            outlet.dqn.environment.state.mean_power_allocated_requests = (
+                                sum_power_allocation
+                                / number_of_requests_in_this_period
+                            )
+                        else:
+                            outlet.dqn.environment.state.mean_power_allocated_requests = (
+                                0
+                            )
+
+                        outlet.power = performance_logger.outlet_services_power_allocation_with_action_period[
+                            outlet
+                        ]
+
+                        outlet.dqn.environment.state.allocated_power = outlet.power
+                        print("outlet.dqn.environment.state.allocated_power : , ", outlet.dqn.environment.state.allocated_power)
+                        outlet.dqn.environment.state.services_requested = performance_logger.outlet_services_requested_number_with_action_period[outlet]
+                        outlet.dqn.environment.state.services_ensured = [0,0,0]
+                        performance_logger.set_outlet_services_ensured_number_with_action_period(
+                            outlet, [0, 0, 0]
                         )
-            # print("outlet requested : ",performance_logger.outlet_services_requested_number[outlet])
-            # print("outlet ensured : ", performance_logger.outlet_services_ensured_number[outlet])
-            # print("req1 : ",req1)
-            # print("ens1 : ",ens1)
-        # if flag == True:
+
+                outlet.dqn.environment.state.action_value = (
+                    outlet.dqn.agents.action.command.action_value_decentralize
+                )
+                outlet.dqn.environment.state.next_state_decentralize = action_decentralize.execute(
+                    outlet.dqn.environment.state,
+                    outlet.dqn.agents.action.command.action_value_decentralize,
+                )
+
+
+                print(
+                    "decenlraize next state value :   ",
+                    outlet.dqn.environment.state.next_state_decentralize,
+                )
+
+                outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward(
+                    x,
+                    outlet.dqn.agents.action.command.action_value_decentralize,
+                    sum(
+                        performance_logger.outlet_services_power_allocation_with_action_period[
+                            outlet
+                        ]
+                    ),
+                    outlet._max_capacity,
+                )
+
+
+                if isinstance(
+                    outlet.dqn.agents.action.command.action_value_decentralize,
+                    np.ndarray,
+                ):
+                    outlet.dqn.agents.action.command.action_value_decentralize = (
+                        outlet.dqn.agents.action.command.action_value_decentralize.item()
+                    )
+
+
+                outlet.dqn.agents.remember_decentralize(
+                    outlet.dqn.environment.state.supported_services,
+                    flag,
+                    outlet.dqn.environment.state.state_value_decentralize,
+                    outlet.dqn.agents.action.command.action_value_decentralize,
+                    outlet.dqn.environment.reward.reward_value,
+                    outlet.dqn.environment.state.next_state_decentralize,
+                )
+
+                outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.next_state_decentralize
+
+                if len(outlet.power_distinct[0]) == 0:
+                    outlet.power = [0.0, 0.0, 0.0]
+
+                outlet.distinct = gridcell.agents.outlets_id[i]
+                # gridcell.environment.state.allocated_power = outlet.power_distinct
+                gridcell.environment.state.supported_services = outlet.supported_services_distinct
+
+
+                for service_index in range(3):
+                    req1[service_index] = (
+                        req1[service_index]
+                        + performance_logger.outlet_services_requested_number[
+                            outlet
+                        ][service_index]
+                    )
+                    ens1[service_index] = (
+                        ens1[service_index]
+                        + performance_logger.outlet_services_ensured_number[outlet][
+                            service_index
+                        ]
+                    )
+                    power[service_index] = (
+                        power[service_index]
+                        + performance_logger.outlet_services_power_allocation[
+                            outlet
+                        ][service_index]
+                    )
+
+
         gridcell.environment.state.services_requested = req1
         gridcell.environment.reward.services_requested = req1
         gridcell.environment.state.services_ensured = ens1
         gridcell.environment.reward.services_ensured = ens1
         gridcell.environment.state.average_power_allocate = power
-        # print("gridcell requested : ", gridcell.environment.state.services_requested)
-        # print("gridcell ensured : ", gridcell.environment.state.services_ensured)
+

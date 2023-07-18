@@ -25,6 +25,7 @@ class Service(ABC):
         self.criticality = criticality
         self._realtime = realtime
         self._service_power_allocate = 0
+        self._processing_time = 0
 
     # def __str__(self):
     #     return f"service criticality : {self.criticality} ,  service bandwidth : {self.bandwidth} , " \
@@ -48,6 +49,12 @@ class Service(ABC):
             else :
                 return False
     @property
+    def processing_time(self):
+        return self._processing_time
+    @processing_time.setter
+    def processing_time(self,value):
+        self._processing_time = value
+    @property
     def service_power_allocate(self):
         return self._service_power_allocate
 
@@ -66,3 +73,7 @@ class Service(ABC):
     @realtime.setter
     def realtime(self, r):
         self._realtime = r
+
+    @abstractmethod
+    def calcualate_processing_time(self):
+        pass

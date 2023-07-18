@@ -102,31 +102,40 @@ class DeCentralizedReward(Reward):
     def reward_value(self, r):
         self._reward_value = r
 
-    def calculate_utility(self, service_index):
-        percentage_array = 0
-        if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
-                self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
-            percentage_array = 0
-        elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
-                self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
+    def calculate_utility(self):
+        percentage_array = [0.0,0.0,0.0]
+        for service_index in range(3):
+            if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
+                    self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
+                percentage_array[service_index] = 0
+            elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
+                    self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
 
-            percentage_array = (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
-                    self._services_requested[service_index] - self._services_requested_prev[service_index])
-        else:
-            percentage_array = 0
+                percentage_array[service_index] = (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
+                        self._services_requested[service_index] - self._services_requested_prev[service_index])
+            else:
+                percentage_array[service_index] = 0
 
         return percentage_array
 
     def resetreward(self):
         print("reset reward of decentralize")
+        self.reward_value = 0
+
         # self._services_requested = np.zeros(self.num_services)
         # self._services_ensured = np.zeros(self.num_services)
+    def calculate_reward2(self,):
 
+        utility = self.calculate_utility()
+        w1 = 1
+        w2 = 1
+        throughput = 1
+        derivation_throughput = 1
+        return w1 * math.tanh(derivation_throughput) + w2 * throughput
     def calculate_reward(self, x, action, c, max_capacity):
         if action == 0:
             action = -1
         reward = 0
-
         if x > 0:
             if action == 1:
                 reward = action * math.pow(math.sqrt(x / max_capacity), -1 * action)
@@ -142,9 +151,9 @@ class DeCentralizedReward(Reward):
             reward = -1 * action * math.pow(alpha, 2) * math.pow(x, 2)
             # print("reward is : ", reward)
             return reward
-        # elif x == 0:
-        #     # print("reward is : ", reward)
-        #     return 1
+        elif x == 0:
+            # print("reward is : ", reward)
+            return 1
 
     def coefficient(self, max_capacity, power_allocated_service, action, request_supported):
         if max_capacity > power_allocated_service and action == 1 and request_supported == 1:
