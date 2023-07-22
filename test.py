@@ -124,3 +124,40 @@ plt.show()
 # plt.savefig('plot_cent.svg', format='svg')
 # Display the plot
 # plt.show()
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def rolling_average(data, window_size):
+    # Convert the data to a NumPy array with float type
+    data_array = np.array(data, dtype=np.float64)
+
+    # Pad the data with NaN values at the beginning to maintain the length of the output
+    padded_data = np.pad(data_array, (window_size - 1, 0), mode='constant', constant_values=np.nan)
+
+    # Calculate the rolling average using convolution with a window of ones
+    weights = np.ones(window_size) / window_size
+    rolling_avg = np.convolve(padded_data, weights, mode='valid')
+
+    return rolling_avg
+
+
+# Example usage:
+data = [10, 5, 7, 9, 8, 12, 15, 20, 18, 16]
+window_size = 3
+
+result = rolling_average(data, window_size)
+x_values = [i for i in range(len(result))]  # Adjust x-axis values
+# x = [i * 320 for i in range(len(deque))]
+
+# Plot the original data and the rolling average
+plt.plot(np.arange(len(data)), data, label='Original Data', marker='o')
+plt.plot(x_values, result, label=f'Rolling Average (window={window_size})', marker='o')
+plt.xlabel('Data Points')
+plt.ylabel('Values')
+plt.legend()
+plt.title('Rolling Average Plot')
+plt.grid(True)
+plt.show()

@@ -1,3 +1,5 @@
+import numpy as np
+
 from Service.IService import Service
 
 
@@ -14,7 +16,9 @@ class FactoryEntertainment(Service):
 
 
     def calcualate_processing_time(self):
-        return self._network_latency + self._data_size
+        # self._network_latency + self._data_size
+        return np.random.choice(np.arange(2,5))
+
     def calculate_arrival_rate(self):
         # TODO: add doc string
         return 1

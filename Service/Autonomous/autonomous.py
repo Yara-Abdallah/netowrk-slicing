@@ -1,3 +1,5 @@
+import numpy as np
+
 from Service.IService import Service
 
 
@@ -15,4 +17,6 @@ class FactoryAutonomous(Service):
         return 3
 
     def calcualate_processing_time(self):
-        return self._network_latency + self._task_complexity
+        # self._network_latency + self._task_complexity
+        return np.random.choice(np.arange(4,8))
+

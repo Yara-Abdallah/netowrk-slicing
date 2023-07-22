@@ -5,38 +5,42 @@ import numpy as np
 
 
 class DeCentralizedReward(Reward):
-    _services_ensured: np.ndarray
-    _services_requested: np.ndarray
+    _services_ensured: int
+    _services_requested: int
 
-    _services_ensured_prev: np.ndarray
-    _services_requested_prev: np.ndarray
+
 
     def __init__(self):
         super().__init__()
         self.grid_cell = 3
         self.num_services = 3
         self.state_shape = DeCentralizedReward.state_shape(self.num_services, self.grid_cell)
-        self._services_ensured = np.zeros(self.num_services)
-        self._services_requested = np.zeros(self.num_services)
-        self._services_ensured_prev = np.zeros(self.num_services)
-        self._services_requested_prev = np.zeros(self.num_services)
+        self._services_ensured = 0
+        self._services_requested = 0
+        self._prev_utility = 0
         self.reward_value = 0
         self._dx_t = 0.0
         self._dx_t_prev = 0.0
         self._coeff = 0
-        self._episode_reward_decentralize = 0
+        self._period_reward_decentralize = []
+        self._episode_reward_decentralize = []
+        self._throughput_weight = 0.5
+        self._throughput_derivation_weight = 0.5
+        self.utility = 0
+        self.rolling_sum_reward = 0
+        self.rolling_sum_reward_320 = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
 
     @property
-    def episode_reward_decentralize(self):
-        return self._episode_reward_decentralize
+    def prev_utility(self):
+        return self._prev_utility
 
-    @episode_reward_decentralize.setter
-    def episode_reward_decentralize(self, value):
-        self._episode_reward_decentralize = value
+    @prev_utility.setter
+    def prev_utility(self,value):
+        self._prev_utility = value
 
     @property
     def coeff(self):
@@ -75,24 +79,11 @@ class DeCentralizedReward(Reward):
         return self._services_ensured
 
     @services_ensured.setter
-    def services_ensured(self, value: np.ndarray):
-        self._services_ensured = np.array(value)
+    def services_ensured(self, value):
+        self._services_ensured = value
 
-    @property
-    def services_requested_prev(self):
-        return self._services_requested_prev
 
-    @services_requested_prev.setter
-    def services_requested_prev(self, value):
-        self._services_requested_prev = value
 
-    @property
-    def services_ensured_prev(self):
-        return self._services_ensured_prev
-
-    @services_ensured_prev.setter
-    def services_ensured_prev(self, value: np.ndarray):
-        self._services_ensured_prev = np.array(value)
 
     @property
     def reward_value(self):
@@ -103,35 +94,39 @@ class DeCentralizedReward(Reward):
         self._reward_value = r
 
     def calculate_utility(self):
-        percentage_array = [0.0,0.0,0.0]
-        for service_index in range(3):
-            if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
-                    self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
-                percentage_array[service_index] = 0
-            elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
-                    self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
+        print("self._services_requested : ", self.services_requested)
+        print("self._services_ensured : ", self.services_ensured)
+        if (self.services_ensured ) == 0 and (
+                self.services_requested ) == 0:
+            return 0
+        elif (self.services_ensured ) != 0 and (
+                self.services_requested ) != 0:
 
-                percentage_array[service_index] = (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
-                        self._services_requested[service_index] - self._services_requested_prev[service_index])
-            else:
-                percentage_array[service_index] = 0
+            return self.services_ensured / self.services_requested
+        else:
+             return 0
 
-        return percentage_array
 
     def resetreward(self):
-        print("reset reward of decentralize")
         self.reward_value = 0
-
-        # self._services_requested = np.zeros(self.num_services)
-        # self._services_ensured = np.zeros(self.num_services)
-    def calculate_reward2(self,):
-
-        utility = self.calculate_utility()
-        w1 = 1
-        w2 = 1
-        throughput = 1
-        derivation_throughput = 1
-        return w1 * math.tanh(derivation_throughput) + w2 * throughput
+        self.services_requested = 0
+        self.services_ensured = 0
+        self.utility = 0
+        self.prev_utility = 0
+    def calculate_reward2(self,requested,ensured):
+        # self.utility  = self.calculate_utility()
+        if requested != 0 and ensured != 0 :
+            self.utility = requested /  ensured
+        else :
+            self.utility = 0
+        # print("utility : ",self.utility)
+        # print("prev_utility : ",self._prev_utility)
+        derivation_throughput = self.utility - self._prev_utility
+        # print("derivation_throughput  : ", derivation_throughput )
+        if self.utility == 0.0 :
+            return -1
+        else :
+            return self._throughput_derivation_weight * math.tanh(derivation_throughput) + self._throughput_weight * self.utility
     def calculate_reward(self, x, action, c, max_capacity):
         if action == 0:
             action = -1

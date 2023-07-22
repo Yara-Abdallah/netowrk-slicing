@@ -84,47 +84,35 @@ class Agent(AbstractAgent):
         action_mask = np.array(action_mask).reshape([1, np.array(action_mask).shape[0]])
         return action_mask
     def replay_buffer_decentralize(self, batch_size, model):
-        # print("epsilon in decentralize : ", self.epsilon)
         minibatch = random.sample(self.memory, batch_size)
         target = 0
-        # print("minibatch : ", minibatch)
         for supported_service,exploitation, state, action, reward, next_state in minibatch:
             target = reward
-            # print("supported services : ", supported_service)
             action_mask = self.action_masking(supported_service)
-            # print("action mask : ", action_mask)
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
                 # print(model.summary())
-                logit_model2 = keras.Model(inputs=model.input, outputs=model.layers[-2].output)
-                logit_model1 = keras.Model(inputs=model.input, outputs=model.layers[-1].output)
-
-                logit_model4 = keras.Model(inputs=model.input, outputs=model.layers[-4].output)
-                # print("......................")
-                # print(logit_model4.predict([next_state, action_mask], verbose=0)[0])
-                # print("  2  ")
-
-                # print(logit_model2.predict([next_state, action_mask], verbose=0)[0])
-                # print("last :",logit_model1.predict([next_state, action_mask], verbose=0)[0])
-
+                # logit_model2 = keras.Model(inputs=model.input, outputs=model.layers[-2].output)
+                # logit_model1 = keras.Model(inputs=model.input, outputs=model.layers[-1].output)
+                #
+                # logit_model4 = keras.Model(inputs=model.input, outputs=model.layers[-4].output)
                 logit_value = model.predict([next_state, action_mask], verbose=0)[0]
-
                 # if exploitation == 1:
-                print("reward : ", reward )
-                print("np.amax(logit_value)  : ", np.amax(logit_value))
+
                 target = reward + self.gamma * np.amax(logit_value)
                 # if exploitation == 0:
                     # print("exploration : decentralize ")
                     # qvalue = model.predict([next_state, action_mask], verbose=0)[0]
                     # target = reward + self.gamma * qvalue[action]
-            # print("target  : ", target)
+
             state = np.array(state).reshape([1, np.array(state).shape[0]])
-
             target_f =  model.predict([state,action_mask], verbose=0)
-
-            # print(" target_f befor : ",target_f)
-            target_f[0][action] = target
-            # print("target_f , decentralize : ", target_f)
+            mapped_action = 0
+            for key, val in self.action_permutations_dectionary.items():
+                if val == action:
+                    mapped_action = val
+            # print("mapped_action : ", mapped_action)
+            target_f[0][mapped_action] = target
             model.fit([state,action_mask], target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon -= self.epsilon * self.epsilon_decay
@@ -185,7 +173,7 @@ class Agent(AbstractAgent):
         action = self.action
         handler = Exploit(action, model, state,mask, Explore(action, FallbackHandler(action)))
         action_Value, flag = handler.handle(test, epsilon)
-        print("action value inside chain : ",action_Value )
+        # print("action value inside chain : ",action_Value )
         return action, action_Value , flag
 
     def chain(self, model, state, epsilon):

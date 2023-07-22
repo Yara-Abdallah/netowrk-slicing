@@ -7,16 +7,12 @@ from RL.RLEnvironment.State.State import State
 
 class DeCentralizedState(State):
     allocated_power: [float]
-    _services_ensured: np.ndarray
-    _services_requested: np.ndarray
-    _services_ensured_prev: np.ndarray
-    _services_requested_prev: np.ndarray
+    _services_ensured: int
+    _services_requested: int
     _tower_capacity = 0.0
     _max_tower_capacity = 0.0
-    # _state_value_decentralize = [_tower_capacity, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0]
-    # _next_state_decentralize = [0.0] * 17
-    _state_value_decentralize = [0.0] * 6
-    _next_state_decentralize = [0.0] * 6
+    _state_value_decentralize = [0.0] * 5
+    _next_state_decentralize = [0.0] * 5
 
     def __init__(self):
         super().__init__()
@@ -25,14 +21,13 @@ class DeCentralizedState(State):
         self.state_shape = DeCentralizedState.state_shape(self.num_services, self.grid_cell)
         self._allocated_power = np.zeros(3)
         self._supported_services = copy.deepcopy(self.allocated_power)
-        self._services_ensured = np.zeros(self.num_services)
-        self._services_requested = np.zeros(self.num_services)
-        self._services_ensured_prev = np.zeros(self.num_services)
-        self._services_requested_prev = np.zeros(self.num_services)
+        self._services_ensured = 0
+        self._services_requested = 0
         self._tower_capacity = 0.0
         self._index_service = 0
-        self._mean_power_allocated_requests = 0.0
+        self._mean_power_allocated_requests = np.zeros(self.num_services)
         self._action_value = 0
+
 
     @staticmethod
     def state_shape(num_services, grid_cell):
@@ -104,24 +99,9 @@ class DeCentralizedState(State):
         return self._services_ensured
 
     @services_ensured.setter
-    def services_ensured(self, value: np.ndarray):
-        self._services_ensured = np.array(value)
+    def services_ensured(self, value):
+        self._services_ensured = value
 
-    @property
-    def services_requested_prev(self):
-        return self._services_requested_prev
-
-    @services_requested_prev.setter
-    def services_requested_prev(self, value):
-        self._services_requested_prev = value
-
-    @property
-    def services_ensured_prev(self):
-        return self._services_ensured_prev
-
-    @services_ensured_prev.setter
-    def services_ensured_prev(self, value: np.ndarray):
-        self._services_ensured_prev = np.array(value)
 
     @property
     def allocated_power(self):
@@ -139,28 +119,13 @@ class DeCentralizedState(State):
     def supported_services(self, supported_array):
         self._supported_services = supported_array
 
-    def calculate_utility(self):
-        percentage_array = np.zeros(self.num_services)
-        for i in range(3):
-            if (self._services_ensured[i]) == 0 and (
-                    self._services_requested[i]) == 0:
-                percentage_array[i] = 0
-            elif (self._services_ensured[i]) != 0 and (
-                    self._services_requested[i]) != 0:
-                percentage_array[i] = (self._services_ensured[i]) / (
-                    self._services_requested[i])
-            else:
-                percentage_array[i] = 0
-
-        return percentage_array
-
     def resetsate(self):
-        self._services_requested = np.zeros(self.num_services)
-        self._services_ensured = np.zeros(self.num_services)
+        self._services_requested = 0
+        self._services_ensured = 0
         self._allocated_power = np.zeros(self.num_services)
         # out.dqn.environment.reward.reward_value = 0
-        self.mean_power_allocated_requests = 0.0
-        self.state_value_decentralize = [0.0] * 6
+        self.mean_power_allocated_requests = np.zeros(self.num_services)
+        self.state_value_decentralize = [0.0] * 5
 
         self.tower_capacity = self.max_tower_capacity
 
@@ -172,17 +137,18 @@ class DeCentralizedState(State):
         #    final_state.append(self._action_value.item())
         # else:
         #     final_state.append(self._action_value)
-        final_state.append(self._mean_power_allocated_requests)
+        final_state.append(self._services_requested)
+        final_state.extend(self._mean_power_allocated_requests)
         # final_state.append(self.index_service)
-        if isinstance(self._supported_services[self.index_service], np.ndarray):
-            final_state.append(self._supported_services[self.index_service])
-        else:
-            final_state.append(self._supported_services[self.index_service])
-        final_state.append(self._services_requested[self.index_service])
-        final_state.append(self._services_ensured[self.index_service])
-        final_state.append(self._allocated_power[self.index_service])
+        # if isinstance(self._supported_services[self.index_service], np.ndarray):
+        #     final_state.append(self._supported_services[self.index_service])
+        # else:
+        #     final_state.append(self._supported_services[self.index_service])
+        # final_state.append(self._services_requested[self.index_service])
+        # final_state.append(self._services_ensured[self.index_service])
+        # final_state.append(self._allocated_power[self.index_service])
         if len(final_state) == 0:
-            final_state = [0.0] * 6
+            final_state = [0.0] * 5
         return final_state
 
     def calculate_initial_state(self):
@@ -193,7 +159,6 @@ class DeCentralizedState(State):
             state.extend([i.item() for i in self._supported_services])
         else:
             state.extend(self._supported_services)
-        state.extend(self._services_requested)
-        state.extend(self._services_ensured)
+
         state.extend(self._allocated_power)
         return state

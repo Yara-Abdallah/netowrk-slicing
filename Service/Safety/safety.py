@@ -1,5 +1,5 @@
 from Service.IService import Service
-
+import numpy as np
 
 class FactorySafety(Service):
     def __init__(self,*args):
@@ -9,7 +9,8 @@ class FactorySafety(Service):
         # add weights for each parameter
 
     def calcualate_processing_time(self):
-        return self._network_latency + self._task_complexity
+        # self._network_latency + self._task_complexity
+        return np.random.choice(np.arange(6,10))
     def calculate_arrival_rate(self):
         # TODO: add doc string
 

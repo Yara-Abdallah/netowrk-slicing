@@ -91,7 +91,6 @@ class CentralizedReward(Reward):
         self._services_ensured_prev = np.array(value)
 
     def resetreward(self):
-        print("reset reward of centralize")
         self._services_ensured_prev = np.zeros(self.num_services)
         self._services_requested_prev = np.zeros(self.num_services)
         self._services_requested = np.zeros(self.num_services)

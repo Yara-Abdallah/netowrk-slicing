@@ -24,12 +24,19 @@ class SingletonMeta(type):
 
 @dataclass
 class PerformanceLogger(metaclass=SingletonMeta):
+
+
     _services_type: str = ""
     _number_of_periods_until_now: int = -1
     requested_services: List[Dict[Vehicle, Service]] = field(default_factory=list)
     handled_services: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
-    _queue_requested_buffer = Dict[Outlet, deque(maxlen=200)]
-    _queue_ensured_buffer = Dict[Outlet, deque(maxlen=200)]
+    _queue_requested_buffer: Dict[Outlet, deque[int]] =  field(default_factory=dict)
+
+    _queue_power_for_requested_in_buffer: Dict[Outlet, deque[Service]] = field(default_factory=dict)
+
+    _queue_ensured_buffer: Dict[Outlet, deque[int]] = field(default_factory=dict)
+
+    _queue_provisioning_time_buffer: Dict[Service, List[int]] = field(default_factory=dict)
 
     _outlet_services_power_allocation: Dict[Outlet, List[float]] = field(default_factory=dict)
     _outlet_services_power_allocation_current: Dict[Outlet, List[float]] = field(default_factory=dict)
@@ -57,19 +64,36 @@ class PerformanceLogger(metaclass=SingletonMeta):
     def queue_requested_buffer(self):
         return self._queue_requested_buffer
 
-    def set_queue_requested_buffer(self, outlet, req):
+    def set_queue_requested_buffer(self, outlet,value):
         if outlet not in self._queue_requested_buffer:
-            self._queue_requested_buffer = {}
-        self._queue_requested_buffer[outlet].append(req)
+            self._queue_requested_buffer[outlet] = {}
+        self._queue_requested_buffer[outlet] = value
+
+    @property
+    def queue_provisioning_time_buffer(self):
+        return self._queue_provisioning_time_buffer
+
+    def set_queue_provisioning_time_buffer(self, service, value):
+        if service not in self._queue_provisioning_time_buffer:
+            self._queue_provisioning_time_buffer[service] = 0
+        self._queue_provisioning_time_buffer[service] = value
+    @property
+    def queue_power_for_requested_in_buffer(self):
+        return self._queue_power_for_requested_in_buffer
+
+    def set_queue_power_for_requested_in_buffer(self, outlet,value):
+        if outlet not in self._queue_power_for_requested_in_buffer:
+            self._queue_power_for_requested_in_buffer[outlet] = {}
+        self._queue_power_for_requested_in_buffer[outlet]=value
 
     @property
     def queue_ensured_buffer(self):
         return self._queue_ensured_buffer
 
-    def set_queue_ensured_buffer(self, outlet, req):
+    def set_queue_ensured_buffer(self, outlet, value):
         if outlet not in self._queue_ensured_buffer:
-            self._queue_ensured_buffer = {}
-        self._queue_ensured_buffer[outlet].append(req)
+            self._queue_ensured_buffer[outlet] = {}
+        self._queue_ensured_buffer[outlet] = value
 
     @property
     def gridcell_utility(self):
@@ -192,7 +216,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
 
     def set_outlet_services_power_allocation(self, outlet, service):
         if outlet not in self._outlet_services_power_allocation:
-            self._outlet_services_power_allocation[outlet] = {}
+            self._outlet_services_power_allocation[outlet]= {}
         self._outlet_services_power_allocation[outlet] = service
 
     @property
@@ -278,11 +302,19 @@ class PerformanceLogger(metaclass=SingletonMeta):
             self._power_costs.extend(value)
 
     def reset_state_decentralize_requirement(self):
-        for key in self._outlet_services_requested_number:
-            self._outlet_services_requested_number[key] = [0, 0, 0]
-        for key in self._outlet_services_ensured_number:
-            self._outlet_services_ensured_number[key] = [0, 0, 0]
-        for key in self._outlet_services_power_allocation:
-            self._outlet_services_power_allocation[key] = [0, 0, 0]
-        for key in self.handled_services:
-            self.handled_services[key] = {}
+        for key in self._queue_requested_buffer:
+            self._queue_requested_buffer[key] = deque([])
+        for key in self._queue_ensured_buffer:
+            self._queue_ensured_buffer[key] = deque([])
+        for key in self._queue_power_for_requested_in_buffer:
+            self._queue_power_for_requested_in_buffer[key] = deque([])
+        for key in self._queue_provisioning_time_buffer:
+            self._queue_provisioning_time_buffer[key] = [0,0]
+        # for key in self._outlet_services_requested_number:
+        #     self._outlet_services_requested_number[key] = [0, 0, 0]
+        # for key in self._outlet_services_ensured_number:
+        #     self._outlet_services_ensured_number[key] = [0, 0, 0]
+        # for key in self._outlet_services_power_allocation:
+        #     self._outlet_services_power_allocation[key] = [0, 0, 0]
+        # for key in self.handled_services:
+        #     self.handled_services[key] = {}

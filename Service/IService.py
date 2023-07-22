@@ -26,6 +26,7 @@ class Service(ABC):
         self._realtime = realtime
         self._service_power_allocate = 0
         self._processing_time = 0
+        self._dec_services_types_mapping= {"FactorySafety":0,"FactoryEntertainment":1,"FactoryAutonomous":2}
 
     # def __str__(self):
     #     return f"service criticality : {self.criticality} ,  service bandwidth : {self.bandwidth} , " \

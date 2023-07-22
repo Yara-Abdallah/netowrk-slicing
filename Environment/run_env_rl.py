@@ -23,6 +23,9 @@ class Environment:
     memory_threshold = 1500  # 3.5GB
     temp_outlets = []
     gridcells_dqn = []
+    flag_processing_old_requests = [False] * 3
+    reset_decentralize = False
+    previouse_steps_reward32 = 0
 
     def __init__(self, period: str):
         Period(period)
@@ -76,7 +79,7 @@ class Environment:
                 traci.poi.setColor(id_, color)
         del color_mapping
 
-    def get_all_outlets(self):
+    def get_all_outlets(self,performancelogger):
         """
         get all outlets and add id with position to env variables
         """
@@ -87,6 +90,7 @@ class Environment:
             type_poi = traci.poi.getType(id_)
 
             if type_poi in env_variables.types_outlets:
+                print(" type_poi : ", type_poi)
                 position_ = traci.poi.getPosition(id_)
                 env_variables.outlets[type_poi].append((id_, position_))
                 val = 0
@@ -113,6 +117,10 @@ class Environment:
                 outlet = factory.produce_cellular_outlet(str(type_poi))
                 outlet.outlet_id = id_
                 outlet.radius = val
+                performancelogger.set_outlet_services_power_allocation(outlet, [0, 0, 0])
+                performancelogger.set_queue_requested_buffer(outlet, deque([]))
+                performancelogger.set_queue_ensured_buffer(outlet, deque([]))
+                performancelogger.set_queue_power_for_requested_in_buffer(outlet, deque([]))
                 outlets.append(outlet)
 
         list(map(lambda x: append_outlets(x), poi_ids))
@@ -259,7 +267,7 @@ class Environment:
 
         list(map(create_vehicle, ids_new_vehicles))
 
-    def car_distribution(self , step):
+    def car_distribution(self, step):
         if step == 0:
             number_cars = int(
                 nump_rand.normal(
@@ -280,13 +288,16 @@ class Environment:
 
     def run(self):
         self.starting()
-        outlets = self.get_all_outlets()
+        performance_logger = PerformanceLogger()
+        outlets = self.get_all_outlets(performance_logger)
+        print("performancelogger.queue_requested_buffer : ...", performance_logger.queue_requested_buffer)
+        print("performancelogger.queue_ensured_buffer : ... ", performance_logger.queue_ensured_buffer)
         self.Grids = self.fill_grids(self.fill_grids_with_the_nearest(outlets[:21]))
         step = 0
         print("\n")
         outlets_pos = self.get_positions_of_outlets(outlets)
         observer = ConcreteObserver(outlets_pos, outlets)
-        performance_logger = PerformanceLogger()
+
         # set the maximum amount of memory that the garbage collector is allowed to use to 1 GB
         max_size = 273741824
 
@@ -313,7 +324,7 @@ class Environment:
                 self.temp_outlets.append(outlet)
 
         load_weigths_buffer(self.gridcells_dqn[0])
-
+        number_of_decentralize_periods = 0
         while step < env_variables.TIME:
             process = psutil.Process()
             memory_usage = process.memory_info().rss / 1024.0 / 1024.0  # Convert to MB
@@ -321,7 +332,8 @@ class Environment:
                 gc.collect(0)
 
             gc.collect(0)
-            self.steps += 1
+
+
             traci.simulationStep()
             self.car_distribution(step)
             self.remove_vehicles_arrived()
@@ -336,33 +348,83 @@ class Environment:
             vehicles = ra.sample(
                 list(env_variables.vehicles.values()), number_of_cars_will_send_requests
             )
-            list(map(lambda veh: requests_buffering(veh, observer, performance_logger),vehicles,))
+            # list(map(lambda veh: requests_buffering(veh, observer, performance_logger), vehicles, ))
 
-            if self.steps == 2:
+            if self.steps == 0:
                 centralize_state_action(self.gridcells_dqn, self.steps, performance_logger)
-                decentralize_period(performance_logger, self.gridcells_dqn, step)
+
+                decentralize_state_action(performance_logger, self.gridcells_dqn, 1)
+                # list(map(lambda veh: decentralize_period_processing(veh, observer, performance_logger),env_variables.vehicles.values(),))
+
+            list(map(lambda veh:enable_sending_requests(veh, observer , self.gridcells_dqn ,performance_logger,self.steps),vehicles,))
+
+            provisioning_time_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger, self.steps)
+
+            # for i in self.temp_outlets:
+            #     print("rolling : ", i.dqn.environment.reward.rolling_sum_reward)
 
             if self.steps - self.previous_period >= 10:
+                # print("decentralize new period  .......   ")
                 self.previous_period = self.steps
-                decentralize_period(performance_logger, self.gridcells_dqn, step)
-                for i, outlet in enumerate(self.gridcells_dqn[0].agents.grid_outlets):
-                    performance_logger.outlet_services_ensured_number_with_action_period[
-                        outlet] = [0,0,0]
-                    performance_logger.outlet_services_requested_number_with_action_period[
-                        outlet] = [0,0,0]
-                    performance_logger.outlet_services_power_allocation_with_action_period[
-                        outlet] = [0,0,0]
+                number_of_decentralize_periods = number_of_decentralize_periods + 1
+                decentralize_nextstate_reward(self.gridcells_dqn, performance_logger, self.steps)
+                update_figures(self.steps/10, self.temp_outlets, self.gridcells_dqn)
 
-                list(
-                    map(
-                        lambda veh: terminate_service(veh, outlets, performance_logger),
-                        env_variables.vehicles.values(),
+
+                update_lines_reward_320_decentralized(lines_out_reward_320_decentralize, self.steps / 10,
+                                                          self.temp_outlets)
+
+                # self.gridcells_dqn[0].agents.grid_outlets
+
+                for index, outlet in enumerate(self.temp_outlets):
+
+                    add_value_to_pickle(
+                        os.path.join(reward_decentralized_path, f"reward{index}.pkl"),
+                        outlet.dqn.environment.reward.reward_value,
                     )
-                )
+
+                    add_value_to_pickle(
+                        os.path.join(requested_decentralized_path, f"requested{index}.pkl"),
+                        outlet.dqn.environment.reward.service_requested,
+                    )
+
+                    add_value_to_pickle(
+                        os.path.join(ensured_decentralized_path, f"ensured{index}.pkl"),
+                        outlet.dqn.environment.reward.service_ensured,
+                    )
+
+                    add_value_to_pickle(
+                        os.path.join(available_capacity_decentralized_path, f"available_capacity{index}.pkl"),
+                        outlet.current_capacity,
+                    )
+
+                    add_value_to_pickle(
+                        os.path.join(action_decentralized_path, f"available_capacity{index}.pkl"),
+                        outlet.dqn.agents.action.command.action_value_decentralize,
+                    )
+
+                    add_value_to_pickle(
+                        os.path.join(supported_service_decentralized_path, f"available_capacity{index}.pkl"),
+                        outlet.dqn.environment.state.supported_services,
+                    )
+
+                decentralize_state_action(performance_logger, self.gridcells_dqn, number_of_decentralize_periods)
+                decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets,performance_logger)
+
+
+                # decentralize_processing_old_requested_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger)
+
+                # list(
+                #      map(
+                #          lambda veh: terminate_service(veh, outlets, performance_logger),
+                #          env_variables.vehicles.values(),
+                #      )
+                #  )
+
 
             if self.steps - self.previous_steps_centralize_action >= 40:
                 self.previous_steps_centralize_action = self.steps
-                centralize_nextstate_reward(self.gridcells_dqn)
+                # centralize_nextstate_reward(self.gridcells_dqn)
                 centralize_state_action(self.gridcells_dqn, step, performance_logger)
 
             if self.steps - self.prev == self.snapshot_time:
@@ -371,6 +433,8 @@ class Environment:
 
             else:
                 close_figures()
+
+
 
             if self.steps - self.previous_steps >= env_variables.decentralized_replay_buffer:
                 self.previous_steps = self.steps
@@ -392,30 +456,30 @@ class Environment:
             #             self.average_qvalue_centralize.append(gridcell_dqn.agents.replay_buffer_centralize(32,
             #                                                                                           gridcell_dqn.model))
 
+
             if self.steps - self.previouse_steps_reseting >= env_variables.episode_steps:
                 self.previouse_steps_reseting = self.steps
                 list_ = []
                 for ind, gridcell_dqn in enumerate(self.gridcells_dqn):
-                    gridcell_dqn.environment.reward.gridcell_reward_episode = sum(
-                        gridcell_dqn.environment.reward.reward_value)
+                    # gridcell_dqn.environment.reward.gridcell_reward_episode = sum(
+                    #     gridcell_dqn.environment.reward.reward_value)
 
                     # gridcell_dqn.agents.qvalue = (
                     #             sum(self.average_qvalue_centralize) / len(self.average_qvalue_centralize))
 
-                    add_value_to_pickle(
-                            os.path.join(centralize_qvalue_path, f'qvalue.pkl'),
-                            gridcell_dqn.agents.qvalue)
+                    # add_value_to_pickle(
+                    #     os.path.join(centralize_qvalue_path, f'qvalue.pkl'),
+                    #     gridcell_dqn.agents.qvalue)
 
-                    update_figures(self.steps, self.temp_outlets,self.gridcells_dqn)
 
                     for i, out in enumerate(gridcell_dqn.agents.grid_outlets):
+
+
                         add_value_to_pickle(
                             os.path.join(decentralize_qvalue_path, f"qvalue{i}.pkl"),
                             out.dqn.agents.qvalue,
                         )
-                        out.dqn.environment.reward.episode_reward_decentralize = (
-                            out.dqn.environment.reward.reward_value
-                        )
+
 
                         out.dqn.environment.state.resetsate()
                         out.dqn.environment.reward.resetreward()
@@ -423,11 +487,10 @@ class Environment:
                     gridcell_dqn.environment.reward.resetreward()
                     gridcell_dqn.environment.state.resetsate(self.temp_outlets)
 
-
-
                 performance_logger.reset_state_decentralize_requirement()
 
             step += 1
+            self.steps += 1
 
             if step == env_variables.TIME:
                 save_weigths_buffer(self.gridcells_dqn[0])
@@ -435,5 +498,4 @@ class Environment:
         self.close()
 
     def close(self):
-        plt.close()
         traci.close()

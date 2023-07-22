@@ -8,7 +8,6 @@ def add_value_to_pickle(path, value):
     with open(path, mode) as file:
         pickle.dump(value, file)
 
-
 def accumulate_until_sum_limit(lst, target_sum):
     accumulated_values = []
     current_sum = 0

@@ -10,7 +10,15 @@ class ActionResponse:
         self.num_services = 3
         self._action_value_decentralize = 0
         self._action_flags = []
+        self._action_object = None
 
+    @property
+    def action_object(self):
+        return self._action_object
+
+    @action_object.setter
+    def action_object(self, value):
+        self._action_object = value
     @property
     def action_flags(self):
         return self._action_flags

@@ -23,11 +23,11 @@ class ActionController:
         return self.command.explore()
 
     def exploit(self, model, state,mask=None):
-        print("mask : ",mask)
+        # print("mask : ",mask)
         if not hasattr(mask , 'all'):
             if mask!=None :
                 if len(mask)>0:
-                    print("mask len : ", len(mask))
+                    # print("mask len : ", len(mask))
 
                     return self.command.exploit(model, state ,mask)
             else :
