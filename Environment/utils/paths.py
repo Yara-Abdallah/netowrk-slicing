@@ -2,7 +2,7 @@ import os
 import sys
 
 
-results_dir = os.path.join(sys.path[0], 'results')
+results_dir = os.path.join(sys.path[0], 'dec_results2')
 centralized_weights = os.path.join(results_dir, 'centralized_weights')
 decentralized_weights = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
@@ -22,13 +22,15 @@ action_decentralized_path = os.path.join(results_dir, 'action_decentralized')
 supported_service_decentralized_path =  os.path.join(results_dir, 'supported_service_decentralized')
 # centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
 # decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
-prev_results_3tanh_dir = os.path.join(sys.path[0],"results3_tanh//results3_tanh//")
+prev_results_3tanh_dir = "/content/netowrk-slicing/results3_tanh"
+#os.path.join(sys.path[0],"results3_tanh//results3_tanh//")
 # results1_explor_decentralize = "//content//drive//MyDrive//network_slicing//results2_explor_decentralize//"
-
+prev_results_dec_weight = "/content/netowrk-slicing/results"
+prev_results_dec_memory = "/content/netowrk-slicing/results"
 prev_centralize_weights_path = os.path.join(prev_results_3tanh_dir,"centralized_weights//")
-# prev_decentralize_weights_path = os.path.join(results1_explor_decentralize,"decentralized_weights//")
+prev_decentralize_weights_path = os.path.join(prev_results_dec_weight,"decentralized_weights//")
 # prev_centralize_memory_path = os.path.join(prev_results_4tanh_dir,"centralize_memory//")
-# prev_decentralize_memory_path = os.path.join(results1_explor_decentralize,"decentralize_memory//")
+prev_decentralize_memory_path = os.path.join(prev_results_dec_memory,"decentralize_memory//")
 centralize_qvalue_path = os.path.join(results_dir,"qvalue_centralized_for_plotting//")
 decentralize_qvalue_path = os.path.join(results_dir,"qvalue_decentralized_for_plotting//")
 

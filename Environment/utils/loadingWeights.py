@@ -1,5 +1,5 @@
 import os
-from Environment.utils.paths import prev_centralize_weights_path
+from Environment.utils.paths import prev_centralize_weights_path , prev_decentralize_weights_path , prev_decentralize_memory_path
 
 def load_weigths_buffer(gridcell):
     for i in range(1):
@@ -12,6 +12,6 @@ def load_weigths_buffer(gridcell):
 
     for i in range(1):
         for index, outlet in enumerate(gridcell.agents.grid_outlets):
-            # outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
-            # outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
+            outlet.dqn.model.load_weights(os.path.join(prev_decentralize_weights_path, f'weights_{index}.hdf5'))
+            outlet.dqn.agents.fill_memory(outlet.dqn.agents.memory , os.path.join(prev_decentralize_memory_path, f'decentralize_buffer{index}.pkl'))
             print()
