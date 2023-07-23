@@ -93,12 +93,8 @@ class Agent(AbstractAgent):
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
                 # print(model.summary())
                 # logit_model2 = keras.Model(inputs=model.input, outputs=model.layers[-2].output)
-                # logit_model1 = keras.Model(inputs=model.input, outputs=model.layers[-1].output)
-                #
-                # logit_model4 = keras.Model(inputs=model.input, outputs=model.layers[-4].output)
                 logit_value = model.predict([next_state, action_mask], verbose=0)[0]
                 # if exploitation == 1:
-
                 target = reward + self.gamma * np.amax(logit_value)
                 # if exploitation == 0:
                     # print("exploration : decentralize ")
