@@ -128,6 +128,8 @@ class DeCentralizedReward(Reward):
         # print("action sum ,",sum(action))
         if self.utility == 0.0 and sum(action) == 0:
             return -1
+        elif self.utility == 0.0 and sum(action) != 0:
+            return 0
         else :
             return self._throughput_derivation_weight * math.tanh(derivation_throughput) + self._throughput_weight * self.utility
     def calculate_reward(self, x, action, c, max_capacity):
