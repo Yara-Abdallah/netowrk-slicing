@@ -116,7 +116,7 @@ class DeCentralizedReward(Reward):
     def calculate_reward2(self,requested,ensured):
         # self.utility  = self.calculate_utility()
         if requested != 0 and ensured != 0 :
-            self.utility = requested /  ensured
+            self.utility = ensured / requested
         else :
             self.utility = 0
         # print("utility : ",self.utility)
