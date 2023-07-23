@@ -29,8 +29,8 @@ prev_results_3tanh_dir =os.path.join(sys.path[0],"results3_tanh//results3_tanh//
     # "/content/drive/MyDrive/network_slicing/results3_tanh"
 #os.path.join(sys.path[0],"results3_tanh//results3_tanh//")
 # results1_explor_decentralize = "//content//drive//MyDrive//network_slicing//results2_explor_decentralize//"
-prev_results_dec_weight = "/content/drive/MyDrive/network_slicing/results"
-prev_results_dec_memory = "/content/drive/MyDrive/network_slicing/results"
+prev_results_dec_weight = "/content/drive/MyDrive/network_slicing"
+prev_results_dec_memory = "/content/drive/MyDrive/network_slicing"
 prev_centralize_weights_path = os.path.join(prev_results_3tanh_dir,"centralized_weights//")
 prev_decentralize_weights_path = os.path.join(prev_results_dec_weight,"decentralized_weights//")
 # prev_centralize_memory_path = os.path.join(prev_results_4tanh_dir,"centralize_memory//")
