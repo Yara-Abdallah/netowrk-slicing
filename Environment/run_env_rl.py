@@ -360,8 +360,6 @@ class Environment:
 
             provisioning_time_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger, self.steps)
 
-            # for i in self.temp_outlets:
-            #     print("rolling : ", i.dqn.environment.reward.rolling_sum_reward)
 
             if self.steps - self.previous_period >= 10:
                 # print("decentralize new period  .......   ")

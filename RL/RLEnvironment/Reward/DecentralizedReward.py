@@ -24,8 +24,8 @@ class DeCentralizedReward(Reward):
         self._coeff = 0
         self._period_reward_decentralize = []
         self._episode_reward_decentralize = []
-        self._throughput_weight = 0.5
-        self._throughput_derivation_weight = 0.5
+        self._throughput_weight = 1
+        self._throughput_derivation_weight = 1
         self.utility = 0
         self.rolling_sum_reward = 0
         self.rolling_sum_reward_320 = 0
@@ -94,8 +94,8 @@ class DeCentralizedReward(Reward):
         self._reward_value = r
 
     def calculate_utility(self):
-        print("self._services_requested : ", self.services_requested)
-        print("self._services_ensured : ", self.services_ensured)
+        # print("self._services_requested : ", self.services_requested)
+        # print("self._services_ensured : ", self.services_ensured)
         if (self.services_ensured ) == 0 and (
                 self.services_requested ) == 0:
             return 0
@@ -113,7 +113,7 @@ class DeCentralizedReward(Reward):
         self.services_ensured = 0
         self.utility = 0
         self.prev_utility = 0
-    def calculate_reward2(self,requested,ensured):
+    def calculate_reward2(self,requested,ensured,action):
         # self.utility  = self.calculate_utility()
         if requested != 0 and ensured != 0 :
             self.utility = ensured / requested
@@ -123,7 +123,10 @@ class DeCentralizedReward(Reward):
         # print("prev_utility : ",self._prev_utility)
         derivation_throughput = self.utility - self._prev_utility
         # print("derivation_throughput  : ", derivation_throughput )
-        if self.utility == 0.0 :
+        # print("utility : ",self.utility)
+        # print("derivation_throughput : ",derivation_throughput)
+        # print("action sum ,",sum(action))
+        if self.utility == 0.0 and sum(action) == 0:
             return -1
         else :
             return self._throughput_derivation_weight * math.tanh(derivation_throughput) + self._throughput_weight * self.utility

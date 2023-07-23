@@ -18,5 +18,5 @@ class FactoryAutonomous(Service):
 
     def calcualate_processing_time(self):
         # self._network_latency + self._task_complexity
-        return np.random.choice(np.arange(4,8))
+        return np.random.choice(np.arange(8,16))
 

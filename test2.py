@@ -4,8 +4,8 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//dec_ac_ma//results//qvalue_decentralized_for_plotting//qvalue2.pkl"
-filename2 = "C://Users//Windows dunya//Downloads//dec_results2-20230723T053338Z-001//dec_results2//qvalue_decentralized_for_plotting//qvalue2.pkl"
+filename  = "C://Users//Windows dunya//Downloads//dec_ac_ma//results//reward_decentralized//reward0.pkl"
+filename2 = "C://Users//Windows dunya//Downloads//dec_results2-20230723T053338Z-001//dec_results2//reward_decentralized//reward0.pkl"
 
 deque = []
 with open(filename, 'rb') as file:
@@ -47,7 +47,7 @@ def rolling_average(data, window_size):
     return rolling_avg
 
 # Example usage:
-window_size = 10
+window_size = 100
 
 result = rolling_average(deque, window_size)
 # print(result)
@@ -57,13 +57,13 @@ x_values = [i for i in range(len(result))]  # Adjust x-axis values
 # x = [i * 320 for i in range(len(deque))]
 
 # Plot the original data and the rolling average
-# plt.plot(np.arange(len(deque)), deque, label='Original Data')
+plt.plot(np.arange(len(deque)), deque, label='Original Data')
 plt.plot(x_values, result, label=f'Rolling Average (window={window_size})')
 plt.xlabel('Data Points')
 plt.ylabel('Values')
 plt.legend()
 plt.title('Rolling Average Plot')
 plt.grid(True)
-plt.savefig('decentralize3__qvalue.svg', format='svg')
+plt.savefig('dec_reward_32.svg', format='svg')
 
 plt.show()
