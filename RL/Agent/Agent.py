@@ -72,10 +72,12 @@ class Agent(AbstractAgent):
             for j in indexs_of_not_supported:
                 if i[j] == 1:
                     not_available_actions.append(i)
+
         not_available_actions = set(not_available_actions)
         not_available_actions = list(not_available_actions)
         available_actions = [item for item in self.permutations if item not in not_available_actions]
         available_mapped_actions = [value for key, value in self.action_permutations_dectionary.items() if key in available_actions]
+        
         action_mask = np.zeros(8)
         for i, value in enumerate(action_mask):
             for j, val in enumerate(available_mapped_actions):

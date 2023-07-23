@@ -4,8 +4,8 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//dec_ac_ma//results//reward_decentralized//reward0.pkl"
-filename2 = "C://Users//Windows dunya//Downloads//dec_results2-20230723T053338Z-001//dec_results2//reward_decentralized//reward0.pkl"
+filename  = "C://Users//Windows dunya//Downloads//last_decentralize//network_slicing//reward_decentralized//reward1.pkl"
+# filename2 = "C://Users//Windows dunya//Downloads//dec_results2-20230723T053338Z-001//dec_results2//reward_decentralized//reward0.pkl"
 
 deque = []
 with open(filename, 'rb') as file:
@@ -16,13 +16,13 @@ with open(filename, 'rb') as file:
     except EOFError:
         pass
 
-with open(filename2, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
+# with open(filename2, 'rb') as file:
+#     try:
+#         while True:
+#             loaded_value = pickle.load(file)
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
 
 print(len(deque))
 for i in deque:
@@ -57,13 +57,13 @@ x_values = [i for i in range(len(result))]  # Adjust x-axis values
 # x = [i * 320 for i in range(len(deque))]
 
 # Plot the original data and the rolling average
-plt.plot(np.arange(len(deque)), deque, label='Original Data')
+# plt.plot(np.arange(len(deque)), deque, label='Original Data')
 plt.plot(x_values, result, label=f'Rolling Average (window={window_size})')
 plt.xlabel('Data Points')
 plt.ylabel('Values')
 plt.legend()
 plt.title('Rolling Average Plot')
 plt.grid(True)
-plt.savefig('dec_reward_32.svg', format='svg')
+plt.savefig('dec2_reward_100_not_org.svg', format='svg')
 
 plt.show()
