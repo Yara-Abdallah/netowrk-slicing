@@ -121,6 +121,7 @@ class Environment:
                 performancelogger.set_queue_requested_buffer(outlet, deque([]))
                 performancelogger.set_queue_ensured_buffer(outlet, deque([]))
                 performancelogger.set_queue_power_for_requested_in_buffer(outlet, deque([]))
+                performancelogger.set_outlet_services_power_allocation_with_action_period(outlet, [0, 0, 0])
                 outlets.append(outlet)
 
         list(map(lambda x: append_outlets(x), poi_ids))
@@ -351,11 +352,20 @@ class Environment:
                 list(env_variables.vehicles.values()), number_of_cars_will_send_requests
             )
             # list(map(lambda veh: requests_buffering(veh, observer, performance_logger), vehicles, ))
+            # for index, outlet in enumerate(self.temp_outlets):
+
 
             if self.steps == 0:
                 centralize_state_action(self.gridcells_dqn, self.steps, performance_logger)
 
                 decentralize_state_action(performance_logger, self.gridcells_dqn, 1)
+                for index, outlet in enumerate(self.temp_outlets):
+
+                    add_value_to_pickle(
+                        os.path.join(available_capacity_decentralized_path, f"available_capacity{index}.pkl"),
+                        outlet.current_capacity,
+                    )
+
                 # list(map(lambda veh: decentralize_period_processing(veh, observer, performance_logger),env_variables.vehicles.values(),))
 
             list(map(lambda veh:enable_sending_requests(veh, observer , self.gridcells_dqn ,performance_logger,self.steps),vehicles,))
@@ -366,6 +376,24 @@ class Environment:
             if self.steps - self.previous_period >= 10:
                 # print("decentralize new period  .......   ")
                 self.previous_period = self.steps
+
+
+                for index, outlet in enumerate(self.temp_outlets):
+
+                    # add_value_to_pickle(
+                    #     os.path.join(available_capacity_decentralized_path, f"available_capacity{index}.pkl"),
+                    #     outlet.current_capacity,
+                    # )
+
+                    add_value_to_pickle(
+                        os.path.join(action_decentralized_path, f"action{index}.pkl"),
+                        outlet.dqn.agents.action.command.action_value_decentralize,
+                    )
+
+                    add_value_to_pickle(
+                        os.path.join(supported_service_decentralized_path, f"supported_services{index}.pkl"),
+                        outlet.dqn.environment.state.supported_services,
+                    )
                 number_of_decentralize_periods = number_of_decentralize_periods + 1
                 decentralize_nextstate_reward(self.gridcells_dqn, performance_logger, number_of_decentralize_periods)
                 update_figures(self.steps/10, self.temp_outlets, self.gridcells_dqn)
@@ -385,7 +413,7 @@ class Environment:
                     add_value_to_pickle(
                         os.path.join(utility_decentralized_path, f"utility{index}.pkl"),
 
-                        outlet.dqn.environment.reward.utility
+                        outlet.dqn.environment.reward.utility,
                     )
 
                     add_value_to_pickle(
@@ -393,33 +421,28 @@ class Environment:
                         outlet.dqn.environment.reward.service_requested,
                     )
 
+                    add_value_to_pickle(
+                        os.path.join(sum_power_allocation_path, f"sum_power_allocation{index}.pkl"),
+                        sum(performance_logger.outlet_services_power_allocation_with_action_period[outlet]),
+                    )
 
-
-
+                    performance_logger.set_outlet_services_power_allocation_with_action_period(outlet, [0, 0, 0])
 
                     add_value_to_pickle(
                         os.path.join(ensured_decentralized_path, f"ensured{index}.pkl"),
                         outlet.dqn.environment.reward.service_ensured,
                     )
 
-                    add_value_to_pickle(
-                        os.path.join(available_capacity_decentralized_path, f"available_capacity{index}.pkl"),
-                        outlet.current_capacity,
-                    )
 
-                    add_value_to_pickle(
-                        os.path.join(action_decentralized_path, f"available_capacity{index}.pkl"),
-                        outlet.dqn.agents.action.command.action_value_decentralize,
-                    )
 
-                    add_value_to_pickle(
-                        os.path.join(supported_service_decentralized_path, f"available_capacity{index}.pkl"),
-                        outlet.dqn.environment.state.supported_services,
-                    )
 
                 decentralize_state_action(performance_logger, self.gridcells_dqn, number_of_decentralize_periods)
-                decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets,performance_logger)
 
+                # for index, outlet in enumerate(self.temp_outlets):
+
+
+
+                decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets,performance_logger)
 
                 # decentralize_processing_old_requested_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger)
 

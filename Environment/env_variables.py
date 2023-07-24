@@ -61,12 +61,12 @@ AUTONOMOUS_RATIO = 0
 
 number_of_days = 3
 episodes = 5 * number_of_days
-number_of_episodes_for_each_period =  45
+number_of_episodes_for_each_period =  50
 advisor_period = [2, number_of_episodes_for_each_period * episode_steps]
 exploitation_exploration_period = [number_of_episodes_for_each_period * episode_steps , number_of_episodes_for_each_period * episode_steps*2]
 last_exploitation_period = [ 2 * number_of_episodes_for_each_period * episode_steps , number_of_episodes_for_each_period * episode_steps * 3]
 
-TIME = 25 * episode_steps
+TIME = 45 * episode_steps
 day_time = 1280
 
 decentralized_replay_buffer = 30

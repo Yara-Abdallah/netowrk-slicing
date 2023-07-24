@@ -389,7 +389,9 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                 if outlet == outlet_:
                     action = outlet_.dqn.agents.action.command.action_value_decentralize
                     service_index = service._dec_services_types_mapping[service.__class__.__name__]
-                    if action[service_index] == 1 and service.request_supported(outlet):
+                    if action[service_index] == 1 and outlet.supported_services[service_index]==1 and sum(action)!=0:
+                        # print("yes")
+                        # print(action,"  ",service.request_supported(outlet)," ",outlet.current_capacity)
                         performance_logger.queue_requested_buffer[outlet].appendleft(1)
                         performance_logger.set_queue_provisioning_time_buffer(service, [0, 0])
                         performance_logger.queue_provisioning_time_buffer[service] = [start_time,
@@ -413,6 +415,16 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                             service.__class__.__name__,
                             1,
                         )
+
+                        power_aggregation(
+                            performance_logger.outlet_services_power_allocation_with_action_period,
+                            outlet,
+                            service.__class__.__name__,
+                            service,
+                            1,
+                        )
+
+
                         performance_logger.queue_power_for_requested_in_buffer[outlet].appendleft(service)
 
                         if outlet.current_capacity > service.service_power_allocate:
@@ -426,7 +438,8 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                             performance_logger.queue_ensured_buffer[outlet].appendleft(1)
                             outlet.current_capacity = outlet.current_capacity - service.service_power_allocate
 
-
+                    # elif sum(action)==0 :
+                    #     print("action here ", action)
 def decentralize_state_action(performancelogger, gridcells_dqn, number_of_decentralize_periods):
     for gridcell in gridcells_dqn:
         for i, outlet in enumerate(gridcell.agents.grid_outlets):

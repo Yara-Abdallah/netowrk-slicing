@@ -4,25 +4,25 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//dec_action_masking_phase1//reward_decentralized//reward2.pkl"
-# filename2 = "C://Users//Windows dunya//Downloads//dec_action_masking_phase2//dec_action_masking_phase2//reward_decentralized//reward1.pkl"
+# filename  = "C://Users//Windows dunya//Downloads//dec_action_masking_phase1//utility_decentralized//utility0.pkl"
+filename2 = "C://Users//Windows dunya//Downloads//dec_action_masking_phase2//reward_accumilated_decentralize//accu_reward2.pkl"
 
 deque = []
-with open(filename, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
-
-# with open(filename2, 'rb') as file:
+# with open(filename, 'rb') as file:
 #     try:
 #         while True:
 #             loaded_value = pickle.load(file)
 #             deque.append(loaded_value)
 #     except EOFError:
 #         pass
+
+with open(filename2, 'rb') as file:
+    try:
+        while True:
+            loaded_value = pickle.load(file)
+            deque.append(loaded_value)
+    except EOFError:
+        pass
 
 print(len(deque))
 for i in deque:
@@ -47,7 +47,7 @@ def rolling_average(data, window_size):
     return rolling_avg
 
 # Example usage:
-window_size = 1100
+window_size = 10
 result = rolling_average(deque, window_size)
 # print(result)
 # print(len(data))
@@ -57,12 +57,12 @@ x_values = [i for i in range(len(result))]  # Adjust x-axis values
 
 # Plot the original data and the rolling average
 # plt.plot(np.arange(len(deque)), deque, label='Original Data')
-plt.plot(x_values, result, label=f'dec_reward2_w1100 (window={window_size})')
+plt.plot(x_values, result, label=f'4G_accu_reward_w_10 (window={window_size})')
 plt.xlabel('Data Points')
 plt.ylabel('Values')
 plt.legend()
 plt.title('Rolling Average Plot')
 plt.grid(True)
-plt.savefig('dec_reward2_w1100.svg', format='svg')
+plt.savefig('4G_accu_reward_w_10.svg', format='svg')
 
 plt.show()

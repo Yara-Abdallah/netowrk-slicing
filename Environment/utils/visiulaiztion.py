@@ -16,6 +16,7 @@ def plotting_Utility_Requested_Ensured():
     lines_out_requested = []
     lines_out_ensured = []
     j = 0
+    out=['wifi','3G','4G']
     for i in range(1):
         row = 0
         line, line1, line2 = 0, 0, 0
@@ -26,9 +27,9 @@ def plotting_Utility_Requested_Ensured():
                 color_str = 'r'
             elif index == 2:
                 color_str = 'g'
-            line, = axs.flatten()[j].plot([], [], label=f"O{row + index + 1} utility", color=color_str )
-            line1, = axs.flatten()[j + 1].plot([], [], label=f"O{row + index + 1} requested", color=color_str)
-            line2, = axs.flatten()[j + 2].plot([], [], label=f"O{row + index + 1} ensured", color=color_str )
+            line, = axs.flatten()[j].plot([], [], label=f"{out[index]} utility", color=color_str )
+            line1, = axs.flatten()[j + 1].plot([], [], label=f"{out[index]} requested", color=color_str)
+            line2, = axs.flatten()[j + 2].plot([], [], label=f"{out[index]} ensured", color=color_str )
             lines_out_utility.append(line)
             lines_out_requested.append(line1)
             lines_out_ensured.append(line2)
