@@ -476,14 +476,17 @@ def decentralize_state_action(performancelogger, gridcells_dqn, number_of_decent
 def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_decentralize_periods):
     for gridcell in gridcells_dqn:
         for i, outlet in enumerate(gridcell.agents.grid_outlets):
-
+            # print(
+            #         "decenlraize  state value :   ",
+            #         outlet.dqn.environment.state.state_value_decentralize,
+            #     )
             outlet.dqn.environment.state.services_requested = len(performancelogger.queue_requested_buffer[outlet]) - len(performancelogger.queue_ensured_buffer[outlet])
             # print("len(performancelogger.queue_requested_buffer[outlet]) : ", len(performancelogger.queue_requested_buffer[outlet]))
             for i in range(3):
                 outlet.dqn.environment.state._mean_power_allocated_requests[i] = \
                     performancelogger.outlet_services_power_allocation[outlet][i] / number_of_decentralize_periods
-            # print("action : ", outlet.dqn.agents.action.command.action_value_decentralize)
-            # print("supported : ", outlet.dqn.environment.state.supported_services)
+            # print("power : ", performancelogger.outlet_services_power_allocation)
+            # print("number_of_decentralize_periods : ", number_of_decentralize_periods)
 
             outlet.dqn.environment.state.next_state_decentralize = outlet.dqn.agents.action.command.action_object.execute(
                 outlet.dqn.environment.state,

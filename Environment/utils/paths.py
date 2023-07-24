@@ -22,6 +22,7 @@ supported_service_decentralized_path =  os.path.join(results_dir, 'supported_ser
 # centralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_centralized_for_plotting')
 # decentralize_qvalue_path = os.path.join(prev_results_dir, 'qvalue_decentralized_for_plotting')
 prev_results_3tanh_dir =os.path.join(sys.path[0],"results3_tanh//results3_tanh//")
+utility_decentralized_path = os.path.join(results_dir, 'utility_decentralized')
     #
     # os.path.join(sys.path[0],"results3_tanh//results3_tanh//")
 
@@ -56,3 +57,4 @@ os.makedirs(ensured_decentralized_path, exist_ok=True)
 os.makedirs(available_capacity_decentralized_path, exist_ok=True)
 os.makedirs(action_decentralized_path, exist_ok=True)
 os.makedirs(supported_service_decentralized_path, exist_ok=True)
+os.makedirs(utility_decentralized_path, exist_ok=True)

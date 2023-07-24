@@ -295,6 +295,8 @@ class Environment:
         self.Grids = self.fill_grids(self.fill_grids_with_the_nearest(outlets[:21]))
         step = 0
         print("\n")
+        for i in outlets :
+            print("out ",i.__class__.__name__)
         outlets_pos = self.get_positions_of_outlets(outlets)
         observer = ConcreteObserver(outlets_pos, outlets)
 
@@ -365,7 +367,7 @@ class Environment:
                 # print("decentralize new period  .......   ")
                 self.previous_period = self.steps
                 number_of_decentralize_periods = number_of_decentralize_periods + 1
-                decentralize_nextstate_reward(self.gridcells_dqn, performance_logger, self.steps)
+                decentralize_nextstate_reward(self.gridcells_dqn, performance_logger, number_of_decentralize_periods)
                 update_figures(self.steps/10, self.temp_outlets, self.gridcells_dqn)
 
 
@@ -379,6 +381,11 @@ class Environment:
                     add_value_to_pickle(
                         os.path.join(reward_decentralized_path, f"reward{index}.pkl"),
                         outlet.dqn.environment.reward.reward_value,
+                    )
+                    add_value_to_pickle(
+                        os.path.join(utility_decentralized_path, f"utility{index}.pkl"),
+
+                        outlet.dqn.environment.reward.utility
                     )
 
                     add_value_to_pickle(
@@ -482,7 +489,13 @@ class Environment:
                         out.dqn.environment.state.resetsate()
                         out.dqn.environment.reward.resetreward()
                         out.current_capacity = out.set_max_capacity(out.__class__.__name__)
+                        for i in range(3):
+                            out.dqn.environment.state._mean_power_allocated_requests[i] = \
+                                performance_logger.outlet_services_power_allocation[out][
+                                    i] / number_of_decentralize_periods
+
                         # print(" out : ", out.current_capacity)
+                        out.dqn.environment.state.state_value_decentralize = out.dqn.environment.state.calculate_state()
 
                     gridcell_dqn.environment.reward.resetreward()
                     gridcell_dqn.environment.state.resetsate(self.temp_outlets)
