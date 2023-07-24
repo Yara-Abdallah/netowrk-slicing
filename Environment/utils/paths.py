@@ -12,7 +12,7 @@ utility_requested_ensured_path = os.path.join(results_dir, 'utility_requested_en
 reward_decentralized_path = os.path.join(results_dir, 'reward_decentralized')
 reward_centralized_path = os.path.join(results_dir, 'reward_centralized')
 reward_320_decentralized_path = os.path.join(results_dir, 'reward_320_decentralized')
-
+print("yes ")
 qvalue_decentralized_path = os.path.join(results_dir, 'qvalue_decentralized')
 qvalue_centralized_path = os.path.join(results_dir, 'qvalue_centralized')
 requested_decentralized_path = os.path.join(results_dir, 'requested_decentralized')
