@@ -4,8 +4,8 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//last_decentralize//network_slicing//reward_decentralized//reward1.pkl"
-# filename2 = "C://Users//Windows dunya//Downloads//dec_results2-20230723T053338Z-001//dec_results2//reward_decentralized//reward0.pkl"
+filename  = "C://Users//Windows dunya//Downloads//last_decentralize//network_slicing//reward_decentralized//reward2.pkl"
+# filename2 = "C://Users//Windows dunya//Downloads//dec_2//dec_action_masking2//qvalue_decentralized_for_plotting//qvalue2.pkl"
 
 deque = []
 with open(filename, 'rb') as file:
@@ -47,7 +47,7 @@ def rolling_average(data, window_size):
     return rolling_avg
 
 # Example usage:
-window_size = 100
+window_size = 32
 
 result = rolling_average(deque, window_size)
 # print(result)
@@ -64,6 +64,6 @@ plt.ylabel('Values')
 plt.legend()
 plt.title('Rolling Average Plot')
 plt.grid(True)
-plt.savefig('dec2_reward_100_not_org.svg', format='svg')
+plt.savefig('dec2_reward_1_2.svg', format='svg')
 
 plt.show()

@@ -2,7 +2,7 @@ import os
 import sys
 
 
-results_dir = os.path.join(sys.path[0], 'dec_action_masking2')
+results_dir = os.path.join(sys.path[0], 'dec_action_masking_phase2')
 centralized_weights = os.path.join(results_dir, 'centralized_weights')
 decentralized_weights = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
