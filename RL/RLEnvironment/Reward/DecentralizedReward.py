@@ -26,9 +26,12 @@ class DeCentralizedReward(Reward):
         self._episode_reward_decentralize = []
         self._throughput_weight = 1
         self._throughput_derivation_weight = 1
+        self._cost_derivation_weight = 1
+        self._cost_weight = 1
         self.utility = 0
         self.rolling_sum_reward = 0
         self.rolling_sum_reward_320 = 0
+        self.reward_value_accumilated = 0
 
     @staticmethod
     def state_shape(num_services, grid_cell):
@@ -113,6 +116,7 @@ class DeCentralizedReward(Reward):
         self.services_ensured = 0
         self.utility = 0
         self.prev_utility = 0
+        self.reward_value_accumilated = 0
     def calculate_reward2(self,requested,ensured,action):
         # self.utility  = self.calculate_utility()
         if requested != 0 and ensured != 0 :
@@ -132,6 +136,7 @@ class DeCentralizedReward(Reward):
             return 0
         else :
             return self._throughput_derivation_weight * math.tanh(derivation_throughput) + self._throughput_weight * self.utility
+                # + self._cost_weight * (1/(1 + np.exp(-1/average_power)))
     def calculate_reward(self, x, action, c, max_capacity):
         if action == 0:
             action = -1

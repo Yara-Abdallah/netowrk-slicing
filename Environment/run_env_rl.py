@@ -393,6 +393,10 @@ class Environment:
                         outlet.dqn.environment.reward.service_requested,
                     )
 
+
+
+
+
                     add_value_to_pickle(
                         os.path.join(ensured_decentralized_path, f"ensured{index}.pkl"),
                         outlet.dqn.environment.reward.service_ensured,
@@ -485,9 +489,15 @@ class Environment:
                             out.dqn.agents.qvalue,
                         )
 
+                        add_value_to_pickle(
+                            os.path.join(reward_accumilated_decentralize_path, f"accu_reward{i}.pkl"),
+                            out.dqn.environment.reward.reward_value_accumilated,
+                        )
+
 
                         out.dqn.environment.state.resetsate()
                         out.dqn.environment.reward.resetreward()
+                        out.dqn.environment.reward.reward_value_accumilated = 0
                         out.current_capacity = out.set_max_capacity(out.__class__.__name__)
                         for i in range(3):
                             out.dqn.environment.state._mean_power_allocated_requests[i] = \

@@ -142,8 +142,10 @@ def requests_buffering(car, observer, performance_logger):
 
 def centralize_state_action(gridcells_dqn, step, performance_logger):
     number_of_services = 3
-    state = 0
     performance_logger.number_of_periods_until_now = 1
+
+
+
     for gridcell in gridcells_dqn:
         states = []
         actions = []
@@ -414,6 +416,7 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                         performance_logger.queue_power_for_requested_in_buffer[outlet].appendleft(service)
 
                         if outlet.current_capacity > service.service_power_allocate:
+
                             ensured_service_aggrigation(
                             performance_logger.outlet_services_ensured_number,
                             outlet,
@@ -498,15 +501,19 @@ def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_de
             # )
             # print("len(performancelogger.queue_requested_buffer[outlet]) : ",len(performancelogger.queue_requested_buffer[outlet]))
             outlet.dqn.environment.reward.service_requested = len(performancelogger.queue_requested_buffer[outlet])
+            # print("outlet.dqn.environment.reward.service_requested ",outlet.dqn.environment.reward.service_requested)
             outlet.dqn.environment.reward.service_ensured = len(performancelogger.queue_ensured_buffer[outlet])
             # print("performancelogger.queue_requested_buffer : ", outlet.dqn.environment.reward.service_requested)
             # print("performancelogger.queue_ensured_buffer : ",outlet.dqn.environment.reward.service_ensured )
 
             outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward2(
                 outlet.dqn.environment.reward.service_requested,
-                outlet.dqn.environment.reward.service_ensured ,
-                outlet.dqn.agents.action.command.action_value_decentralize
+                outlet.dqn.environment.reward.service_ensured,
+                outlet.dqn.agents.action.command.action_value_decentralize,
+
                 )
+
+            outlet.dqn.environment.reward.reward_value_accumilated = outlet.dqn.environment.reward.reward_value_accumilated + outlet.dqn.environment.reward.reward_value
             # print("reward : ",outlet.dqn.environment.reward.reward_value )
 
             outlet.dqn.environment.reward._period_reward_decentralize.append(
