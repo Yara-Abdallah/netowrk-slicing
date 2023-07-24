@@ -431,6 +431,7 @@ def decentralize_state_action(performancelogger, gridcells_dqn, number_of_decent
                         performancelogger.outlet_services_power_allocation[outlet][i] / number_of_decentralize_periods
 
                 outlet.dqn.environment.state.services_requested = len(performancelogger.queue_requested_buffer[outlet]) -  len(performancelogger.queue_ensured_buffer[outlet])
+                outlet.dqn.environment.state.services_ensured = len(performancelogger.queue_ensured_buffer[outlet])
 
                 outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.calculate_state()
 
