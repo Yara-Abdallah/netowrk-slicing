@@ -343,7 +343,7 @@ class Environment:
             #     previous_steps_sending = self.steps
 
             number_of_cars_will_send_requests = round(
-                len(list(env_variables.vehicles.values())) * 0.01
+                len(list(env_variables.vehicles.values())) * 0.05
             )
             vehicles = ra.sample(
                 list(env_variables.vehicles.values()), number_of_cars_will_send_requests
@@ -481,6 +481,8 @@ class Environment:
 
                         out.dqn.environment.state.resetsate()
                         out.dqn.environment.reward.resetreward()
+                        out.current_capacity = out.set_max_capacity(out.__class__.__name__)
+                        # print(" out : ", out.current_capacity)
 
                     gridcell_dqn.environment.reward.resetreward()
                     gridcell_dqn.environment.state.resetsate(self.temp_outlets)

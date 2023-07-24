@@ -2,7 +2,7 @@ import os
 import sys
 
 
-results_dir = os.path.join(sys.path[0], 'dec_action_masking_phase2')
+results_dir = os.path.join(sys.path[0], 'dec_action_masking_phase1')
 centralized_weights = os.path.join(results_dir, 'centralized_weights')
 decentralized_weights = os.path.join(results_dir, 'decentralized_weights')
 path_memory_centralize = os.path.join(results_dir,'centralize_memory')
@@ -12,7 +12,6 @@ utility_requested_ensured_path = os.path.join(results_dir, 'utility_requested_en
 reward_decentralized_path = os.path.join(results_dir, 'reward_decentralized')
 reward_centralized_path = os.path.join(results_dir, 'reward_centralized')
 reward_320_decentralized_path = os.path.join(results_dir, 'reward_320_decentralized')
-print("yes ")
 qvalue_decentralized_path = os.path.join(results_dir, 'qvalue_decentralized')
 qvalue_centralized_path = os.path.join(results_dir, 'qvalue_centralized')
 requested_decentralized_path = os.path.join(results_dir, 'requested_decentralized')
@@ -29,12 +28,12 @@ prev_results_3tanh_dir =os.path.join(sys.path[0],"results3_tanh//results3_tanh//
     # "/content/drive/MyDrive/network_slicing/results3_tanh"
 #os.path.join(sys.path[0],"results3_tanh//results3_tanh//")
 # results1_explor_decentralize = "//content//drive//MyDrive//network_slicing//results2_explor_decentralize//"
-prev_results_dec_weight = "/content/drive/MyDrive/network_slicing/dec_action_masking_phase2"
-prev_results_dec_memory = "/content/drive/MyDrive/network_slicing/dec_action_masking_phase2"
+# prev_results_dec_weight = "/content/drive/MyDrive/network_slicing/dec_action_masking_phase2"
+# prev_results_dec_memory = "/content/drive/MyDrive/network_slicing/dec_action_masking_phase2"
 prev_centralize_weights_path = os.path.join(prev_results_3tanh_dir,"centralized_weights//")
-prev_decentralize_weights_path = os.path.join(prev_results_dec_weight,"decentralized_weights//")
+# prev_decentralize_weights_path = os.path.join(prev_results_dec_weight,"decentralized_weights//")
 # prev_centralize_memory_path = os.path.join(prev_results_4tanh_dir,"centralize_memory//")
-prev_decentralize_memory_path = os.path.join(prev_results_dec_memory,"decentralize_memory//")
+# prev_decentralize_memory_path = os.path.join(prev_results_dec_memory,"decentralize_memory//")
 centralize_qvalue_path = os.path.join(results_dir,"qvalue_centralized_for_plotting//")
 decentralize_qvalue_path = os.path.join(results_dir,"qvalue_decentralized_for_plotting//")
 

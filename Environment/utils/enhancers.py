@@ -404,9 +404,22 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                             service,
                             1,
                         )
+
+                        services_aggregation(
+                            performance_logger.outlet_services_requested_number,
+                            outlet,
+                            service.__class__.__name__,
+                            1,
+                        )
                         performance_logger.queue_power_for_requested_in_buffer[outlet].appendleft(service)
 
                         if outlet.current_capacity > service.service_power_allocate:
+                            ensured_service_aggrigation(
+                            performance_logger.outlet_services_ensured_number,
+                            outlet,
+                            service.__class__.__name__,
+                            1,
+                        )
                             performance_logger.queue_ensured_buffer[outlet].appendleft(1)
                             outlet.current_capacity = outlet.current_capacity - service.service_power_allocate
 

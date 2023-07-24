@@ -1,8 +1,8 @@
 def power_aggregation(
 		outlet_services_power_allocation, outlet, service_type, service, flag
 ):
-	# if outlet not in outlet_services_power_allocation:
-	#     outlet_services_power_allocation[outlet]= [0.0, 0.0, 0.0]
+	if outlet not in outlet_services_power_allocation:
+		outlet_services_power_allocation[outlet] = [0.0, 0.0, 0.0]
 
 	if str(service_type) == "FactorySafety":
 		x = outlet_services_power_allocation[outlet][0]
@@ -45,6 +45,9 @@ def services_aggregation(
 		outlet_services_requested_number, outlet, service_type, flag
 ):
 	# print("outlet_services_requested_number: ... ", outlet_services_requested_number[outlet])
+	if outlet not in outlet_services_requested_number:
+		outlet_services_requested_number[outlet] = [0.0, 0.0, 0.0]
+
 	if str(service_type) == "FactorySafety":
 		num = outlet_services_requested_number[outlet][0]
 		if flag == -1 and num != 0:
@@ -67,8 +70,10 @@ def services_aggregation(
 
 
 def ensured_service_aggrigation(
-		outlet_services_ensured_number: object, outlet: object, service_type: object, flag: object
-) -> object:
+		outlet_services_ensured_number, outlet, service_type, flag) :
+	if outlet not in outlet_services_ensured_number:
+		outlet_services_ensured_number[outlet] = [0.0, 0.0, 0.0]
+
 	if str(service_type) == "FactorySafety":
 		service_ensured_value = outlet_services_ensured_number[outlet][0]
 		# if action_value == 1:
