@@ -123,7 +123,7 @@ class DeCentralizedReward(Reward):
             self.utility = ensured / requested
         else :
             self.utility = 0
-        print("utility : ",self.utility)
+        # print("utility : ",self.utility)
         # print("prev_utility : ",self._prev_utility)
         derivation_throughput = self.utility - self._prev_utility
         # print("derivation_throughput  : ", derivation_throughput )

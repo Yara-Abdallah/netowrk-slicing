@@ -23,13 +23,17 @@ class IHandler(ABC):
 
 class Explore(IHandler):
     "A Concrete Handler"
+    def __init__(self, action, mask, successor):
+        super().__init__(action, successor)
+        self.mask = mask
+
 
     def check_epsilon(self, test, epsilon):
         if 1 > epsilon >= test > 0:
             self.flag = 0
             # action = Action.explore()
             # print(f'handled in {self.__class__.__name__} because epsilon is {epsilon} and random is {test}')
-            explore_val = self.action.explore()
+            explore_val = self.action.explore(self.mask)
             return explore_val
 
 

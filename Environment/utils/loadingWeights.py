@@ -8,8 +8,6 @@ def load_weigths_buffer(gridcell):
             os.path.join(prev_centralize_weights_path, f"weights_{i}.hdf5")
         )
         # self.gridcells_dqn[i].agents.fill_memory(self.gridcells_dqn[i].agents.memory , os.path.join(prev_centralize_memory_path, f'centralize_buffer.pkl'))
-
-
     for i in range(1):
         print()
         # for index, outlet in enumerate(gridcell.agents.grid_outlets):

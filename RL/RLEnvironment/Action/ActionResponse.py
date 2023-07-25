@@ -34,11 +34,19 @@ class ActionResponse:
         self._action_value_decentralize = val
 
 
-    def explore(self):
-        ac = np.random.choice(np.arange(0,8))
+    def explore(self,action_mask):
+        available_actions=[]
+        action_mask = action_mask[0]
+        # print("mask in explor :",action_mask)
+        for i in range(len(action_mask)):
+            if action_mask[i] == 1 :
+                available_actions.append(i)
+        # print("available_actions : ",available_actions)
+        ac = np.random.choice(available_actions)
         return ac
 
     def exploit(self, model, state,mask):
+        # print(" mask exploit : ", mask)
         state = np.array(state).reshape([1, np.array(state).shape[0]])
         c=np.array(model.predict([state,mask], verbose=0))
         c = np.array(c).reshape(1,8)

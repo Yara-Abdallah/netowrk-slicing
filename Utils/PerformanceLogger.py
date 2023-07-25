@@ -42,11 +42,9 @@ class PerformanceLogger(metaclass=SingletonMeta):
     _outlet_services_power_allocation_current: Dict[Outlet, List[float]] = field(default_factory=dict)
 
     _outlet_services_requested_number: Dict[Outlet, List[int]] = field(default_factory=dict)
+    _outlet_services_requested_number_all_periods: Dict[Outlet, List[int]] = field(default_factory=dict)
+
     _outlet_services_ensured_number: Dict[Outlet, List[int]] = field(default_factory=dict)
-    _outlet_services_requested_number_with_action_period: Dict[Outlet, List[int]] = field(default_factory=dict)
-    _outlet_services_ensured_number_with_action_period: Dict[Outlet, List[int]] = field(default_factory=dict)
-    _outlet_services_power_allocation_with_action_period: Dict[Service, float] = field(default_factory=dict)
-    _outlet_services_power_allocation_for_all_requested: Dict[Service, List[float]] = field(default_factory=dict)
 
     _outlet_occupancy: Dict[Outlet, float] = field(default_factory=dict)
     _outlet_utility: Dict[Outlet, float] = field(default_factory=dict)
@@ -211,6 +209,16 @@ class PerformanceLogger(metaclass=SingletonMeta):
         self._outlet_services_requested_number[outlet] = num
 
     @property
+    def outlet_services_requested_number_all_periods(self):
+        return self._outlet_services_requested_number_all_periods
+
+    def set_outlet_services_requested_number_all_periods(self, outlet, num):
+        if outlet not in self._outlet_services_requested_number_all_periods:
+            self._outlet_services_requested_number_all_periods[outlet] = {}
+        self._outlet_services_requested_number_all_periods[outlet] = num
+
+
+    @property
     def outlet_services_power_allocation(self):
         return self._outlet_services_power_allocation
 
@@ -219,41 +227,8 @@ class PerformanceLogger(metaclass=SingletonMeta):
             self._outlet_services_power_allocation[outlet]= {}
         self._outlet_services_power_allocation[outlet] = service
 
-    @property
-    def outlet_services_ensured_number_with_action_period(self):
-        return self._outlet_services_ensured_number_with_action_period
 
-    def set_outlet_services_ensured_number_with_action_period(self, outlet, num):
-        if outlet not in self._outlet_services_ensured_number_with_action_period:
-            self._outlet_services_ensured_number_with_action_period[outlet] = {}
-        self._outlet_services_ensured_number_with_action_period[outlet] = num
 
-    @property
-    def outlet_services_requested_number_with_action_period(self):
-        return self._outlet_services_requested_number_with_action_period
-
-    def set_outlet_services_requested_number_with_action_period(self, outlet, num):
-        if outlet not in self._outlet_services_requested_number_with_action_period:
-            self._outlet_services_requested_number_with_action_period[outlet] = {}
-        self._outlet_services_requested_number_with_action_period[outlet] = num
-
-    @property
-    def outlet_services_power_allocation_with_action_period(self):
-        return self._outlet_services_power_allocation_with_action_period
-
-    def set_outlet_services_power_allocation_with_action_period(self, outlet, service):
-        if outlet not in self._outlet_services_power_allocation_with_action_period:
-            self._outlet_services_power_allocation_with_action_period[outlet] = {}
-        self._outlet_services_power_allocation_with_action_period[outlet] = service
-
-    @property
-    def outlet_services_power_allocation_for_all_requested(self):
-        return self._outlet_services_power_allocation_for_all_requested
-
-    def set_outlet_services_power_allocation_for_all_requested(self, outlet, service):
-        if outlet not in self._outlet_services_power_allocation_for_all_requested:
-            self._outlet_services_power_allocation_for_all_requested[outlet] = {}
-        self._outlet_services_power_allocation_for_all_requested[outlet] = service
 
     @property
     def service_requested(self):
@@ -310,6 +285,10 @@ class PerformanceLogger(metaclass=SingletonMeta):
             self._queue_power_for_requested_in_buffer[key] = deque([])
         for key in self._queue_provisioning_time_buffer:
             self._queue_provisioning_time_buffer[key] = [0,0]
+        for key in self._outlet_services_requested_number:
+            self._outlet_services_requested_number[key] = [0,0,0]
+        for key in self._outlet_services_ensured_number:
+            self._outlet_services_ensured_number[key] = [0,0,0]
         # for key in self._outlet_services_requested_number:
         #     self._outlet_services_requested_number[key] = [0, 0, 0]
         # for key in self._outlet_services_ensured_number:

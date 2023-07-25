@@ -84,6 +84,7 @@ class Car(Vehicle):
             # print("self.outlets_serve[distance.index(min(distance))] :  ", self.outlets_serve[distance.index(min(distance))])
             # print("min distance : ", min(distance))
             # print("self.outlets_serve : ", self.outlets_serve)
+            # print("self.outlets_serve[distance.index(min(distance))]  : " ,self.outlets_serve[distance.index(min(distance))])
             return self.outlets_serve[distance.index(min(distance))], car_request_tuple
         # return self.outlets_serve[-1], car_request_tuple
     def check_outlet_types(self, outlet, type):

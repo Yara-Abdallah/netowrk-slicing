@@ -35,10 +35,8 @@ class ActionAssignment:
         self._action_value_centralize = val
 
     def explore(self):
-        c = np.random.randint(2, size=(1,2))
-        # print("choose explore")
-        #c = random.randint(0, 1)
-        return np.argmax(c[0])
+        ac = np.random.choice([0,1])
+        return ac
 
     def exploit(self, model, state ):
         #return np.array(model.predict(state, verbose=0).reshape(3, 3), )

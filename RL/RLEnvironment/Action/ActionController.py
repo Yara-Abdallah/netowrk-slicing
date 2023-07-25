@@ -19,8 +19,18 @@ class ActionController:
         next_state = self.command.execute(state, action_decision)
         return next_state
 
-    def explore(self):
-        return self.command.explore()
+    def explore(self,mask=None):
+        if not hasattr(mask , 'all'):
+            if mask!=None :
+                if len(mask)>0:
+                    # print("mask len : ", len(mask))
+
+                    return self.command.explore(mask)
+            else :
+                return self.command.explore()
+        else :
+            return self.command.explore(mask)
+
 
     def exploit(self, model, state,mask=None):
         # print("mask : ",mask)

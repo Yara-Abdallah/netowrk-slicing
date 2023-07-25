@@ -101,7 +101,7 @@ class Environment:
                 elif type_poi == "5G":
                     val = 10000
                 elif type_poi == "wifi":
-                    val = 550
+                    val = 150
                 factory = FactoryCellular(
                     outlet_types[str(type_poi)],
                     1,
@@ -121,7 +121,10 @@ class Environment:
                 performancelogger.set_queue_requested_buffer(outlet, deque([]))
                 performancelogger.set_queue_ensured_buffer(outlet, deque([]))
                 performancelogger.set_queue_power_for_requested_in_buffer(outlet, deque([]))
-                performancelogger.set_outlet_services_power_allocation_with_action_period(outlet, [0, 0, 0])
+                performancelogger.set_outlet_services_requested_number_all_periods(outlet, [0, 0, 0])
+                performancelogger.set_outlet_services_requested_number(outlet, [0, 0, 0])
+                performancelogger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
+
                 outlets.append(outlet)
 
         list(map(lambda x: append_outlets(x), poi_ids))
@@ -346,7 +349,7 @@ class Environment:
             #     previous_steps_sending = self.steps
 
             number_of_cars_will_send_requests = round(
-                len(list(env_variables.vehicles.values())) * 0.05
+                len(list(env_variables.vehicles.values())) * 0.01
             )
             vehicles = ra.sample(
                 list(env_variables.vehicles.values()), number_of_cars_will_send_requests
@@ -361,12 +364,12 @@ class Environment:
 
 
                 decentralize_state_action(performance_logger, self.gridcells_dqn, 1)
-                for index, outlet in enumerate(self.temp_outlets):
+                # for index, outlet in enumerate(self.temp_outlets):
 
-                    add_value_to_pickle(
-                        os.path.join(available_capacity_decentralized_path, f"available_capacity{index}.pkl"),
-                        outlet.current_capacity,
-                    )
+                    # add_value_to_pickle(
+                    #     os.path.join(available_capacity_decentralized_path, f"available_capacity{index}.pkl"),
+                    #     outlet.current_capacity,
+                    # )
 
                 # list(map(lambda veh: decentralize_period_processing(veh, observer, performance_logger),env_variables.vehicles.values(),))
 
@@ -423,12 +426,12 @@ class Environment:
                         outlet.dqn.environment.reward.service_requested,
                     )
 
-                    add_value_to_pickle(
-                        os.path.join(sum_power_allocation_path, f"sum_power_allocation{index}.pkl"),
-                        sum(performance_logger.outlet_services_power_allocation_with_action_period[outlet]),
-                    )
-
-                    performance_logger.set_outlet_services_power_allocation_with_action_period(outlet, [0, 0, 0])
+                    # add_value_to_pickle(
+                    #     os.path.join(sum_power_allocation_path, f"sum_power_allocation{index}.pkl"),
+                    #     sum(performance_logger.outlet_services_power_allocation_with_action_period[outlet]),
+                    # )
+                    #
+                    # performance_logger.set_outlet_services_power_allocation_with_action_period(outlet, [0, 0, 0])
 
                     add_value_to_pickle(
                         os.path.join(ensured_decentralized_path, f"ensured{index}.pkl"),
@@ -494,6 +497,7 @@ class Environment:
             if self.steps - self.previouse_steps_reseting >= env_variables.episode_steps:
                 self.previouse_steps_reseting = self.steps
                 list_ = []
+                print("resetting ................. ")
                 for ind, gridcell_dqn in enumerate(self.gridcells_dqn):
                     # gridcell_dqn.environment.reward.gridcell_reward_episode = sum(
                     #     gridcell_dqn.environment.reward.reward_value)
@@ -524,10 +528,11 @@ class Environment:
                         out.dqn.environment.reward.resetreward()
                         out.dqn.environment.reward.reward_value_accumilated = 0
                         out.current_capacity = out.set_max_capacity(out.__class__.__name__)
+
                         for i in range(3):
                             out.dqn.environment.state._mean_power_allocated_requests[i] = \
                                 performance_logger.outlet_services_power_allocation[out][
-                                    i] / number_of_decentralize_periods
+                                    i] / performance_logger.outlet_services_requested_number_all_periods[out][i]
 
                         # print(" out : ", out.current_capacity)
                         out.dqn.environment.state.state_value_decentralize = out.dqn.environment.state.calculate_state()

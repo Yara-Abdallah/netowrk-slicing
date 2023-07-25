@@ -1,14 +1,14 @@
 import os
 
 import keras
-import numpy as np
+
 import random
 from RL.Agent.IAgent import AbstractAgent
 from RL.RLEnvironment.Action.ActionChain import Exploit, Explore, FallbackHandler
 import pickle
 import tensorflow as tf
-from itertools import product
-
+import numpy as np
+from Environment.utils.mask_generation import *
 
 class Agent(AbstractAgent):
     _grid_outlets = []
@@ -21,9 +21,7 @@ class Agent(AbstractAgent):
         self._grid_outlets = []
         self._action_value = 0
         self._qvalue = 0.0
-        self.permutations = list(product([0, 1], repeat=3))
-        self.action_space = 8
-        self.action_permutations_dectionary = {self.permutations[i]: i for i in range(self.action_space)}
+        self.mask = []
 
     @property
     def outlets_id(self):
@@ -40,6 +38,7 @@ class Agent(AbstractAgent):
     @qvalue.setter
     def qvalue(self, q):
         self._qvalue = q
+
     @property
     def grid_outlets(self):
         return self._grid_outlets
@@ -64,33 +63,15 @@ class Agent(AbstractAgent):
     @action_value.setter
     def action_value(self, a):
         self._action_value = a
-    def action_masking(self,supported_service):
 
-        indexs_of_not_supported = [index for index, value in enumerate(supported_service) if value == 0]
-        not_available_actions = []
-        for i in self.permutations:
-            for j in indexs_of_not_supported:
-                if i[j] == 1:
-                    not_available_actions.append(i)
 
-        not_available_actions = set(not_available_actions)
-        not_available_actions = list(not_available_actions)
-        available_actions = [item for item in self.permutations if item not in not_available_actions]
-        available_mapped_actions = [value for key, value in self.action_permutations_dectionary.items() if key in available_actions]
-        
-        action_mask = np.zeros(8)
-        for i, value in enumerate(action_mask):
-            for j, val in enumerate(available_mapped_actions):
-                if action_mask[val] == 0:
-                    action_mask[val] = 1
-        action_mask = np.array(action_mask).reshape([1, np.array(action_mask).shape[0]])
-        return action_mask
+
     def replay_buffer_decentralize(self, batch_size, model):
         minibatch = random.sample(self.memory, batch_size)
         target = 0
-        for supported_service,exploitation, state, action, reward, next_state in minibatch:
+        for  action_mask , exploitation, state, action, reward, next_state in minibatch:
             target = reward
-            action_mask = self.action_masking(supported_service)
+            # action_mask = self.action_masking(supported_service)
             if next_state is not None:
                 next_state = np.array(next_state).reshape([1, np.array(next_state).shape[0]])
                 # print(model.summary())
@@ -99,19 +80,19 @@ class Agent(AbstractAgent):
                 # if exploitation == 1:
                 target = reward + self.gamma * np.amax(logit_value)
                 # if exploitation == 0:
-                    # print("exploration : decentralize ")
-                    # qvalue = model.predict([next_state, action_mask], verbose=0)[0]
-                    # target = reward + self.gamma * qvalue[action]
+                # print("exploration : decentralize ")
+                # qvalue = model.predict([next_state, action_mask], verbose=0)[0]
+                # target = reward + self.gamma * qvalue[action]
 
             state = np.array(state).reshape([1, np.array(state).shape[0]])
-            target_f =  model.predict([state,action_mask], verbose=0)
+            target_f = model.predict([state, action_mask], verbose=0)
             mapped_action = 0
-            for key, val in self.action_permutations_dectionary.items():
+            for key, val in action_permutations_dectionary.items():
                 if val == action:
                     mapped_action = val
             # print("mapped_action : ", mapped_action)
             target_f[0][mapped_action] = target
-            model.fit([state,action_mask], target_f, epochs=1, verbose=0)
+            model.fit([state, action_mask], target_f, epochs=1, verbose=0)
         if self.epsilon > self.min_epsilon:
             self.epsilon -= self.epsilon * self.epsilon_decay
         return target
@@ -149,7 +130,6 @@ class Agent(AbstractAgent):
                 pickle.dump(item, file)
         deque.clear()
 
-
     def fill_memory(self, deque, filename):
         with open(filename, 'rb') as file:
             try:
@@ -161,19 +141,22 @@ class Agent(AbstractAgent):
 
     def remember(self, flag, state, action, reward, next_state):
         self.memory.append((flag, state, action, reward, next_state))
-    def remember_decentralize(self, supported_services ,flag, state, action, reward, next_state,rem):
+
+    def remember_decentralize(self, supported_services, flag, state, action, reward, next_state, rem):
         if rem:
-            self.memory.append((supported_services ,flag, state, action, reward, next_state))
+            # print(supported_services, "  \n  ",flag  , "  \n  ", state, "  \n  ", action, "  \n  ", reward, "  \n  ", next_state)
+            self.memory.append((supported_services, flag, state, action, reward, next_state))
 
     def chain_dec(self, model, state, mask, epsilon):
         "A chain with a default first successor"
         test = np.random.rand()
         "Setting the first successor that will modify the payload"
         action = self.action
-        handler = Exploit(action, model, state,mask, Explore(action, FallbackHandler(action)))
+        handler = Exploit(action, model, state, mask,
+                          Explore(action, mask, FallbackHandler(action)))
         action_Value, flag = handler.handle(test, epsilon)
         # print("action value inside chain : ",action_Value )
-        return action, action_Value , flag
+        return action, action_Value, flag
 
     def chain(self, model, state, epsilon):
         "A chain with a default first successor"
