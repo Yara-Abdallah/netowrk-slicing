@@ -218,18 +218,20 @@ class CentralizedState(State):
         x = list(map(self.filtered_powers[x[0]].__getitem__, x[1]))
         return x
 
-    def calculate_utility(self, service_index):
-        percentage_array = 0
-        if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
-                self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
-            percentage_array = 0
-        elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
-                self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
+    def calculate_utility(self):
+        percentage_array = []
 
-            percentage_array = (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
-                    self._services_requested[service_index] - self._services_requested_prev[service_index])
-        else:
-            percentage_array = 0
+        for service_index in range(3):
+            if (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) == 0 and (
+                    self._services_requested[service_index] - self._services_requested_prev[service_index]) == 0:
+                percentage_array.append(0)
+            elif (self._services_ensured[service_index] - self._services_ensured_prev[service_index]) != 0 and (
+                    self._services_requested[service_index] - self._services_requested_prev[service_index]) != 0:
+
+                percentage_array.append(self._services_ensured[service_index] - self._services_ensured_prev[service_index]) / (
+                        self._services_requested[service_index] - self._services_requested_prev[service_index])
+            else:
+                percentage_array.append(0)
 
         return percentage_array
 
@@ -269,20 +271,15 @@ class CentralizedState(State):
     #     else:
     #         return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     def calculate_state(self):
-        final_state = []
-        final_state.append(self.index_outlet)
-        final_state.append(self.max_capacity_each_outlet[self.index_outlet])
-        final_state.append(self.capacity_each_tower[self.index_outlet])
-        final_state.append(self.index_service)
-        if isinstance(self.supported_service, np.ndarray):
-            final_state.append((self.supported_services[self.index_service][self.index_outlet]).item())
-        else:
-            final_state.append(self.supported_services[self.index_service][self.index_outlet])
-        final_state.append(self.services_requested_for_outlet[self.index_service])
-        final_state.append(self.services_ensured_for_outlet[self.index_service])
-        final_state.append(self.allocated_power[self.index_service][self.index_outlet])
-        final_state.append(self.services_requested[self.index_service])
-        final_state.append(self.services_ensured[self.index_service])
-        final_state.append(self.average_power_allocate[self.index_service])
-        final_state.append(self.calculate_utility(self.index_service))
+        final_state = list()
+        final_state.extend(self.max_capacity_each_outlet)
+        final_state.extend(self.capacity_each_tower)
+        final_state.extend(list(np.array(self.supported_services).flatten()))
+        final_state.extend(self.services_requested_for_outlet)
+        final_state.extend(self.services_ensured_for_outlet)
+        final_state.extend(list(np.array(self.allocated_power).flatten()))
+        final_state.extend(self.services_requested)
+        final_state.extend(self.services_ensured)
+        final_state.extend(self.average_power_allocate)
+        final_state.extend(self.calculate_utility())
         return final_state

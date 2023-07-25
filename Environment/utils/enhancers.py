@@ -245,7 +245,7 @@ def centralize_state_action(gridcells_dqn, step, performance_logger):
                 actions.extend(outlet.supported_services)
             # print("outlet.supported_services : ", outlet.supported_services)
             outlet.dqn.environment.state.supported_services = outlet.supported_services
-
+        print('fuck', gridcell.environment.state.state_value_centralize)
         # gridcell.agents.action.command.action_objects = actions_objects
         gridcell.agents.action.command.action_value_centralize = actions
         gridcell.agents.action.command.action_flags = list_flags
