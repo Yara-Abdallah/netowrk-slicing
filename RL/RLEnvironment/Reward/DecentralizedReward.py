@@ -117,24 +117,23 @@ class DeCentralizedReward(Reward):
         self.utility = 0
         self.prev_utility = 0
         self.reward_value_accumilated = 0
-    def calculate_reward2(self,requested,ensured,action):
+    def calculate_reward2(self,requested,ensured,action,supported):
         # self.utility  = self.calculate_utility()
         if requested != 0 and ensured != 0 :
             self.utility = ensured / requested
         else :
             self.utility = 0
-        # print("utility : ",self.utility)
+        print("utility : ",self.utility)
         # print("prev_utility : ",self._prev_utility)
         derivation_throughput = self.utility - self._prev_utility
         # print("derivation_throughput  : ", derivation_throughput )
         # print("utility : ",self.utility)
         # print("derivation_throughput : ",derivation_throughput)
         # print("action sum ,",sum(action))
-        if self.utility == 0.0 and sum(action) == 0:
+
+        if self.utility == 0.0:
             return -1
-        elif self.utility == 0.0 and sum(action) != 0:
-            return 0
-        else :
+        else:
             return self._throughput_derivation_weight * math.tanh(derivation_throughput) + self._throughput_weight * self.utility
                 # + self._cost_weight * (1/(1 + np.exp(-1/average_power)))
     def calculate_reward(self, x, action, c, max_capacity):

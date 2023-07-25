@@ -358,6 +358,8 @@ class Environment:
             if self.steps == 0:
                 centralize_state_action(self.gridcells_dqn, self.steps, performance_logger)
 
+
+
                 decentralize_state_action(performance_logger, self.gridcells_dqn, 1)
                 for index, outlet in enumerate(self.temp_outlets):
 
@@ -440,9 +442,9 @@ class Environment:
 
                 # for index, outlet in enumerate(self.temp_outlets):
 
-
-
                 decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets,performance_logger)
+
+
 
                 # decentralize_processing_old_requested_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger)
 

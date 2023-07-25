@@ -161,8 +161,9 @@ class Agent(AbstractAgent):
 
     def remember(self, flag, state, action, reward, next_state):
         self.memory.append((flag, state, action, reward, next_state))
-    def remember_decentralize(self, supported_services ,flag, state, action, reward, next_state):
-        self.memory.append((supported_services ,flag, state, action, reward, next_state))
+    def remember_decentralize(self, supported_services ,flag, state, action, reward, next_state,rem):
+        if rem:
+            self.memory.append((supported_services ,flag, state, action, reward, next_state))
 
     def chain_dec(self, model, state, mask, epsilon):
         "A chain with a default first successor"

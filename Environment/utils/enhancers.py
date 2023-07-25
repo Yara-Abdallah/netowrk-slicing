@@ -324,9 +324,9 @@ def centralize_nextstate_reward(gridcells_dqn):
 
 def decentralize_reset(outlets, performance_logger):
     for i, outlet in enumerate(outlets):
-        # print("befor resetting : ")
-        # print("requested buffer  : ", len(performance_logger.queue_requested_buffer[outlet]))
-        # print("ensured buffer  : ", len(performance_logger.queue_ensured_buffer[outlet]))
+        print("befor resetting : ")
+        print("requested buffer  : ", len(performance_logger.queue_requested_buffer[outlet]))
+        print("ensured buffer  : ", len(performance_logger.queue_ensured_buffer[outlet]))
         # print("requests demanded from each tower : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
 
         for j in range(len(performance_logger.queue_ensured_buffer[outlet])):
@@ -336,9 +336,9 @@ def decentralize_reset(outlets, performance_logger):
             performance_logger.queue_provisioning_time_buffer.pop(service)
         performance_logger.queue_ensured_buffer[outlet].clear()
 
-        # print("after resetting : ")
-        # print("requested buffer  after : ", len(performance_logger.queue_requested_buffer[outlet]))
-        # print("ensured buffer  after : ", len(performance_logger.queue_ensured_buffer[outlet]))
+        print("after resetting : ")
+        print("requested buffer  after : ", len(performance_logger.queue_requested_buffer[outlet]))
+        print("ensured buffer  after : ", len(performance_logger.queue_ensured_buffer[outlet]))
         # print("requests demanded from each tower : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
 
 
@@ -389,8 +389,7 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                 if outlet == outlet_:
                     action = outlet_.dqn.agents.action.command.action_value_decentralize
                     service_index = service._dec_services_types_mapping[service.__class__.__name__]
-                    if action[service_index] == 1 and outlet.supported_services[service_index]==1 and sum(action)!=0:
-                        # print("yes")
+                    if outlet.supported_services[service_index] == 1:
                         # print(action,"  ",service.request_supported(outlet)," ",outlet.current_capacity)
                         performance_logger.queue_requested_buffer[outlet].appendleft(1)
                         performance_logger.set_queue_provisioning_time_buffer(service, [0, 0])
@@ -427,7 +426,7 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
 
                         performance_logger.queue_power_for_requested_in_buffer[outlet].appendleft(service)
 
-                        if outlet.current_capacity > service.service_power_allocate:
+                        if action[service_index] == 1 and outlet.current_capacity > service.service_power_allocate:
 
                             ensured_service_aggrigation(
                             performance_logger.outlet_services_ensured_number,
@@ -443,133 +442,144 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
 def decentralize_state_action(performancelogger, gridcells_dqn, number_of_decentralize_periods):
     for gridcell in gridcells_dqn:
         for i, outlet in enumerate(gridcell.agents.grid_outlets):
-            # if outlet in performance_logger.handled_services:
-            outlet._max_capacity = outlet.set_max_capacity(outlet.__class__.__name__)
-            gridcell.environment.state._max_capacity_each_outlet[i] = outlet._max_capacity
-            gridcell.environment.state._capacity_each_tower[i] = outlet.current_capacity
+            if sum(outlet.supported_services) != 0:
+                # if outlet in performance_logger.handled_services:
+                outlet._max_capacity = outlet.set_max_capacity(outlet.__class__.__name__)
+                gridcell.environment.state._max_capacity_each_outlet[i] = outlet._max_capacity
+                gridcell.environment.state._capacity_each_tower[i] = outlet.current_capacity
 
-            outlet.dqn.environment.state.state_value_decentralize[0] = outlet.current_capacity
-            outlet.dqn.environment.state.tower_capacity = outlet.current_capacity
-            outlet.dqn.environment.state.max_tower_capacity = outlet._max_capacity
-            # outlet.dqn.environment.state.supported_services = outlet.supported_services
-            # outlet.dqn.environment.state.action_value = outlet.dqn.agents.action_value
+                outlet.dqn.environment.state.state_value_decentralize[0] = outlet.current_capacity
+                outlet.dqn.environment.state.tower_capacity = outlet.current_capacity
+                outlet.dqn.environment.state.max_tower_capacity = outlet._max_capacity
+                # outlet.dqn.environment.state.supported_services = outlet.supported_services
+                # outlet.dqn.environment.state.action_value = outlet.dqn.agents.action_value
 
-            if number_of_decentralize_periods == 1:
-                for i in range(3):
-                    outlet.dqn.environment.state._mean_power_allocated_requests[i] = \
-                        performancelogger.outlet_services_power_allocation[outlet][i] / number_of_decentralize_periods
+                if number_of_decentralize_periods == 1:
+                    for i in range(3):
+                        outlet.dqn.environment.state._mean_power_allocated_requests[i] = \
+                            performancelogger.outlet_services_power_allocation[outlet][i] / number_of_decentralize_periods
 
-                outlet.dqn.environment.state.services_requested = len(performancelogger.queue_requested_buffer[outlet]) -  len(performancelogger.queue_ensured_buffer[outlet])
-                outlet.dqn.environment.state.services_ensured = len(performancelogger.queue_ensured_buffer[outlet])
+                    outlet.dqn.environment.state.services_requested = len(performancelogger.queue_requested_buffer[outlet])
+                    outlet.dqn.environment.state.services_ensured = len(performancelogger.queue_ensured_buffer[outlet])
 
-                outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.calculate_state()
+                    outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.calculate_state()
 
-            # print(" outlet.dqn.environment.state.state_value_decentralize  : ",
-            #       outlet.dqn.environment.state.state_value_decentralize)
-            outlet.dqn.agents.action.command.action_object, outlet.dqn.agents.action.command.action_value_decentralize, flag = \
-                outlet.dqn.agents.chain_dec(
-                    outlet.dqn.model,
-                    outlet.dqn.environment.state.state_value_decentralize,
-                    outlet.dqn.agents.action_masking(outlet.dqn.environment.state.supported_services),
+                # print(" outlet.dqn.environment.state.state_value_decentralize  : ",
+                #       outlet.dqn.environment.state.state_value_decentralize)
+                outlet.dqn.agents.action.command.action_object, outlet.dqn.agents.action.command.action_value_decentralize, flag = \
+                    outlet.dqn.agents.chain_dec(
+                        outlet.dqn.model,
+                        outlet.dqn.environment.state.state_value_decentralize,
+                        outlet.dqn.agents.action_masking(outlet.dqn.environment.state.supported_services),
 
-                    outlet.dqn.agents.epsilon,
+                        0.001,
+                    )
+
+                mapped_action = 0
+                for key, val in outlet.dqn.agents.action_permutations_dectionary.items():
+                    if val == outlet.dqn.agents.action.command.action_value_decentralize:
+                        # print("the key : ", key)
+                        mapped_action = key
+
+                outlet.dqn.agents.action.command.action_value_decentralize = mapped_action
+
+                outlet.dqn.agents.action_value = (
+                    outlet.dqn.agents.action.command.action_value_decentralize
                 )
-
-            mapped_action = 0
-            for key, val in outlet.dqn.agents.action_permutations_dectionary.items():
-                if val == outlet.dqn.agents.action.command.action_value_decentralize:
-                    # print("the key : ", key)
-                    mapped_action = key
-
-            outlet.dqn.agents.action.command.action_value_decentralize = mapped_action
-            # print("after mapping  : ", outlet.dqn.agents.action.command.action_value_decentralize)
-
-            outlet.dqn.agents.action_value = (
-                outlet.dqn.agents.action.command.action_value_decentralize
-            )
 
 
 def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_decentralize_periods):
     for gridcell in gridcells_dqn:
         for i, outlet in enumerate(gridcell.agents.grid_outlets):
-            # print(
-            #         "decenlraize  state value :   ",
-            #         outlet.dqn.environment.state.state_value_decentralize,
-            #     )
-            outlet.dqn.environment.state.services_requested = len(performancelogger.queue_requested_buffer[outlet]) - len(performancelogger.queue_ensured_buffer[outlet])
-            # print("len(performancelogger.queue_requested_buffer[outlet]) : ", len(performancelogger.queue_requested_buffer[outlet]))
-            for i in range(3):
-                outlet.dqn.environment.state._mean_power_allocated_requests[i] = \
-                    performancelogger.outlet_services_power_allocation[outlet][i] / number_of_decentralize_periods
-            # print("power : ", performancelogger.outlet_services_power_allocation)
-            # print("number_of_decentralize_periods : ", number_of_decentralize_periods)
+            if sum(outlet.supported_services) != 0:
 
-            outlet.dqn.environment.state.next_state_decentralize = outlet.dqn.agents.action.command.action_object.execute(
-                outlet.dqn.environment.state,
-                outlet.dqn.agents.action.command.action_value_decentralize,
-            )
-            # print(
-            #     "decenlraize next state value :   ",
-            #     outlet.dqn.environment.state.next_state_decentralize,
-            # )
-            # print("len(performancelogger.queue_requested_buffer[outlet]) : ",len(performancelogger.queue_requested_buffer[outlet]))
-            outlet.dqn.environment.reward.service_requested = len(performancelogger.queue_requested_buffer[outlet])
-            # print("outlet.dqn.environment.reward.service_requested ",outlet.dqn.environment.reward.service_requested)
-            outlet.dqn.environment.reward.service_ensured = len(performancelogger.queue_ensured_buffer[outlet])
-            # print("performancelogger.queue_requested_buffer : ", outlet.dqn.environment.reward.service_requested)
-            # print("performancelogger.queue_ensured_buffer : ",outlet.dqn.environment.reward.service_ensured )
+                print(f"after mapping {outlet.__class__.__name__}  : ", outlet.dqn.agents.action.command.action_value_decentralize)
+                print(f"supported services  {outlet.__class__.__name__}  : ", outlet.supported_services)
 
-            outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward2(
-                outlet.dqn.environment.reward.service_requested,
-                outlet.dqn.environment.reward.service_ensured,
-                outlet.dqn.agents.action.command.action_value_decentralize,
+                print(
+                        "decenlraize  state value :   ",
+                        outlet.dqn.environment.state.state_value_decentralize,
+                    )
 
+                outlet.dqn.environment.state.services_requested = len(performancelogger.queue_requested_buffer[outlet]) - len(performancelogger.queue_ensured_buffer[outlet])
+                print("len(performancelogger.queue_requested_buffer[outlet]) : ", len(performancelogger.queue_requested_buffer[outlet]))
+                for i in range(3):
+                    outlet.dqn.environment.state._mean_power_allocated_requests[i] = \
+                        performancelogger.outlet_services_power_allocation[outlet][i] / number_of_decentralize_periods
+                # print("power : ", performancelogger.outlet_services_power_allocation)
+                # print("number_of_decentralize_periods : ", number_of_decentralize_periods)
+
+                outlet.dqn.environment.state.next_state_decentralize = outlet.dqn.agents.action.command.action_object.execute(
+                    outlet.dqn.environment.state,
+                    outlet.dqn.agents.action.command.action_value_decentralize,
+                )
+                print(
+                    "decenlraize next state value :",
+                    outlet.dqn.environment.state.next_state_decentralize,
+                )
+                # print("len(performancelogger.queue_requested_buffer[outlet]) : ",len(performancelogger.queue_requested_buffer[outlet]))
+                outlet.dqn.environment.reward.service_requested = len(performancelogger.queue_requested_buffer[outlet]) - len(performancelogger.queue_ensured_buffer[outlet])
+                # print("outlet.dqn.environment.reward.service_requested ",outlet.dqn.environment.reward.service_requested)
+                outlet.dqn.environment.reward.service_ensured = len(performancelogger.queue_ensured_buffer[outlet])
+                print("performancelogger.queue_requested_buffer : ", outlet.dqn.environment.reward.service_requested)
+                print("performancelogger.queue_ensured_buffer : ",outlet.dqn.environment.reward.service_ensured )
+
+
+                outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward2(
+                    outlet.dqn.environment.reward.service_requested,
+                    outlet.dqn.environment.reward.service_ensured,
+                    outlet.dqn.agents.action.command.action_value_decentralize,
+                    outlet.supported_services
+                    )
+
+                outlet.dqn.environment.reward.reward_value_accumilated = outlet.dqn.environment.reward.reward_value_accumilated + outlet.dqn.environment.reward.reward_value
+                print("reward : ",outlet.dqn.environment.reward.reward_value )
+
+                outlet.dqn.environment.reward._period_reward_decentralize.append(
+                    outlet.dqn.environment.reward.reward_value)
+
+                outlet.dqn.environment.reward._episode_reward_decentralize.append(
+                    outlet.dqn.environment.reward.reward_value)
+                # print("outlet.dqn.environment.reward._period_reward_decentralize : ",
+                #       outlet.dqn.environment.reward._period_reward_decentralize)
+                # print("#################################################################################")
+
+                if len(outlet.dqn.environment.reward._period_reward_decentralize) == 10:
+                    outlet.dqn.environment.reward.rolling_sum_reward = rolling_average(
+                        outlet.dqn.environment.reward._period_reward_decentralize, window_size=10)
+
+                if len(outlet.dqn.environment.reward._period_reward_decentralize) > 10:
+                    outlet.dqn.environment.reward._period_reward_decentralize.pop(0)
+                    outlet.dqn.environment.reward.rolling_sum_reward = rolling_average(
+                        outlet.dqn.environment.reward._period_reward_decentralize, window_size=10)
+
+
+                if len(outlet.dqn.environment.reward._episode_reward_decentralize) == 32:
+                    outlet.dqn.environment.reward.rolling_sum_reward_320 = rolling_average(
+                        outlet.dqn.environment.reward._episode_reward_decentralize, window_size=32)
+
+                if len(outlet.dqn.environment.reward._episode_reward_decentralize) > 32:
+                    outlet.dqn.environment.reward._episode_reward_decentralize.pop(0)
+                    outlet.dqn.environment.reward.rolling_sum_reward_320 = rolling_average(
+                        outlet.dqn.environment.reward._episode_reward_decentralize, window_size=32)
+
+                flag = 1
+                # print(" remember after mapping  : ", outlet.dqn.agents.action.command.action_value_decentralize)
+                if outlet.dqn.environment.reward.service_requested == 0 and (sum(outlet.dqn.agents.action.command.action_value_decentralize) != 0):
+                    remember_flag = False
+                else:
+                    remember_flag = True
+                outlet.dqn.agents.remember_decentralize(
+                    outlet.dqn.environment.state.supported_services,
+                    flag,
+                    outlet.dqn.environment.state.state_value_decentralize,
+                    outlet.dqn.agents.action.command.action_value_decentralize,
+                    outlet.dqn.environment.reward.reward_value,
+                    outlet.dqn.environment.state.next_state_decentralize,
+                    remember_flag
                 )
 
-            outlet.dqn.environment.reward.reward_value_accumilated = outlet.dqn.environment.reward.reward_value_accumilated + outlet.dqn.environment.reward.reward_value
-            # print("reward : ",outlet.dqn.environment.reward.reward_value )
-
-            outlet.dqn.environment.reward._period_reward_decentralize.append(
-                outlet.dqn.environment.reward.reward_value)
-
-            outlet.dqn.environment.reward._episode_reward_decentralize.append(
-                outlet.dqn.environment.reward.reward_value)
-            # print("outlet.dqn.environment.reward._period_reward_decentralize : ",
-            #       outlet.dqn.environment.reward._period_reward_decentralize)
-            # print("#################################################################################")
-
-            if len(outlet.dqn.environment.reward._period_reward_decentralize) == 10:
-                outlet.dqn.environment.reward.rolling_sum_reward = rolling_average(
-                    outlet.dqn.environment.reward._period_reward_decentralize, window_size=10)
-
-            if len(outlet.dqn.environment.reward._period_reward_decentralize) > 10:
-                outlet.dqn.environment.reward._period_reward_decentralize.pop(0)
-                outlet.dqn.environment.reward.rolling_sum_reward = rolling_average(
-                    outlet.dqn.environment.reward._period_reward_decentralize, window_size=10)
-
-
-            if len(outlet.dqn.environment.reward._episode_reward_decentralize) == 32:
-                outlet.dqn.environment.reward.rolling_sum_reward_320 = rolling_average(
-                    outlet.dqn.environment.reward._episode_reward_decentralize, window_size=32)
-
-            if len(outlet.dqn.environment.reward._episode_reward_decentralize) > 32:
-                outlet.dqn.environment.reward._episode_reward_decentralize.pop(0)
-                outlet.dqn.environment.reward.rolling_sum_reward_320 = rolling_average(
-                    outlet.dqn.environment.reward._episode_reward_decentralize, window_size=32)
-
-            flag = 1
-            # print(" remember after mapping  : ", outlet.dqn.agents.action.command.action_value_decentralize)
-
-            outlet.dqn.agents.remember_decentralize(
-                outlet.dqn.environment.state.supported_services,
-                flag,
-                outlet.dqn.environment.state.state_value_decentralize,
-                outlet.dqn.agents.action.command.action_value_decentralize,
-                outlet.dqn.environment.reward.reward_value,
-                outlet.dqn.environment.state.next_state_decentralize,
-            )
-
-            outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.next_state_decentralize
-            # print("outlet.dqn.environment.state.state_value_decentralize after assingment : ",outlet.dqn.environment.state.state_value_decentralize)
-            outlet.dqn.environment.reward.prev_utility = outlet.dqn.environment.reward.utility
-            # print("outlet.dqn.environment.reward.prev_utility  : ", outlet.dqn.environment.reward.prev_utility )
+                outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.next_state_decentralize
+                # print("outlet.dqn.environment.state.state_value_decentralize after assingment : ",outlet.dqn.environment.state.state_value_decentralize)
+                outlet.dqn.environment.reward.prev_utility = outlet.dqn.environment.reward.utility
+                # print("outlet.dqn.environment.reward.prev_utility  : ", outlet.dqn.environment.reward.prev_utility )

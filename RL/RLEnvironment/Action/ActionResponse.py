@@ -40,7 +40,7 @@ class ActionResponse:
 
     def exploit(self, model, state,mask):
         state = np.array(state).reshape([1, np.array(state).shape[0]])
-        c=np.array(model.predict([state,mask] , verbose=0))
+        c=np.array(model.predict([state,mask], verbose=0))
         c = np.array(c).reshape(1,8)
         return np.argmax(c[0])
 
