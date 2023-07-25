@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # filename  = "C://Users//Windows dunya//Downloads//dec_action_masking_phase1//utility_decentralized//utility0.pkl"
-filename2 = "C://Users//Windows dunya//Downloads//reward_accumilated_decentralize//accu_reward1.pkl"
+filename2 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario//decentralize_action_masking_last_scenario//qvalue_decentralized_for_plotting//qvalue2.pkl"
 
 deque = []
 # with open(filename, 'rb') as file:
@@ -47,7 +47,7 @@ def rolling_average(data, window_size):
     return rolling_avg
 
 # Example usage:
-window_size = 1
+window_size = 16
 result = rolling_average(deque, window_size)
 # print(result)
 # print(len(data))
@@ -57,12 +57,12 @@ x_values = [i for i in range(len(result))]  # Adjust x-axis values
 
 # Plot the original data and the rolling average
 # plt.plot(np.arange(len(deque)), deque, label='Original Data')
-plt.plot(x_values, result, label=f'3G_r_w_10 (window={window_size})')
+plt.plot(x_values, result, label=f'4G_r_w_10 (window={window_size})')
 plt.xlabel('steps')
-plt.ylabel('reward')
+plt.ylabel('qvalue')
 plt.legend()
 plt.title('Rolling Average Plot')
 plt.grid(True)
-plt.savefig('3G_r_w_10.svg', format='svg')
+plt.savefig('4G_r_w_10.svg', format='svg')
 
 plt.show()
