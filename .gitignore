@@ -53,3 +53,9 @@ Thumbs.db
 .coverage
 .pytest_cache/
 *.docx#
+
+*.csv
+*.svg
+*.png
+*.zip
+*.mp4
