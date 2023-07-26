@@ -325,24 +325,19 @@ def centralize_nextstate_reward(gridcells_dqn):
 
 def decentralize_reset(outlets, performance_logger):
     for i, outlet in enumerate(outlets):
+        performance_logger.set_outlet_services_power_allocation_10_TimeStep(outlet,[0,0,0])
         # print("befor resetting : ")
         # print("requested buffer  : ", len(performance_logger.queue_requested_buffer[outlet]))
         # print("ensured buffer  : ", len(performance_logger.queue_ensured_buffer[outlet]))
 
-        # print("requests demanded from each tower : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
-
         for j in range(len(performance_logger.queue_ensured_buffer[outlet])):
             performance_logger.queue_requested_buffer[outlet].popleft()
             service = performance_logger.queue_power_for_requested_in_buffer[outlet].popleft()
-
             performance_logger.queue_provisioning_time_buffer.pop(service)
         performance_logger.queue_ensured_buffer[outlet].clear()
-
         # print("after resetting : ")
         # print("requested buffer  after : ", len(performance_logger.queue_requested_buffer[outlet]))
         # print("ensured buffer  after : ", len(performance_logger.queue_ensured_buffer[outlet]))
-        # print("requests demanded from each tower : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
-
 
 def provisioning_time_services(outlets, performance_logger, time_step_simulation):
     for i, outlet in enumerate(outlets):
@@ -384,7 +379,7 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                         request_cost = RequestCost(request_bandwidth, service.realtime)
                         request_cost.cost_setter(service.realtime)
                         service.service_power_allocate = request_bandwidth.allocated
-
+                        # print("service.service_power_allocate : ",service.service_power_allocate)
                         power_aggregation(
                             performance_logger.outlet_services_power_allocation,
                             outlet,
@@ -400,13 +395,7 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                             1,
                         )
 
-                        # power_aggregation(
-                        #     performance_logger.outlet_services_power_allocation_with_action_period,
-                        #     outlet,
-                        #     service.__class__.__name__,
-                        #     service,
-                        #     1,
-                        # )
+
 
                         services_aggregation(
                             performance_logger.outlet_services_requested_number_all_periods,
@@ -429,7 +418,15 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                             outlet,
                             service.__class__.__name__,
                             1,
-                        )
+
+                            )
+                            power_aggregation(
+                                performance_logger._outlet_services_power_allocation_10_TimeStep,
+                                outlet,
+                                service.__class__.__name__,
+                                service,
+                                1,
+                            )
                             performance_logger.queue_ensured_buffer[outlet].appendleft(1)
                             outlet.current_capacity = outlet.current_capacity - service.service_power_allocate
 
@@ -530,15 +527,23 @@ def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_de
                 outlet.dqn.environment.reward.service_requested = len(performancelogger.queue_requested_buffer[outlet])
                 # print("outlet.dqn.environment.reward.service_requested ",outlet.dqn.environment.reward.service_requested)
                 outlet.dqn.environment.reward.service_ensured = len(performancelogger.queue_ensured_buffer[outlet])
-                # print("performancelogger.queue_requested_buffer : ", outlet.dqn.environment.reward.service_requested)
+                # print("outlet.dqn.environment.reward.service_ensured ",outlet.dqn.environment.reward.service_ensured)
+                if sum(performancelogger._outlet_services_power_allocation_10_TimeStep[outlet]) != 0 :
+                    outlet.dqn.environment.reward._mean_power_allocation_3services_this_period = \
+                        sum(performancelogger._outlet_services_power_allocation_10_TimeStep[outlet])/outlet.dqn.environment.reward.service_ensured
+                else :
+                    outlet.dqn.environment.reward._mean_power_allocation_3services_this_period = 0
+
+                # print("mean : ", outlet.dqn.environment.reward._mean_power_allocation_3services_this_period )
+                    # print("performancelogger.queue_requested_buffer : ", outlet.dqn.environment.reward.service_requested)
                 # print("performancelogger.queue_ensured_buffer : ",outlet.dqn.environment.reward.service_ensured )
 
-
+                # print("outlet : ",outlet.__class__.__name__)
                 outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward2(
                     outlet.dqn.environment.reward.service_requested,
                     outlet.dqn.environment.reward.service_ensured,
-                    outlet.dqn.agents.action.command.action_value_decentralize,
-                    outlet.supported_services
+
+
                     )
 
                 outlet.dqn.environment.reward.reward_value_accumilated = outlet.dqn.environment.reward.reward_value_accumilated + outlet.dqn.environment.reward.reward_value
@@ -592,4 +597,5 @@ def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_de
                 outlet.dqn.environment.state.state_value_decentralize = outlet.dqn.environment.state.next_state_decentralize
                 # print("outlet.dqn.environment.state.state_value_decentralize after assingment : ",outlet.dqn.environment.state.state_value_decentralize)
                 outlet.dqn.environment.reward.prev_utility = outlet.dqn.environment.reward.utility
-                # print("outlet.dqn.environment.reward.prev_utility  : ", outlet.dqn.environment.reward.prev_utility )
+                outlet.dqn.environment.reward.prev_mean_power_allocation_3services_this_period = outlet.dqn.environment.reward._mean_power_allocation_3services_this_period
+                # print("outlet.dqn.environment.reward._prev_mean_power_allocation_3services_this_period  : ", outlet.dqn.environment.reward._prev_mean_power_allocation_3services_this_period )

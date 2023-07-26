@@ -124,6 +124,7 @@ class Environment:
                 performancelogger.set_outlet_services_requested_number_all_periods(outlet, [0, 0, 0])
                 performancelogger.set_outlet_services_requested_number(outlet, [0, 0, 0])
                 performancelogger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
+                performancelogger.set_outlet_services_power_allocation_10_TimeStep(outlet,[0,0,0])
 
                 outlets.append(outlet)
 

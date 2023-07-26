@@ -25,11 +25,14 @@ class SingletonMeta(type):
 @dataclass
 class PerformanceLogger(metaclass=SingletonMeta):
 
-
     _services_type: str = ""
+
     _number_of_periods_until_now: int = -1
+
     requested_services: List[Dict[Vehicle, Service]] = field(default_factory=list)
+
     handled_services: Dict[Outlet, Dict[Vehicle, Service]] = field(default_factory=dict)
+
     _queue_requested_buffer: Dict[Outlet, deque[int]] =  field(default_factory=dict)
 
     _queue_power_for_requested_in_buffer: Dict[Outlet, deque[Service]] = field(default_factory=dict)
@@ -39,24 +42,18 @@ class PerformanceLogger(metaclass=SingletonMeta):
     _queue_provisioning_time_buffer: Dict[Service, List[int]] = field(default_factory=dict)
 
     _outlet_services_power_allocation: Dict[Outlet, List[float]] = field(default_factory=dict)
-    _outlet_services_power_allocation_current: Dict[Outlet, List[float]] = field(default_factory=dict)
+
+    _outlet_services_power_allocation_10_TimeStep: Dict[Outlet, List[float]] = field(default_factory=dict)
 
     _outlet_services_requested_number: Dict[Outlet, List[int]] = field(default_factory=dict)
+
     _outlet_services_requested_number_all_periods: Dict[Outlet, List[int]] = field(default_factory=dict)
 
     _outlet_services_ensured_number: Dict[Outlet, List[int]] = field(default_factory=dict)
 
-    _outlet_occupancy: Dict[Outlet, float] = field(default_factory=dict)
-    _outlet_utility: Dict[Outlet, float] = field(default_factory=dict)
-    _gridcell_utility: Dict[Outlet, float] = field(default_factory=dict)
-    _decentralized_reward: Dict[Agent, float] = field(default_factory=dict)
-    _decentralize_z_c: Dict[Outlet, int] = field(default_factory=dict)
-    _decentralize_action_value: Dict[Outlet, int] = field(default_factory=dict)
-    _centralized_reward: Dict[Agent, float] = field(default_factory=dict)
-    _service_power_allocate: Dict[Service, float] = field(default_factory=dict)
     _request_costs: List[int] = field(default_factory=list)
+
     _power_costs: List[float] = field(default_factory=list)
-    served_ratio: List[float] = field(default_factory=list)
 
     @property
     def queue_requested_buffer(self):
@@ -102,31 +99,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
             self._gridcell_utility[outlet] = {}
         self._gridcell_utility[outlet] = utility
 
-    @property
-    def number_of_periods_until_now(self):
-        return self._number_of_periods_until_now
 
-    @number_of_periods_until_now.setter
-    def number_of_periods_until_now(self, value):
-        self._number_of_periods_until_now += 1
-
-    @property
-    def decentralize_z_c(self):
-        return self._decentralize_z_c
-
-    def set_decentralize_z_c(self, outlet, value):
-        if outlet not in self._decentralize_z_c:
-            self._decentralize_z_c[outlet] = {}
-        self._decentralize_z_c[outlet] = value
-
-    @property
-    def decentralize_action_value(self):
-        return self._decentralize_action_value
-
-    def set_decentralize_action_value(self, outlet, value):
-        if outlet not in self._decentralize_action_value:
-            self._decentralize_action_value = {}
-        self._decentralize_action_value[outlet] = value
 
     @property
     def service_power_allocate(self):
@@ -138,57 +111,15 @@ class PerformanceLogger(metaclass=SingletonMeta):
         self._service_power_allocate[outlet] = cost
 
     @property
-    def outlet_services_power_allocation_current(self):
-        return self._outlet_services_power_allocation_current
+    def outlet_services_power_allocation_10_TimeStep(self):
+        return self._outlet_services_power_allocation_10_TimeStep
 
-    def set_outlet_services_power_allocation_current(self, outlet, cost):
-        if outlet not in self._outlet_services_power_allocation_current:
-            self._outlet_services_power_allocation_current[outlet] = {}
-        self._outlet_services_power_allocation_current[outlet] = cost
+    def set_outlet_services_power_allocation_10_TimeStep(self, outlet, cost):
+        if outlet not in self._outlet_services_power_allocation_10_TimeStep:
+            self._outlet_services_power_allocation_10_TimeStep[outlet] = {}
+        self._outlet_services_power_allocation_10_TimeStep[outlet] = cost
 
-    @property
-    def centralized_reward(self):
-        return self._centralized_reward
 
-    def set_centralized_reward(self, outlet, reward):
-        if outlet not in self._centralized_reward:
-            self._centralized_reward[outlet] = {}
-        self._centralized_reward[outlet] = reward
-
-    @property
-    def decentralized_reward(self):
-        return self._decentralized_reward
-
-    def set_decentralized_reward(self, outlet, reward):
-        if outlet not in self._decentralized_reward:
-            self._decentralized_reward[outlet] = {}
-        self._decentralized_reward[outlet] = reward
-
-    @property
-    def outlet_occupancy(self):
-        return self._outlet_occupancy
-
-    def set_outlet_occupancy(self, outlet, occupancy):
-        if outlet not in self._outlet_occupancy:
-            self._outlet_occupancy[outlet] = {}
-        self._outlet_occupancy[outlet] = occupancy
-
-    @property
-    def outlet_utility(self):
-        return self._outlet_utility
-
-    def set_outlet_utility(self, outlet, utility):
-        if outlet not in self._outlet_utility:
-            self._outlet_utility[outlet] = {}
-        self._outlet_utility[outlet] = utility
-
-    @property
-    def services_type(self):
-        return self._services_type
-
-    @services_type.setter
-    def services_type(self, value):
-        self._services_type = value
 
     @property
     def outlet_services_ensured_number(self):
