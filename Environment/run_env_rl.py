@@ -295,8 +295,6 @@ class Environment:
         self.starting()
         performance_logger = PerformanceLogger()
         outlets = self.get_all_outlets(performance_logger)
-        print("performancelogger.queue_requested_buffer : ...", performance_logger.queue_requested_buffer)
-        print("performancelogger.queue_ensured_buffer : ... ", performance_logger.queue_ensured_buffer)
         self.Grids = self.fill_grids(self.fill_grids_with_the_nearest(outlets[:21]))
         step = 0
         print("\n")

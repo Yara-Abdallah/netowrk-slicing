@@ -1,73 +1,38 @@
-import traci
-from Environment import env_variables
-import xml.etree.ElementTree as ET
-import random
-from uuid import uuid4
 
-from Greedy.Greedy import Greedy
+from Environment.utils.imports import *
+from Environment.utils.period import Period
+from Greedy.greedy import Greedy
 from GridCell.GridCell import GridCell
-from Outlet.Sat.sat import Satellite
-from Utils.Bandwidth import Bandwidth
-from Utils.Cost import TowerCost, RequestCost
-from Utils.PerformanceLogger import PerformanceLogger
-from Utils.config import outlet_types, Grids
-from Vehicle.Car import Car
-from Outlet.Cellular.FactoryCellular import FactoryCellular
-from Vehicle.VehicleOutletObserver import ConcreteObserver
-import numpy as np
-import matplotlib.pyplot as plt
 
-fig, axs = plt.subplots(nrows=5, ncols=3, figsize=(100, 32))
-fig.subplots_adjust(hspace=0.8)
-
-lines_out_utility = []
-lines_out_requested = []
-lines_out_ensured = []
-
-
-
-fig_satellite, axs_satellite = plt.subplots(nrows=1, ncols=1, figsize=(30, 22))
-fig_satellite.subplots_adjust(hspace=0.8)
-
-
-lines_satellite_utility = 0
-satellite_utility=[]
-def plotting_satellite():
-    lines_satellite_utility, = axs_satellite.plot([], [], label=f"satellite utility", color='b')
-    return lines_satellite_utility
-
-
-lines_satellite_utility = plotting_satellite()
-
-
-def plotting_Utility_Requested_Ensured():
-    j = 0
-    for i in range(5):
-        row = 0
-        line, line1, line2 = 0, 0, 0
-        for index in range(3):
-            if index == 0:
-                color_str = 'b'
-            elif index == 1:
-                color_str = 'r'
-            elif index == 2:
-                color_str = 'g'
-            line, = axs.flatten()[j].plot([], [], label=f"O{row + index + 1} utility", color=color_str)
-            line1, = axs.flatten()[j + 1].plot([], [], label=f"O{row + index + 1} requested", color=color_str)
-            line2, = axs.flatten()[j + 2].plot([], [], label=f"O{row + index + 1} ensured", color=color_str)
-            lines_out_utility.append(line)
-            lines_out_requested.append(line1)
-            lines_out_ensured.append(line2)
-        j += 3
-
-
-plotting_Utility_Requested_Ensured()
 
 
 class Environment:
     Grids = {}
 
-    def __init__(self):
+    size = 0
+    data = {}
+    Grids = {}
+    steps = 0
+    average_qvalue_centralize = []
+    # Initialize previous_steps variable
+    previous_steps = 0
+    frame_rate_for_sending_requests = 1
+    previous_steps_sending = 0
+    previous_period = 0
+    snapshot_time = 5
+    previous_steps_centralize = 0
+    previous_steps_centralize_action = 0
+    previouse_steps_reseting = 0
+    prev = 0
+    memory_threshold = 1500  # 3.5GB
+    temp_outlets = []
+    gridcells_dqn = []
+    flag_processing_old_requests = [False] * 3
+    reset_decentralize = False
+    previouse_steps_reward32 = 0
+
+    def __init__(self, period: str):
+        Period(period)
         self.polygon = traci.polygon
         self.route = traci.route
         self.vehicle = traci.vehicle
@@ -82,7 +47,7 @@ class Environment:
     def get_buildings(self):
         all_builds_ = []
         for id_poly in self.get_polygons():
-            if self.polygon.getType(id_poly) == 'building':
+            if self.polygon.getType(id_poly) == "building":
                 all_builds_.append(id_poly)
         return all_builds_
 
@@ -94,28 +59,31 @@ class Environment:
         tree = ET.parse(env_variables.random_routes_path)
         root = tree.getroot()
         for child_root in root:
-            # print(child_root.tag, child_root.attrib)
-            id_ = child_root.attrib['id']
+            id_ = child_root.attrib["id"]
             for child in child_root:
                 # print(child.tag, child.attrib)
-                edges_ = list((child.attrib['edges']).split(' '))
+                # if child_root.tag == 'route':
+                edges_ = list((child.attrib["edges"]).split(" "))
                 # print('the id: {}  , edges: {}'.format(id_, edges_))
                 self.route.add(id_, edges_)
                 env_variables.all_routes.append(id_)
+        del tree
+        del root
 
     def update_outlet_color(self, id_, value):
         color_mapping = {
             (9, 10): (64, 64, 64, 255),  # dark grey
             (6, 9): (255, 0, 0, 255),  # red
             (3, 6): (0, 255, 0, 255),  # green
-            (1, 3): (255, 255, 0, 255)  # yellow
+            (1, 3): (255, 255, 0, 255),  # yellow
         }
 
         for val_range, color in color_mapping.items():
             if value >= val_range[0] and value <= val_range[1]:
                 traci.poi.setColor(id_, color)
+        del color_mapping
 
-    def get_all_outlets(self):
+    def get_all_outlets(self, performancelogger):
         """
         get all outlets and add id with position to env variables
         """
@@ -124,47 +92,93 @@ class Environment:
 
         def append_outlets(id_):
             type_poi = traci.poi.getType(id_)
-            raduis = 0.0
+
             if type_poi in env_variables.types_outlets:
+                print(" type_poi : ", type_poi)
                 position_ = traci.poi.getPosition(id_)
                 env_variables.outlets[type_poi].append((id_, position_))
-                # self.poi.add(id_, position_[0], position_[1],color=(255, 255, 0,255), size=100)
-                # print("str(type_poi)",str(type_poi))
-                if str(type_poi) == 'wifi':
-                    raduis = 100.0
-                elif str(type_poi) == '3G':
-                    raduis = 500.0
-                elif str(type_poi) == '4G':
-                    raduis = 1000.0
-                elif str(type_poi) == '5G':
-                    raduis = 10000.0
-                factory = FactoryCellular(outlet_types[str(type_poi)], 1, 1, [1, 1, 0], id_,
-                                          [position_[0], position_[1]],
-                                          raduis, [],
-                                          [10, 10, 10])
+                val = 0
+                if type_poi == "3G":
+                    val = 850
+                elif type_poi == "4G":
+                    val = 1250
+                elif type_poi == "5G":
+                    val = 10000
+                elif type_poi == "wifi":
+                    val = 150
+                factory = FactoryCellular(
+                    outlet_types[str(type_poi)],
+                    1,
+                    1,
+                    [1, 1, 0],
+                    id_,
+                    [position_[0], position_[1]],
+                    10000,
+                    [],
+                    [10, 10, 10],
+                )
+
                 outlet = factory.produce_cellular_outlet(str(type_poi))
                 outlet.outlet_id = id_
-                outlet.radius = raduis
+                outlet.radius = val
+                performancelogger.set_outlet_services_power_allocation(outlet, [0, 0, 0])
+                performancelogger.set_queue_requested_buffer(outlet, deque([]))
+                performancelogger.set_queue_ensured_buffer(outlet, deque([]))
+                performancelogger.set_queue_power_for_requested_in_buffer(outlet, deque([]))
+                performancelogger.set_outlet_services_requested_number_all_periods(outlet, [0, 0, 0])
+                # performancelogger.set_outlet_services_requested_number(outlet, [0, 0, 0])
+                performancelogger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
+                # performancelogger.set_outlet_services_power_allocation_10_TimeStep(outlet, [0, 0, 0])
+
                 outlets.append(outlet)
 
         list(map(lambda x: append_outlets(x), poi_ids))
 
-        satellite = Satellite(1, 1, [1, 1, 0], 0, [0, 0],
-                              10000000000, [],
-                              [10, 10, 10])
-        outlets.append(satellite)
+        # satellite = Satellite(1, [1, 1, 0], 0, [0, 0],
+        #                       100000, [],
+        #                       [10, 10, 10])
+        # outlets.append(satellite)
+
+        del poi_ids
 
         return outlets
 
+    def distance(self, outlet1, outlet2):
+        """Returns the Euclidean distance between two outlets"""
+        return math.sqrt(
+            (outlet1.position[0] - outlet2.position[0]) ** 2
+            + (outlet1.position[1] - outlet2.position[1]) ** 2
+        )
+
+    def fill_grids_with_the_nearest(self, outlets):
+        sub_dis = []
+        for j in outlets:
+            dis = []
+            for i in outlets:
+                dis.append(self.distance(j, i))
+            if len(dis) >= 3:
+                sorted_dis = sorted(dis)
+                min_indices = [dis.index(sorted_dis[i]) for i in range(3)]
+                elements = [outlets[i] for i in min_indices]
+                outlets = [
+                    element
+                    for index, element in enumerate(outlets)
+                    if index not in min_indices
+                ]
+                sub_dis.append(elements)
+        return sub_dis
+
     @staticmethod
-    def fill_grids(outlets):
+    def fill_grids(grids):
         Grids = {
             "grid1": [],
             "grid2": [],
             "grid3": [],
             "grid4": [],
+            "grid5": [],
+            "grid6": [],
+            "grid7": [],
         }
-        grids = [outlets[i:i + 3] for i in range(0, len(outlets), 3)]
 
         def grid_namer(i, grid):
             name = "grid" + str(i + 1)
@@ -175,11 +189,25 @@ class Environment:
 
     def select_outlets_to_show_in_gui(self):
         """
-        select outlets in network to display type of each outlet
+        select outlets in .network to display type of each outlet
         """
+        # for key in env_variables.outlets.keys():
+        #     for _id,_ in env_variables.outlets[key]:
+        #         self.gui.toggleSelection(_id, 'poi')
         from itertools import chain
-        array = list(map(lambda x: x, chain(*list(map(lambda x: x[1], env_variables.outlets.items())))))
-        list(map(lambda x: self.gui.toggleSelection(x[0], 'poi'), map(lambda x: x, array)))
+
+        array = list(
+            map(
+                lambda x: x,
+                chain(*list(map(lambda x: x[1], env_variables.outlets.items()))),
+            )
+        )
+        list(
+            map(
+                lambda x: self.gui.toggleSelection(x[0], "poi"), map(lambda x: x, array)
+            )
+        )
+        del array
 
     def get_positions_of_outlets(self, outlets):
         positions_of_outlets = []
@@ -200,14 +228,22 @@ class Environment:
             uid = str(uuid4())
             self.vehicle.add(vehID=uid, routeID=id_route_)
 
-        list(map(add_vehicle, random.choices(all_routes, k=number_vehicles)))
+            env_variables.vehicles[uid] = Car(uid, 0.0, 0.0)
+
+        list(map(add_vehicle, ra.choices(all_routes, k=number_vehicles)))
+        del all_routes
 
     def starting(self):
         """
         The function starts the simulation by calling the sumoBinary, which is the sumo-gui or sumo
         depending on the nogui option
         """
-        sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
+
+        os.environ["SUMO_NUM_THREADS"] = "8"
+        # show gui
+        # sumo_cmd = ["sumo-gui", "-c", env_variables.network_path]
+        # dont show gui
+        sumo_cmd = ["sumo", "-c", env_variables.network_path]
         traci.start(sumo_cmd)
 
         # end the simulation and d
@@ -222,357 +258,225 @@ class Environment:
         ids_arrived = self.simulation.getArrivedIDList()
 
         def remove_vehicle(id_):
-            env_variables.vehicles[id_] = None
+            # print("del car object ")
+            del env_variables.vehicles[id_]
 
-        list(map(remove_vehicle, ids_arrived))
+        if len(ids_arrived) != 0:
+            list(map(remove_vehicle, ids_arrived))
 
     def add_new_vehicles(self):
         """
         Add vehicles which inserted into the road network in this time step.
         the add to env_variables.vehicles (dictionary)
         """
-        ids_new_vehicles = self.simulation.getDepartedIDList()
+        ids_new_vehicles = traci.vehicle.getIDList()
 
         def create_vehicle(id_):
             env_variables.vehicles[id_] = Car(id_, 0, 0)
 
         list(map(create_vehicle, ids_new_vehicles))
 
-    def outlets_logging(self, outlet_num, outlet, cars):
-        return f"Outlet {outlet_num} : -> {outlet}   -  Number Of Cars Which Send Request To It -> {len(cars)} \n "
+    def car_distribution(self, step):
+        if step == 0:
+            number_cars = int(
+                nump_rand.normal(
+                    loc=env_variables.number_cars_mean_std["mean"],
+                    scale=env_variables.number_cars_mean_std["std"],
+                )
+            )
+            self.generate_vehicles(number_cars)
 
-    def car_services_logging(self, car_num, car, service):
-        return f"  The Car {car_num} Which Send To It -> : {car} \n" \
-               f"     And Its Services Is  ->  : {service} \n"
+        if traci.vehicle.getIDCount() <= env_variables.threashold_number_veh:
+            number_cars = int(
+                nump_rand.normal(
+                    loc=env_variables.number_cars_mean_std["mean"],
+                    scale=env_variables.number_cars_mean_std["std"],
+                )
+            )
+            self.generate_vehicles(number_cars)
 
-    def logging_the_final_results(self, performance_logger):
-        service_handled = performance_logger.service_handled
+    def decentralize_reset(self,outlets, performance_logger):
+        for i, outlet in enumerate(outlets):
+            performance_logger.set_outlet_services_power_allocation_10_TimeStep(outlet, [0, 0, 0])
+            # print("befor resetting : ")
+            # print("requested buffer  : ", len(performance_logger.queue_requested_buffer[outlet]))
+            # print("ensured buffer  : ", len(performance_logger.queue_ensured_buffer[outlet]))
 
-        for i, outer_key in enumerate(service_handled):
-            num = 0
-            print(self.outlets_logging(i, outer_key, service_handled[outer_key]))
-            for key, value in performance_logger.service_handled[outer_key].items():
-                num += 1
-                print(self.car_services_logging(num, key, value))
+            for j in range(len(performance_logger.queue_ensured_buffer[outlet])):
+                performance_logger.queue_requested_buffer[outlet].popleft()
+                service = performance_logger.queue_power_for_requested_in_buffer[outlet].popleft()
+                performance_logger.queue_provisioning_time_buffer.pop(service)
+            performance_logger.queue_ensured_buffer[outlet].clear()
+            # print("after resetting : ")
+            # print("requested buffer  after : ", len(performance_logger.queue_requested_buffer[outlet]))
+            # print("ensured buffer  after : ", len(performance_logger.queue_ensured_buffer[outlet]))
 
-    def get_current_vehicles(self):
-        """
-        :return: vehicles that running in road network in this time step
-        """
-        self.remove_vehicles_arrived()
-        self.add_new_vehicles()
-        return env_variables.vehicles
+    def provisioning_time_services(self,outlets, performance_logger, time_step_simulation):
+        for i, outlet in enumerate(outlets):
+            for service in performance_logger.queue_power_for_requested_in_buffer[outlet]:
+                start_time = performance_logger.queue_provisioning_time_buffer[service][0]
+                period_of_termination = performance_logger.queue_provisioning_time_buffer[service][1]
+                if start_time + period_of_termination == time_step_simulation:
+                    outlet.current_capacity = outlet.current_capacity + service.service_power_allocate
 
-    def ensured_service_aggrigation(self, performance_logger, outlet, service_type, action_value):
-
-        if outlet not in performance_logger._outlet_services_ensured_number:
-            performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
-
-        if str(service_type) == "FactorySafety":
-            service_ensured_value = performance_logger.outlet_services_ensured_number[outlet][0]
-            if action_value == 1:
-                performance_logger.outlet_services_ensured_number[outlet][0] = int(service_ensured_value) + 1
-
-        elif str(service_type) == "FactoryEntertainment":
-            service_ensured_value = performance_logger.outlet_services_ensured_number[outlet][1]
-            if action_value == 1:
-                performance_logger.outlet_services_ensured_number[outlet][1] = int(service_ensured_value) + 1
-
-        elif str(service_type) == "FactoryAutonomous":
-            service_ensured_value = performance_logger.outlet_services_ensured_number[outlet][2]
-            if action_value == 1:
-                performance_logger.outlet_services_ensured_number[outlet][2] = int(service_ensured_value) + 1
-
-    """"""
-
-    def services_aggregation(self, performance_logger, outlet, service_type, request_cost):
-        if outlet not in performance_logger._outlet_services_requested_number:
-            performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
-
-        if str(service_type) == "FactorySafety":
-            num = performance_logger.outlet_services_requested_number[outlet][0]
-            performance_logger.outlet_services_requested_number[outlet][0] = int(num) + 1
-
-        elif str(service_type) == "FactoryEntertainment":
-            num = performance_logger.outlet_services_requested_number[outlet][1]
-            performance_logger.outlet_services_requested_number[outlet][1] = int(num) + 1
-
-        elif str(service_type) == "FactoryAutonomous":
-            num = performance_logger.outlet_services_requested_number[outlet][2]
-            performance_logger.outlet_services_requested_number[outlet][2] = int(num) + 1
-
-    def power_aggregation(self, performance_logger, outlet, service_type, request_cost, action_value):
-        if outlet not in performance_logger._outlet_services_power_allocation:
-            performance_logger.set_outlet_services_power_allocation(outlet, [0.0, 0.0, 0.0])
-
-        if str(service_type) == "FactorySafety":
-
-            x = performance_logger.outlet_services_power_allocation[outlet][0]
-            if action_value == 1:
-                performance_logger.outlet_services_power_allocation[outlet][0] = float(x) + float(
-                    request_cost)
-
-
-        elif str(service_type) == "FactoryEntertainment":
-            x = performance_logger.outlet_services_power_allocation[outlet][1]
-            if action_value == 1:
-                performance_logger.outlet_services_power_allocation[outlet][1] = float(x) + float(
-                    request_cost)
-
-
-        elif str(service_type) == "FactoryAutonomous":
-            x = performance_logger.outlet_services_power_allocation[outlet][2]
-            if action_value == 1:
-                performance_logger.outlet_services_power_allocation[outlet][2] = float(x) + float(
-                    request_cost)
-
-    def car_interact(self, car, observer, performance_logger, gridcells_dqn, outlets, greedy):
-        # car.outlets_serve.append(outlets[-1])
+    def enable_sending_requests(self,greedy,car, observer, performance_logger, start_time):
 
         car.attach(observer)
-        car.set_state(car.get_x(), car.get_y())
+        car.set_state(
+            float(round(traci.vehicle.getPosition(car.id)[0], 4)),
+            float(round(traci.vehicle.getPosition(car.id)[1], 4)),
+        )
 
-        car.add_satellite(outlets[-1])
-
+        # car.add_satellite(outlets[-1])
         info = car.send_request()
-        car = info[1][1]
-        service = info[1][2]
-        outlet = info[0]
+        if info != None:
+            service = info[1][2]
+            outlet = info[0]
+            service_index = service._dec_services_types_mapping[service.__class__.__name__]
+            outlet.supported_services = greedy._supported_services
 
-        # print("outlet name : ", outlet.__class__.__name__)
+            if outlet.supported_services[service_index] == 1:
+                # print(action,"  ",service.request_supported(outlet)," ",outlet.current_capacity)
+                performance_logger.queue_requested_buffer[outlet].appendleft(1)
+                performance_logger.set_queue_provisioning_time_buffer(service, [0, 0])
+                performance_logger.queue_provisioning_time_buffer[service] = [start_time,
+                                                                              service.calcualate_processing_time()]
+                request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
+                request_cost = RequestCost(request_bandwidth, service.realtime)
+                request_cost.cost_setter(service.realtime)
+                service.service_power_allocate = request_bandwidth.allocated
+                # print("service.service_power_allocate : ",service.service_power_allocate)
+                power_aggregation(
+                    performance_logger.outlet_services_power_allocation,
+                    outlet,
+                    service.__class__.__name__,
+                    service,
+                    1,
+                )
 
-        # print("outlet is : ", outlet)
-        # print("outlet . max capacity : ",outlet.max_capacity)
+                services_aggregation(
+                    performance_logger.outlet_services_requested_number,
+                    outlet,
+                    service.__class__.__name__,
+                    1,
+                )
 
-        performance_logger.service_requested = {car: service}
-        # .................................................................................................
-        performance_logger.set_service_handled(outlet, info[1][1], service)
+                services_aggregation(
+                    performance_logger.outlet_services_requested_number_all_periods,
+                    outlet,
+                    service.__class__.__name__,
+                    1,
+                )
 
-        request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
-        request_cost = RequestCost(request_bandwidth, service.realtime)
-        request_cost.cost_setter(service.realtime)
-        # print(f"request cost from car {car.get_id()} : ->  {service.__class__.__name__, service.bandwidth, request_cost.cost} \n ")
-        performance_logger.request_costs.append(request_cost.cost)
-        performance_logger.set_service_power_allocate(service, request_bandwidth.allocated)
-        tower_cost = TowerCost(request_bandwidth, service.realtime)
-        tower_cost.cost_setter(service.realtime)
-        performance_logger.power_costs.append(tower_cost.cost)
-        # print(f"bandwidth_demand is:{request_bandwidth.allocated:.2f} ")
+                performance_logger.queue_power_for_requested_in_buffer[outlet].appendleft(service)
+                # print("req")
+                # print("action : ",outlet.dqn.agents.action.command.action_value_decentralize)
+                # print("action[service_index] : ", action[service_index])
+                # print("outlet.current_capacity : ",outlet.current_capacity)
+                # print("service.service_power_allocate : ",service.service_power_allocate)
+                if outlet._max_capacity !=0 and outlet._max_capacity > service.service_power_allocate:
+                    # print("ensured ")
+                    ensured_service_aggrigation(
+                        performance_logger.outlet_services_ensured_number,
+                        outlet,
+                        service.__class__.__name__,
+                        1,
 
-        if outlet._max_capacity != 0 and outlet.max_capacity > request_bandwidth.allocated:
-            self.services_aggregation(performance_logger, outlet, service.__class__.__name__, request_cost.cost)
-            # print(f"capacity is: {outlet._max_capacity} MBps outlet type : {outlet.__class__.__name__}")
-            outlet._max_capacity = outlet._max_capacity - request_bandwidth.allocated
-            # print(f"tower capacity after send request from  {car.get_id()} : ->  {outlet._max_capacity} \n ")
-            tower_cost.cost = outlet._max_capacity
-            outlet.services_requested = performance_logger.outlet_services_requested_number[outlet]
-            # print(f" outlet service requested : {outlet} , {outlet.services_requested}")
-            self.ensured_service_aggrigation(performance_logger, outlet, service.__class__.__name__,
-                                             greedy.request_response_reject)
-            outlet.services_ensured = performance_logger.outlet_services_ensured_number[outlet]
-            # print(f" outlet  ensured : {outlet} , {outlet.services_ensured}")
-
-        if request_bandwidth.allocated > outlet.max_capacity:
-            self.services_aggregation(performance_logger, outlet, service.__class__.__name__, request_cost.cost)
-            outlet.services_requested = performance_logger.outlet_services_requested_number[outlet]
-
-        if len(outlet.power_distinct[0]) == 0:
-            outlet.power = [0.0, 0.0, 0.0]
-            performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
-            performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
-            performance_logger.set_outlet_utility(outlet, 0.0)
-            performance_logger.set_outlet_occupancy(outlet, 0.0)
-
-        if sum(outlet.services_requested) == 0 and sum(
-                outlet.services_ensured) == 0:
-            outlet.utility = 0
-        elif sum(outlet.services_requested) != 0 and sum(
-                outlet.services_ensured) != 0:
-            outlet.utility = int((sum(outlet.services_ensured) / sum(
-                outlet.services_requested)) * 10)
-        else:
-            outlet.utility = 0
-
-        if outlet.__class__.__name__=='Satellite':
-            # print("satellite_utility : ",outlet.utility)
-            satellite_utility.append(outlet.utility)
-
-        performance_logger.set_outlet_utility(outlet, outlet.utility)
-
-        for ind, gridcell_dqn in enumerate(gridcells_dqn):
-
-            gridcell_dqn.services_requested = [0, 0, 0]
-            gridcell_dqn.services_ensured = [0, 0, 0]
-            performance_logger.set_gridcell_utility(gridcell_dqn, 0.0)
-
-            for i, outlet in enumerate(gridcell_dqn.grid_outlets):
-                if len(outlet.power_distinct[0]) == 0:
-                    outlet.power = [0.0, 0.0, 0.0]
-                    performance_logger.set_outlet_services_requested_number(outlet, [0, 0, 0])
-                    performance_logger.set_outlet_services_ensured_number(outlet, [0, 0, 0])
-                    performance_logger.set_outlet_utility(outlet, 0.0)
-
-                outlet.distinct = gridcell_dqn.outlets_id[i]
-
-                gridcell_dqn.allocated_power = outlet.power_distinct
-                gridcell_dqn.supported_services = outlet.supported_services_distinct
-                gridcell_dqn.services_requested = gridcell_dqn.services_requested + outlet.services_requested
-                gridcell_dqn.services_ensured = gridcell_dqn.services_ensured + outlet.services_ensured
-
-                # print(f"service requested in grid {ind} , {gridcell_dqn.services_requested}")
-                # print(f"service requested in outlet {i} , {outlet.services_requested}")
-                #
-                # print(f"service ensured in grid {ind} , {gridcell_dqn.services_ensured}")
-                # print(f"service ensured in outlet {i} , {outlet.services_ensured}")
-                #
-                # print(f"utility of outlet {i} , {outlet.utility}")
-                # print(f"occupancy of outlet {i} , {outlet.occupancy}")
-
-    def terminate_service(self, veh, outlets, performance_logger):
-        for out in outlets:
-            if out not in veh.outlets_serve:
-                if out in performance_logger.handled_services:
-                    if veh in performance_logger.handled_services[out]:
-                        serv = performance_logger.handled_services[out][veh]
-                        out._max_capacity = out._max_capacity + performance_logger.service_power_allocate[serv]
-            else:
-                # print(f"{out} is in the out_serv_of_car  {veh.outlets_serve}")
-                pass
+                    )
+                    power_aggregation(
+                        performance_logger._outlet_services_power_allocation_10_TimeStep,
+                        outlet,
+                        service.__class__.__name__,
+                        service,
+                        1,
+                    )
+                    performance_logger.queue_ensured_buffer[outlet].appendleft(1)
+                    outlet._max_capacity = outlet._max_capacity - service.service_power_allocate
 
     def run(self):
 
-        gridcells_dqn = []
         self.starting()
-        greedy = Greedy()
-
-        outlets = self.get_all_outlets()
-        self.Grids = self.fill_grids(outlets)
+        performance_logger = PerformanceLogger()
+        outlets = self.get_all_outlets(performance_logger)
+        self.Grids = self.fill_grids(self.fill_grids_with_the_nearest(outlets[:21]))
         step = 0
         print("\n")
+        for i in outlets:
+            print("out ", i.__class__.__name__)
+
         outlets_pos = self.get_positions_of_outlets(outlets)
         observer = ConcreteObserver(outlets_pos, outlets)
-        performance_logger = PerformanceLogger()
+        greedy = Greedy()
+        # set the maximum amount of memory that the garbage collector is allowed to use to 1 GB
+        max_size = 273741824
 
-        gridcell1 = GridCell()
-        gridcell1.grid_outlets = self.Grids.get("grid1")
-        gridcell1.outlets_id = list(range(len(gridcell1.grid_outlets)))
-        gridcell2 = GridCell()
-        gridcell2.grid_outlets = self.Grids.get("grid2")
-        gridcell2.outlets_id = list(range(len(gridcell2.grid_outlets)))
+        gc.set_threshold(700, max_size // gc.get_threshold()[1])
+        gc.collect(0)
+        build = []
+        for i in range(1):
+            build.append(RLBuilder())
+            self.gridcells_dqn.append(
+                build[i]
+                .agent.build_agent(ActionAssignment())
+                .environment.build_env(CentralizedReward(), CentralizedState())
+                .model_.build_model("centralized", 12, 2)
+                .build()
+            )
 
-        gridcell3 = GridCell()
-        gridcell3.grid_outlets = self.Grids.get("grid3")
-        gridcell3.outlets_id = list(range(len(gridcell3.grid_outlets)))
+            self.gridcells_dqn[i].agents.grid_outlets = self.Grids.get(f"grid{i + 1}")
+            self.gridcells_dqn[i].agents.outlets_id = list(
+                range(len(self.gridcells_dqn[i].agents.grid_outlets))
+            )
 
-        gridcell4 = GridCell()
-        gridcell4.grid_outlets = self.Grids.get("grid4")
-        gridcell4.outlets_id = list(range(len(gridcell4.grid_outlets)))
+        for i in range(1):
+            for index, outlet in enumerate(self.gridcells_dqn[i].agents.grid_outlets):
+                outlet._max_capacity = outlet.set_max_capacity(outlet.__class__.__name__)
 
-        gridcell5 = GridCell()
-        gridcell5.grid_outlets = self.Grids.get("grid5")
-        gridcell5.outlets_id = list(range(len(gridcell5.grid_outlets)))
+                self.temp_outlets.append(outlet)
+        print("self.temp_outlets.append(outlet): ", self.temp_outlets)
 
-        # gridcell6 = GridCell()
-        # gridcell6.grid_outlets = self.Grids.get("grid6")
-        # gridcell6.outlets_id = list(range(len(gridcell6.grid_outlets)))
-        #
-        # gridcell7 = GridCell()
-        # gridcell7.grid_outlets = self.Grids.get("grid7")
-        # gridcell7.outlets_id = list(range(len(gridcell7.grid_outlets)))
-
-        gridcells_dqn.append(gridcell1)
-        gridcells_dqn.append(gridcell2)
-        gridcells_dqn.append(gridcell3)
-        gridcells_dqn.append(gridcell4)
-        gridcells_dqn.append(gridcell5)
-        # gridcells_dqn.append(gridcell6)
-        # gridcells_dqn.append(gridcell7)
-
-        steps = 0
-
-        # Initialize previous_steps variable
-        previous_steps = 0
-        snapshot_time = 2
-        prev = 0
-        temp_outlet_reward = []
-        poi_ids = traci.poi.getIDList()
-        temp_outlets = []
-
-        for i in range(5):
-            for index, outlet in enumerate(gridcells_dqn[i].grid_outlets):
-                temp_outlets.append(outlet)
-
+        number_of_decentralize_periods = 0
         while step < env_variables.TIME:
-            steps += 1
+            process = psutil.Process()
+            memory_usage = process.memory_info().rss / 1024.0 / 1024.0  # Convert to MB
+            if memory_usage > self.memory_threshold:
+                gc.collect(0)
+
+            gc.collect(0)
+
             traci.simulationStep()
+            self.car_distribution(step)
+            self.remove_vehicles_arrived()
+            print("step is ....................................... ", step)
 
-            self.get_current_vehicles()
-            if step == 0:
-                self.generate_vehicles(250)
-                self.select_outlets_to_show_in_gui()
-            list(map(lambda veh: self.car_interact(veh, observer, performance_logger, gridcells_dqn, outlets, greedy),
-                     env_variables.vehicles.values()))
+            # if self.steps - previous_steps_sending == frame_rate_for_sending_requests:
+            #     previous_steps_sending = self.steps
 
-            list(map(lambda veh: self.terminate_service(veh, outlets, performance_logger),
-                     env_variables.vehicles.values()))
+            number_of_cars_will_send_requests = round(
+                len(list(env_variables.vehicles.values())) * 0.01
+            )
+            vehicles = ra.sample(
+                list(env_variables.vehicles.values()), number_of_cars_will_send_requests
+            )
+            # list(map(lambda veh: requests_buffering(veh, observer, performance_logger), vehicles, ))
+            # for index, outlet in enumerate(self.temp_outlets):
 
-            for i in range(5):
-                for index, outlet in enumerate(gridcells_dqn[i].grid_outlets):
-                    self.update_outlet_color(outlet.outlet_id, outlet.utility)
+            list(map(lambda veh:self.car_interact(veh, observer , self.gridcells_dqn ,performance_logger,self.steps,greedy),vehicles))
 
-            for j, line in enumerate(lines_out_utility):
-                x_data, y_data = line.get_data()
-                x_data = np.append(x_data, steps)
-                y_data = np.append(y_data, temp_outlets[j].utility)
-                line.set_data(x_data, y_data)
+            update_figures(self.steps / 10, self.temp_outlets, self.gridcells_dqn)
 
-            for j, line1 in enumerate(lines_out_requested):
-                x_data, y_data = line1.get_data()
-                x_data = np.append(x_data, steps)
-                y_data = np.append(y_data, sum(temp_outlets[j].services_requested))
-                line1.set_data(x_data, y_data)
+            if self.steps - self.prev == self.snapshot_time:
+                self.prev = self.steps
+                take_snapshot_figures()
 
-            for j, line2 in enumerate(lines_out_ensured):
-                x_data, y_data = line2.get_data()
-                x_data = np.append(x_data, steps)
-                y_data = np.append(y_data, sum(temp_outlets[j].services_ensured))
-                line2.set_data(x_data, y_data)
+            else:
+                close_figures()
 
-            for j, utility in enumerate(satellite_utility):
-                x_data, y_data = lines_satellite_utility.get_data()
-                x_data = np.append(x_data, steps)
-                y_data = np.append(y_data,utility)
-                lines_satellite_utility.set_data(x_data, y_data)
-
-            for ax in axs.flatten():
-                ax.legend()
-                ax.relim()
-                ax.autoscale_view()
-
-            axs_satellite.legend()
-            axs_satellite.relim()
-            axs_satellite.autoscale_view()
+                step += 1
+                self.steps += 1
 
 
-            fig.canvas.draw()
-            # fig_satellite.canvas.draw()
+            self.close()
 
-            if steps - prev == snapshot_time:
-                prev = steps
-                path1 = f'I://Documents//greedy_utility//snapshot{steps}'
-                path2=  f'I://Documents//greedy_satellite//snapshot{steps}'
-                fig.savefig(path1 + '.png')
-                fig_satellite.savefig(path2 + '.png')
-                plt.pause(0.001)
-
-            if steps % 2 == 0:
-                plt.pause(0.001)
-
-            step += 1
-            if step == 24 * 60 * 7:
-                self.logging_the_final_results(performance_logger)
-                break
-
-        plt.show()
-        plt.close()
+    def close(self):
         traci.close()

@@ -364,8 +364,6 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
 
         for gridcell in gridcells_dqn:
             for j, outlet_ in enumerate(gridcell.agents.grid_outlets):
-
-
                 if outlet == outlet_:
                     action = outlet_.dqn.agents.action.command.action_value_decentralize
                     service_index = service._dec_services_types_mapping[service.__class__.__name__]

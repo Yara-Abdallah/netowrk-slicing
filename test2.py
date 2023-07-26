@@ -4,12 +4,12 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario//utility_decentralized//utility2.pkl"
-filename2 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase2//utility_decentralized//utility2.pkl"
-filename3 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase3//utility_decentralized//utility2.pkl"
-filename4 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase4//utility_decentralized//utility2.pkl"
-filename5 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase5//utility_decentralized//utility2.pkl"
-
+filename  = "C://Users//Windows dunya//Downloads//decentralize_action_masking_throughput_cost_phase1//utility_decentralized//utility2.pkl"
+# filename2 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase2//utility_decentralized//utility2.pkl"
+# filename3 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase3//utility_decentralized//utility2.pkl"
+# filename4 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase4//utility_decentralized//utility2.pkl"
+# filename5 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase5//utility_decentralized//utility2.pkl"
+#
 deque = []
 with open(filename, 'rb') as file:
     try:
@@ -19,37 +19,37 @@ with open(filename, 'rb') as file:
     except EOFError:
         pass
 
-with open(filename2, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
-
-with open(filename3, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
-
-with open(filename4, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
-
-with open(filename5, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
+# with open(filename2, 'rb') as file:
+#     try:
+#         while True:
+#             loaded_value = pickle.load(file)
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
+#
+# with open(filename3, 'rb') as file:
+#     try:
+#         while True:
+#             loaded_value = pickle.load(file)
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
+#
+# with open(filename4, 'rb') as file:
+#     try:
+#         while True:
+#             loaded_value = pickle.load(file)
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
+#
+# with open(filename5, 'rb') as file:
+#     try:
+#         while True:
+#             loaded_value = pickle.load(file)
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
 
 print(len(deque))
 for i in deque:
@@ -74,7 +74,7 @@ def rolling_average(data, window_size):
     return rolling_avg
 
 # Example usage:
-window_size = 100
+window_size = 16
 result = rolling_average(deque, window_size)
 # print(result)
 # print(len(data))
@@ -84,12 +84,12 @@ x_values = [i for i in range(len(result))]  # Adjust x-axis values
 
 # Plot the original data and the rolling average
 # plt.plot(np.arange(len(deque)), deque, label='Original Data')
-plt.plot(x_values, result, label=f'4G_throughput (window={window_size})')
+plt.plot(x_values, result, label=f'4G_acc_utility (window={window_size})')
 plt.xlabel('steps')
-plt.ylabel('throughput')
+plt.ylabel('utility')
 plt.legend()
 plt.title('Rolling Average Plot')
 plt.grid(True)
-plt.savefig('4G_throughput.svg', format='svg')
+plt.savefig('4G_acc_utility.svg', format='svg')
 
 plt.show()

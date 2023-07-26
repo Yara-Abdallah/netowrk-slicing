@@ -7,7 +7,7 @@ import random
 from uuid import uuid4
 
 from FairDistribuition.FairDistribuition import FairDistribuition
-from Greedy.Greedy import Greedy
+from Greedy.greedy import Greedy
 from GridCell.GridCell import GridCell
 from Outlet.Sat.sat import Satellite
 from Utils.Bandwidth import Bandwidth
