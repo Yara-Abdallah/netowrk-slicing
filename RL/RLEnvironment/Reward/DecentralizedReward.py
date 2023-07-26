@@ -24,8 +24,8 @@ class DeCentralizedReward(Reward):
         self._coeff = 0
         self._period_reward_decentralize = []
         self._episode_reward_decentralize = []
-        self._throughput_weight = 1
-        self._throughput_derivation_weight = 1
+        self._throughput_weight = 0.1
+        self._throughput_derivation_weight = 0.1
         self._cost_derivation_weight = 0.4
         self._cost_weight = 0.4
         self.utility = 0
@@ -143,19 +143,19 @@ class DeCentralizedReward(Reward):
         else :
             self.utility = 0
         derivation_throughput = self.utility - self._prev_utility
-        # inv_cost = 0
-        # inv_prev_cost = 0
-        # if self._mean_power_allocation_3services_this_period ==  0 :
-        #     inv_cost = 0
-        # else :
-        #     inv_cost = (1 / self._mean_power_allocation_3services_this_period)
-        #
-        # if self._prev_mean_power_allocation_3services_this_period == 0 :
-        #     inv_prev_cost = 0
-        # else:
-        #     inv_prev_cost = (1 / self._prev_mean_power_allocation_3services_this_period)
-        #
-        # derivation_cost = inv_cost - inv_prev_cost
+        inv_cost = 0
+        inv_prev_cost = 0
+        if self._mean_power_allocation_3services_this_period ==  0 :
+            inv_cost = 0
+        else :
+            inv_cost = (1 / self._mean_power_allocation_3services_this_period)
+
+        if self._prev_mean_power_allocation_3services_this_period == 0 :
+            inv_prev_cost = 0
+        else:
+            inv_prev_cost = (1 / self._prev_mean_power_allocation_3services_this_period)
+
+        derivation_cost = inv_cost - inv_prev_cost
         # print("cost : ",self._mean_power_allocation_3services_this_period)
         # print("cost prev: ", self._prev_mean_power_allocation_3services_this_period)
         # print("1/cost : ",inv_cost)
@@ -165,9 +165,8 @@ class DeCentralizedReward(Reward):
         if self.utility == 0.0:
             return -1
         else:
-            return self._throughput_derivation_weight * math.tanh(derivation_throughput) + self._throughput_weight * self.utility
-                # + self._cost_weight * (1/(1 + np.exp(-inv_cost))) + \
-                # self._cost_derivation_weight * math.tanh(derivation_cost)
+            return self._throughput_derivation_weight * math.tanh(derivation_throughput) + self._throughput_weight * self.utility + self._cost_weight * (1/(1 + np.exp(-inv_cost))) + \
+                self._cost_derivation_weight * math.tanh(derivation_cost)
     def calculate_reward(self, x, action, c, max_capacity):
         if action == 0:
             action = -1
