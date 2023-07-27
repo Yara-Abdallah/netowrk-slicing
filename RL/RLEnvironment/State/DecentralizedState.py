@@ -11,8 +11,8 @@ class DeCentralizedState(State):
     _services_requested: int
     _tower_capacity = 0.0
     _max_tower_capacity = 0.0
-    _state_value_decentralize = [0.0] * 11
-    _next_state_decentralize = [0.0] * 11
+    _state_value_decentralize = [0.0] * 7
+    _next_state_decentralize = [0.0] * 7
 
     def __init__(self):
         super().__init__()
@@ -27,8 +27,9 @@ class DeCentralizedState(State):
         self._index_service = 0
         self._mean_power_allocated_requests = np.zeros(self.num_services)
         self._action_value = 0
-        self._number_requested_all_services = np.zeros(self.num_services)
-        self._number_ensured_all_services = np.zeros(self.num_services)
+        self._number_requested_in_period = np.zeros(self.num_services)
+        self._number_ensured_in_period = np.zeros(self.num_services)
+        self.ratio_of_occupancy = 0
 
 
 
@@ -45,20 +46,20 @@ class DeCentralizedState(State):
         self._mean_power_allocated_requests = value
 
     @property
-    def number_requested_all_services(self):
-        return self._number_requested_all_services
+    def number_requested_in_period(self):
+        return self._number_requested_in_period
 
-    @number_requested_all_services.setter
-    def number_requested_all_services(self, value):
-        self._number_requested_all_services = value
+    @number_requested_in_period.setter
+    def number_requested_in_period(self, value):
+        self._number_requested_in_period = value
 
     @property
-    def number_ensured_all_services(self):
-        return self._number_ensured_all_services
+    def number_ensured_in_period(self):
+        return self._number_ensured_in_period
 
-    @number_ensured_all_services.setter
-    def number_ensured_all_services(self, value):
-        self._number_ensured_all_services = value
+    @number_ensured_in_period.setter
+    def number_ensured_in_period(self, value):
+        self._number_ensured_in_period = value
 
     @property
     def index_service(self):
@@ -143,25 +144,27 @@ class DeCentralizedState(State):
         self._services_ensured = 0
         self._allocated_power = np.zeros(self.num_services)
         # out.dqn.environment.reward.reward_value = 0
+        self.ratio_of_occupancy = 0
         self.mean_power_allocated_requests = np.zeros(self.num_services)
-        self.state_value_decentralize = [0.0] * 11
-        self._number_ensured_all_services = np.zeros(self.num_services)
-        self._number_requested_all_services = np.zeros(self.num_services)
+        self.state_value_decentralize = [0.0] * 7
+        self._number_ensured_in_period = 0
+        self._number_requested_in_period = 0
 
         self.tower_capacity = self.max_tower_capacity
 
     def calculate_state(self):
         final_state = []
         # final_state.append(self.max_tower_capacity)
-        final_state.append(self.tower_capacity)
+        # final_state.append(self.tower_capacity)
         # if isinstance(self._action_value, np.ndarray):
         #    final_state.append(self._action_value.item())
         # else:
         #     final_state.append(self._action_value)
+        final_state.append(self.ratio_of_occupancy)
         final_state.append(self._services_requested)
         final_state.extend(self._mean_power_allocated_requests)
-        final_state.extend(self._number_requested_all_services)
-        final_state.extend(self._number_ensured_all_services)
+        final_state.append(self._number_requested_in_period)
+        final_state.append(self._number_ensured_in_period)
         # final_state.append(self.index_service)
         # if isinstance(self._supported_services[self.index_service], np.ndarray):
         #     final_state.append(self._supported_services[self.index_service])
@@ -171,7 +174,7 @@ class DeCentralizedState(State):
         # final_state.append(self._services_ensured[self.index_service])
         # final_state.append(self._allocated_power[self.index_service])
         if len(final_state) == 0:
-            final_state = [0.0] * 11
+            final_state = [0.0] * 7
         return final_state
 
     def calculate_initial_state(self):

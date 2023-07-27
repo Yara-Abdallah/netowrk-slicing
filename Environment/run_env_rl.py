@@ -348,7 +348,7 @@ class Environment:
             #     previous_steps_sending = self.steps
 
             number_of_cars_will_send_requests = round(
-                len(list(env_variables.vehicles.values())) * 0.01
+                len(list(env_variables.vehicles.values())) * 0.05
             )
             vehicles = ra.sample(
                 list(env_variables.vehicles.values()), number_of_cars_will_send_requests
@@ -372,9 +372,9 @@ class Environment:
 
                 # list(map(lambda veh: decentralize_period_processing(veh, observer, performance_logger),env_variables.vehicles.values(),))
 
-            list(map(lambda veh:enable_sending_requests(veh, observer , self.gridcells_dqn ,performance_logger,self.steps),vehicles,))
 
             provisioning_time_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger, self.steps)
+            list(map(lambda veh:enable_sending_requests(veh, observer , self.gridcells_dqn ,performance_logger,self.steps),vehicles,))
 
 
             if self.steps - self.previous_period >= 10:
@@ -531,7 +531,7 @@ class Environment:
                         for i in range(3):
                             out.dqn.environment.state._mean_power_allocated_requests[i] = \
                                 performance_logger.outlet_services_power_allocation[out][
-                                    i] / performance_logger.outlet_services_requested_number_all_periods[out][i]
+                                    i] /number_of_decentralize_periods
 
                         # print(" out : ", out.current_capacity)
                         out.dqn.environment.state.state_value_decentralize = out.dqn.environment.state.calculate_state()

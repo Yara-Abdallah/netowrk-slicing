@@ -4,10 +4,10 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//decentralize_action_masking_throughput_cost_phase1//utility_decentralized//utility2.pkl"
-filename2 = "C://Users//Windows dunya//Downloads/decentralize_action_masking_throughput_cost_phase2//utility_decentralized//utility2.pkl"
-filename3 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_throughput_cost_phase3//utility_decentralized//utility2.pkl"
-filename4 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_throughput_cost_phase4//utility_decentralized//utility2.pkl"
+filename  = "C://Users//Windows dunya//Downloads//dec_action_masking_phase_replace_towers//reward_accumilated_decentralize//accu_reward0.pkl"
+# filename2 = "C://Users//Windows dunya//Downloads/dec_action_masking_phase2//qvalue_decentralized_for_plotting//qvalue2.pkl"
+# filename3 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_throughput_phase3_period1//reward_accumilated_decentralize//accu_reward0.pkl"
+# filename4 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_throughput_phase4_period1//reward_accumilated_decentralize//accu_reward0.pkl"
 # filename5 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase5//utility_decentralized//utility2.pkl"
 #
 deque = []
@@ -18,31 +18,31 @@ with open(filename, 'rb') as file:
             deque.append(loaded_value)
     except EOFError:
         pass
-
-with open(filename2, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
-
-with open(filename3, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
 #
-with open(filename4, 'rb') as file:
-    try:
-        while True:
-            loaded_value = pickle.load(file)
-            deque.append(loaded_value)
-    except EOFError:
-        pass
-#
+# with open(filename2, 'rb') as file:
+#     try:
+#         while True:
+#             loaded_value = pickle.load(file)
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
+
+# with open(filename3, 'rb') as file:
+#     try:
+#         while True:
+#             loaded_value = pickle.load(file)
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
+# #
+# with open(filename4, 'rb') as file:
+#     try:
+#         while True:
+#             loaded_value = pickle.load(file)
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
+# #
 # with open(filename5, 'rb') as file:
 #     try:
 #         while True:
@@ -74,7 +74,7 @@ def rolling_average(data, window_size):
     return rolling_avg
 
 # Example usage:
-window_size = 32
+window_size = 1
 result = rolling_average(deque, window_size)
 # print(result)
 # print(len(data))
@@ -84,12 +84,12 @@ x_values = [i for i in range(len(result))]  # Adjust x-axis values
 
 # Plot the original data and the rolling average
 # plt.plot(np.arange(len(deque)), deque, label='Original Data')
-plt.plot(x_values, result, label=f'4G_throughput')
+plt.plot(x_values, result, label=f'WIFI_accu_reward')
 plt.xlabel('episode')
-plt.ylabel('throughput')
+plt.ylabel('accu_reward')
 plt.legend()
 plt.title(f'Rolling Average Plot (window={window_size})')
 plt.grid(True)
-plt.savefig('4G_throughput.svg', format='svg')
+plt.savefig('WIFI_accu_reward.svg', format='svg')
 
 plt.show()
