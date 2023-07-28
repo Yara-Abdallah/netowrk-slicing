@@ -409,12 +409,17 @@ def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_de
                 #         sum(performancelogger._outlet_services_power_allocation_10_TimeStep[outlet])/outlet.dqn.environment.reward.service_ensured
                 # else :
                 #     outlet.dqn.environment.reward._mean_power_allocation_3services_this_period = 0
+                invers_of_complement_waisted_requests = 0
+                if outlet.dqn.environment.reward.service_requested != 0:
+                    invers_of_complement_waisted_requests = (outlet.dqn.environment.reward.service_ensured / outlet.dqn.environment.reward.service_requested) - 1
+                else :
+                    invers_of_complement_waisted_requests = 0
 
+                # print("served num : ",outlet.dqn.environment.reward.service_ensured)
+                # print("accepted : ",outlet.dqn.environment.reward.service_requested)
                 outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward2(
                     ratio_of_occupancy ,
-                    outlet.dqn.environment.reward.service_requested,
-                    outlet.dqn.environment.reward.service_ensured,
-
+                    invers_of_complement_waisted_requests
 
                     )
                 if outlet.dqn.environment.reward.service_requested != 0  and outlet.dqn.environment.reward.service_ensured!=0:
@@ -449,3 +454,5 @@ def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_de
                 outlet.dqn.environment.reward.prev_utility = outlet.dqn.environment.reward.utility
                 # outlet.dqn.environment.reward.prev_mean_power_allocation_3services_this_period = outlet.dqn.environment.reward._mean_power_allocation_3services_this_period
                 # print("outlet.dqn.environment.reward._prev_mean_power_allocation_3services_this_period  : ", outlet.dqn.environment.reward._prev_mean_power_allocation_3services_this_period )
+                outlet.dqn.environment.reward.perv_occupancy = ratio_of_occupancy
+                outlet.dqn.environment.reward.perv_wasting_requests_ratio = invers_of_complement_waisted_requests
