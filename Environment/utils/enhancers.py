@@ -414,7 +414,7 @@ def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_de
                     invers_of_complement_waisted_requests = (outlet.dqn.environment.reward.service_ensured / outlet.dqn.environment.reward.service_requested) - 1
                 else :
                     invers_of_complement_waisted_requests = 0
-
+                #
                 # print("served num : ",outlet.dqn.environment.reward.service_ensured)
                 # print("accepted : ",outlet.dqn.environment.reward.service_requested)
                 outlet.dqn.environment.reward.reward_value = outlet.dqn.environment.reward.calculate_reward2(
