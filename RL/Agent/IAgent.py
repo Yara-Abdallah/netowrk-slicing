@@ -13,10 +13,10 @@ class AgentProtocol(Protocol):
 
 
 class AbstractAgent():
-    def __init__(self, epsilon=0.30, gamma=0.95, epsilon_decay=0.00015, min_epsilon=0.001,
+    def __init__(self, epsilon=0.98, gamma=0.95, epsilon_decay=0.000025, min_epsilon=0.80,
                  episodes=7,
                  cumulative_reward=0,
-                 step=60 ):
+                 step=60):
         self._action = None
         # self.action_type = ActionController()
         self.epsilon = epsilon

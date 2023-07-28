@@ -34,8 +34,8 @@ class DeCentralizedReward(Reward):
         self.reward_value_accumilated = 0
         self._mean_power_allocation_3services_this_period = 0
         self._prev_mean_power_allocation_3services_this_period = 0
-        self.occupancy_weight=0.5
-        self.inverse_of_complement_wasting_requests_weight = 0.5
+        self.occupancy_weight=0.25
+        self.inverse_of_complement_wasting_requests_weight = 0.25
         self.perv_occupancy = 0
         self.derivation_occupancy_weight = 0.25
         self.derivation_wasting_requests_weight = 0.25
@@ -148,7 +148,6 @@ class DeCentralizedReward(Reward):
         # print("occ : ",occupancy_ratio)
         # print("served num : ",served)
         # print("accepted : ",accepted)
-        # invers_of_complement_waisted_requests = 0
         derivation_of_occupancy = occupancy_ratio - self.perv_occupancy
         derivation_of_invers_of_complement_waisted_requests = invers_of_complement_waisted_requests - self.perv_wasting_requests_ratio
                 # if accepted != 0  :
@@ -162,9 +161,9 @@ class DeCentralizedReward(Reward):
         # print("derivation_of_invers_of_complement_waisted_requests : ",
         #       derivation_of_invers_of_complement_waisted_requests)
 
-        return self.occupancy_weight * occupancy_ratio + self.inverse_of_complement_wasting_requests_weight * invers_of_complement_waisted_requests
-            # + self.perv_wasting_requests_ratio * derivation_of_invers_of_complement_waisted_requests \
-            # + self.derivation_occupancy_weight * derivation_of_occupancy
+        return self.occupancy_weight * occupancy_ratio + self.inverse_of_complement_wasting_requests_weight * invers_of_complement_waisted_requests\
+            + self.derivation_wasting_requests_weight * derivation_of_invers_of_complement_waisted_requests \
+            + self.derivation_occupancy_weight * derivation_of_occupancy
 
     def calculate_reward3(self,requested,ensured):
         if requested != 0 and ensured != 0 :
