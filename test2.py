@@ -4,10 +4,10 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_with_derivations_period2_phase1//reward_accumilated_decentralize//accu_reward2.pkl"
-filename2 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_with_derivations_period2_phase2//reward_accumilated_decentralize//accu_reward2.pkl"
-# filename3 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period2_phase3//reward_accumilated_decentralize//accu_reward0.pkl"
-# filename4 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period2_phase4//reward_accumilated_decentralize//accu_reward0.pkl"
+filename  = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_phase1//reward_accumilated_decentralize//accu_reward2.pkl"
+# filename2 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_with_derivations_period2_phase2//reward_accumilated_decentralize//accu_reward0.pkl"
+# filename3 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_with_derivations_period2_phase3//reward_accumilated_decentralize//accu_reward0.pkl"
+# filename4 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_with_derivations_period2_phase4//reward_accumilated_decentralize//accu_reward0.pkl"
 # filename5 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase5//utility_decentralized//utility2.pkl"
 #
 deque = []
@@ -19,18 +19,18 @@ with open(filename, 'rb') as file:
     except EOFError:
         pass
 #
-with open(filename2, 'rb') as file:
-    try:
-        n = 8
-        l=[]
-        while True:
-            loaded_value = pickle.load(file)
-            # l.append(loaded_value)
-            # if len(l)>8:
-            deque.append(loaded_value)
-    except EOFError:
-        pass
-#
+# with open(filename2, 'rb') as file:
+#     try:
+#         n = 8
+#         l=[]
+#         while True:
+#             loaded_value = pickle.load(file)
+#             # l.append(loaded_value)
+#             # if len(l)>8:
+#             deque.append(loaded_value)
+#     except EOFError:
+#         pass
+# #
 # with open(filename3, 'rb') as file:
 #     try:
 #         while True:
@@ -46,7 +46,7 @@ with open(filename2, 'rb') as file:
 #             deque.append(loaded_value)
 #     except EOFError:
 #         pass
-#
+
 # with open(filename5, 'rb') as file:
 #     try:
 #         while True:
