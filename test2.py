@@ -4,8 +4,8 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_phase1_more_explore//reward_accumilated_decentralize//accu_reward0.pkl"
-# filename2 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_phase2//reward_accumilated_decentralize//accu_reward2.pkl"
+filename  = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_phase1_more_explore//reward_accumilated_decentralize//accu_reward2.pkl"
+filename2 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_phase2_more_explore//reward_accumilated_decentralize//accu_reward2.pkl"
 # filename3 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_phase3//reward_accumilated_decentralize//accu_reward2.pkl"
 # filename4 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_phase4//reward_accumilated_decentralize//accu_reward2.pkl"
 # filename5 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_last_scenario_phase5//utility_decentralized//utility2.pkl"
@@ -86,12 +86,12 @@ x_values = [i for i in range(len(result))]  # Adjust x-axis values
 
 # Plot the original data and the rolling average
 # plt.plot(np.arange(len(deque)), deque, label='Original Data')
-plt.plot(x_values, result, label=f'wifi_accu_reward')
+plt.plot(x_values, result, label=f'4G_accu_reward')
 plt.xlabel('episode')
 plt.ylabel('accu_reward')
 plt.legend()
 plt.title(f'Rolling Average Plot (window={window_size})')
 plt.grid(True)
-plt.savefig('wifi_accu_reward.svg', format='svg')
+plt.savefig('4G_accu_reward.svg', format='svg')
 
 plt.show()
