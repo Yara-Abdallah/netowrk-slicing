@@ -10,7 +10,7 @@ import gc
 gc.set_debug(gc.DEBUG_UNCOLLECTABLE) # Enable debugging of circular references
 
 def main():
-    env = run_env_rl.Environment("period2")
+    env = run_env_rl.Environment("period3")
     env.run()
 
 
