@@ -29,13 +29,21 @@ class DeCentralizedState(State):
         self._action_value = 0
         self._number_requested_in_period = np.zeros(self.num_services)
         self._number_ensured_in_period = np.zeros(self.num_services)
-        self.ratio_of_occupancy = 0
+        self._ratio_of_occupancy = 0
 
 
 
     @staticmethod
     def state_shape(num_services, grid_cell):
         return [num_services, grid_cell]
+
+    @property
+    def ratio_of_occupancy(self):
+        return self._ratio_of_occupancy
+
+    @ratio_of_occupancy.setter
+    def ratio_of_occupancy(self, value):
+        self._ratio_of_occupancy = value
 
     @property
     def mean_power_allocated_requests(self):
@@ -160,7 +168,7 @@ class DeCentralizedState(State):
         #    final_state.append(self._action_value.item())
         # else:
         #     final_state.append(self._action_value)
-        final_state.append(self.ratio_of_occupancy)
+        final_state.append(self._ratio_of_occupancy)
         final_state.append(self._services_requested)
         final_state.extend(self._mean_power_allocated_requests)
         final_state.append(self._number_requested_in_period)

@@ -109,6 +109,7 @@ def update_lines_outlet_utility(lines_out_utility, steps, outlets):
         line.set_data(x_data, y_data)
 
 
+
 def update_lines_outlet_requested(lines_out_requested, steps, outlets):
     for j, line1 in enumerate(lines_out_requested):
         x_data, y_data = line1.get_data()

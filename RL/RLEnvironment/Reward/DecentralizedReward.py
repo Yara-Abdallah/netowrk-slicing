@@ -146,8 +146,7 @@ class DeCentralizedReward(Reward):
 
     def calculate_reward2(self,occupancy_ratio,invers_of_complement_waisted_requests):
         # print("occ : ",occupancy_ratio)
-        # print("served num : ",served)
-        # print("accepted : ",accepted)
+
         derivation_of_occupancy = occupancy_ratio - self.perv_occupancy
         derivation_of_invers_of_complement_waisted_requests = invers_of_complement_waisted_requests - self.perv_wasting_requests_ratio
                 # if accepted != 0  :

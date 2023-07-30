@@ -35,7 +35,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
 
     _queue_requested_buffer: Dict[Outlet, deque[int]] =  field(default_factory=dict)
 
-    _queue_power_for_requested_in_buffer: Dict[Outlet, deque[Service]] = field(default_factory=dict)
+    _queue_power_for_requested_in_buffer: Dict[Outlet, deque[Service,bool]] = field(default_factory=dict)
 
     _queue_ensured_buffer: Dict[Outlet, deque[int]] = field(default_factory=dict)
 

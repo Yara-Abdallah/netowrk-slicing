@@ -362,7 +362,7 @@ class Environment:
 
 
 
-                decentralize_state_action(performance_logger, self.gridcells_dqn, 1)
+                decentralize_state_action(performance_logger, self.gridcells_dqn, 1,0)
                 # for index, outlet in enumerate(self.temp_outlets):
 
                     # add_value_to_pickle(
@@ -398,6 +398,11 @@ class Environment:
                         os.path.join(supported_service_decentralized_path, f"supported_services{index}.pkl"),
                         outlet.dqn.environment.state.supported_services,
                     )
+                    add_value_to_pickle(
+                        os.path.join(ratio_of_occupancy_decentralized_path, f"ratio_of_occupancy{index}.pkl"),
+                        outlet.dqn.environment.state.ratio_of_occupancy,
+                    )
+
                 number_of_decentralize_periods = number_of_decentralize_periods + 1
                 decentralize_nextstate_reward(self.gridcells_dqn, performance_logger, number_of_decentralize_periods)
                 update_figures(self.steps/10, self.temp_outlets, self.gridcells_dqn)
@@ -439,12 +444,18 @@ class Environment:
 
 
 
+                decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets,performance_logger)
 
-                decentralize_state_action(performance_logger, self.gridcells_dqn, number_of_decentralize_periods)
+                decentralize_state_action(performance_logger, self.gridcells_dqn, number_of_decentralize_periods,self.steps)
+                if self.steps == 310:
+                    for i, gridcell in enumerate(self.gridcells_dqn):
+                        for j, outlet_ in enumerate(gridcell.agents.grid_outlets):
+                            print(outlet_.dqn.agents.action.command.action_value_decentralize)
 
+                            outlet_.dqn.agents.action.command.action_value_decentralize = (0, 0, 0)
+                            print(outlet_.dqn.agents.action.command.action_value_decentralize)
                 # for index, outlet in enumerate(self.temp_outlets):
 
-                decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets,performance_logger)
 
 
 
@@ -472,17 +483,17 @@ class Environment:
 
 
 
-            if self.steps - self.previous_steps >= env_variables.decentralized_replay_buffer:
-                self.previous_steps = self.steps
-                for ind, gridcell_dqn in enumerate(self.gridcells_dqn):
-                    for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
-                        if len(outlet.dqn.agents.memory) > 31:
-                            # print("replay buffer of decentralize ")
-                            outlet.dqn.agents.qvalue = (
-                                outlet.dqn.agents.replay_buffer_decentralize(
-                                    30, outlet.dqn.model
-                                )
-                            )
+            # if self.steps - self.previous_steps >= env_variables.decentralized_replay_buffer:
+            #     self.previous_steps = self.steps
+            #     for ind, gridcell_dqn in enumerate(self.gridcells_dqn):
+            #         for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
+            #             if len(outlet.dqn.agents.memory) > 31:
+            #                 # print("replay buffer of decentralize ")
+            #                 outlet.dqn.agents.qvalue = (
+            #                     outlet.dqn.agents.replay_buffer_decentralize(
+            #                         30, outlet.dqn.model
+            #                     )
+            #                 )
 
             # if self.steps - self.previous_steps_centralize >= env_variables.centralized_replay_buffer:
             #     self.previous_steps_centralize = self.steps
