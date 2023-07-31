@@ -453,7 +453,7 @@ def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_de
                 #     outlet.dqn.environment.reward._mean_power_allocation_3services_this_period = 0
                 invers_of_complement_waisted_requests = 0
                 if outlet.dqn.environment.reward.service_requested != 0:
-                    invers_of_complement_waisted_requests = (outlet.dqn.environment.reward.service_ensured / outlet.dqn.environment.reward.service_requested) - 1
+                    invers_of_complement_waisted_requests = (outlet.dqn.environment.reward.service_ensured / outlet.dqn.environment.reward.service_requested)
                 else :
                     invers_of_complement_waisted_requests = 0
                 #
