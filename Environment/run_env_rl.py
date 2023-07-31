@@ -348,7 +348,7 @@ class Environment:
             #     previous_steps_sending = self.steps
 
             number_of_cars_will_send_requests = round(
-                len(list(env_variables.vehicles.values())) * 0.05
+                len(list(env_variables.vehicles.values())) * 0.2
             )
             vehicles = ra.sample(
                 list(env_variables.vehicles.values()), number_of_cars_will_send_requests
@@ -483,17 +483,17 @@ class Environment:
 
 
 
-            # if self.steps - self.previous_steps >= env_variables.decentralized_replay_buffer:
-            #     self.previous_steps = self.steps
-            #     for ind, gridcell_dqn in enumerate(self.gridcells_dqn):
-            #         for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
-            #             if len(outlet.dqn.agents.memory) > 31:
-            #                 # print("replay buffer of decentralize ")
-            #                 outlet.dqn.agents.qvalue = (
-            #                     outlet.dqn.agents.replay_buffer_decentralize(
-            #                         30, outlet.dqn.model
-            #                     )
-            #                 )
+            if self.steps - self.previous_steps >= env_variables.decentralized_replay_buffer:
+                self.previous_steps = self.steps
+                for ind, gridcell_dqn in enumerate(self.gridcells_dqn):
+                    for i, outlet in enumerate(gridcell_dqn.agents.grid_outlets):
+                        if len(outlet.dqn.agents.memory) > 31:
+                            # print("replay buffer of decentralize ")
+                            outlet.dqn.agents.qvalue = (
+                                outlet.dqn.agents.replay_buffer_decentralize(
+                                    30, outlet.dqn.model
+                                )
+                            )
 
             # if self.steps - self.previous_steps_centralize >= env_variables.centralized_replay_buffer:
             #     self.previous_steps_centralize = self.steps
