@@ -8,12 +8,12 @@ paths = ["ratio_of_occupancy_decentralized//ratio_of_occupancy","reward_accumila
 
 def paths_reading_from(outlet_number):
     filesname = []
-    for phase_number in range(4):
-        filesname.append(f"C://Users//Windows dunya//Downloads//action_masking_phase{phase_number+1}_period3_occ_wasting_req//qvalue_decentralized_for_plotting//qvalue{outlet_number}.pkl")
+    for phase_number in range(3):
+        filesname.append(f"C://Users//Windows dunya//Downloads//action_masking_phase{phase_number+1}_period3_occ_serving_req//utility_decentralized//utility{outlet_number}.pkl")
     return filesname
 
 results_dir = os.path.join(sys.path[0],
-                           'action_masking_phase3_period3_occ_serving_req_results')
+                           'action_masking_phase3_period3_occ_serving_req_results2')
 
 accu_reward = os.path.join(results_dir, 'accu_reward')
 qvalue = os.path.join(results_dir, 'qvalue')
@@ -25,7 +25,7 @@ os.makedirs(serving_ratio, exist_ok=True)
 os.makedirs(occupancy, exist_ok=True)
 
 def read_data(filesname,queue):
-    for i in range(4):
+    for i in range(3):
         with open(filesname[i], 'rb') as file:
             try:
                 while True:
