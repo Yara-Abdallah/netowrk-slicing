@@ -4,9 +4,9 @@ from collections import deque
 import numpy as np
 from matplotlib import pyplot as plt
 
-filename  = "C://Users//Windows dunya//Downloads//action_masking_phase1_period3_occ_wasting_req//qvalue_decentralized_for_plotting//qvalue2.pkl"
-# filename2 = "C://Users//Windows dunya//Downloads//action_masking_occ_wasting_req_period3_phase2//qvalue_decentralized_for_plotting//qvalue1.pkl"
-# filename3 = "C://Users//Windows dunya//Downloads//action_masking_occ_wasting_req_period3_phase3//qvalue_decentralized_for_plotting//qvalue1.pkl"
+filename  = "C://Users//Windows dunya//Downloads//action_masking_phase1_period3_occ_serving_req//reward_accumilated_decentralize//accu_reward2.pkl"
+# filename2 = "C://Users//Windows dunya//Downloads//action_masking_phase2_period3_occ_wasting_req//utility_decentralized//utility0.pkl"
+# filename3 = "C://Users//Windows dunya//Downloads//action_masking_phase3_period3_occ_wasting_req//utility_decentralized//utility0.pkl"
 # filename4 = "C://Users//Windows dunya//Downloads//action_masking_occ_wasting_req_period3_phase4//qvalue_decentralized_for_plotting//qvalue1.pkl"
 # filename5 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_test2_on_3G_weights//utility_decentralized//utility1.pkl"
 # # filename6 = "C://Users//Windows dunya//Downloads//decentralize_action_masking_occupancy_wasting_requests_period3_phase1//utility_decentralized//utility2.pkl"
@@ -31,7 +31,7 @@ with open(filename, 'rb') as file:
 #             deque.append(loaded_value)
 #     except EOFError:
 #         pass
-# # #
+# # # #
 # with open(filename3, 'rb') as file:
 #     try:
 #         while True:
@@ -99,12 +99,12 @@ x_values = [i for i in range(len(result))]  # Adjust x-axis values
 
 # Plot the original data and the rolling average
 # plt.plot(np.arange(len(deque)), deque, label='Original Data')
-plt.plot(x_values, result, label=f'4G_qvalue')
+plt.plot(x_values, result, label=f'acc_reward')
 plt.xlabel('episode')
-plt.ylabel('4G_qvalue')
+plt.ylabel('acc_reward')
 plt.legend()
 plt.title(f'Rolling Average Plot (window={window_size})')
 plt.grid(True)
-plt.savefig('4G_qvalue.svg', format='svg')
+plt.savefig('acc_reward.svg', format='svg')
 
 plt.show()
