@@ -207,13 +207,12 @@ def centralize_nextstate_reward(gridcells_dqn):
 def decentralize_reset(outlets, performance_logger):
     for i, outlet in enumerate(outlets):
         # performance_logger.set_outlet_services_power_allocation_10_TimeStep(outlet,[0,0,0])
-        print(outlet.__class__.__name__)
+        # print(outlet.__class__.__name__)
         # print("befor resetting : ")
         # print("action : ", outlet.dqn.agents.action.command.action_value_decentralize)
         # print("requested buffer  : ", len(performance_logger.queue_requested_buffer[outlet]))
         # print("ensured buffer  : ", len(performance_logger.queue_ensured_buffer[outlet]))
         # print("len : ", len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
-
 
         for j in range(len(performance_logger.queue_ensured_buffer[outlet])):
             performance_logger.queue_requested_buffer[outlet].popleft()
