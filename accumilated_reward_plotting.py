@@ -3,7 +3,7 @@ deque = []
 deque = read_data(paths_reading_from(outlet_number=0),deque)
 
 # Example usage:
-window_size = 10
+window_size = 16
 result = rolling_average(deque, window_size)
 print(len(deque))
 x_values = [i for i in range(len(result))]  # Adjust x-axis values
