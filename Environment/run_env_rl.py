@@ -347,7 +347,7 @@ class Environment:
             #     previous_steps_sending = self.steps
 
             number_of_cars_will_send_requests = round(
-                len(list(env_variables.vehicles.values())) * 0.2
+                len(list(env_variables.vehicles.values())) * 0.05
             )
             vehicles = ra.sample(
                 list(env_variables.vehicles.values()), number_of_cars_will_send_requests
@@ -391,10 +391,6 @@ class Environment:
                         os.path.join(supported_service_decentralized_path, f"supported_services{index}.pkl"),
                         outlet.dqn.environment.state.supported_services,
                     )
-                    add_value_to_pickle(
-                        os.path.join(ratio_of_occupancy_decentralized_path, f"ratio_of_occupancy{index}.pkl"),
-                        outlet.dqn.environment.state.ratio_of_occupancy,
-                    )
 
                 number_of_decentralize_periods = number_of_decentralize_periods + 1
                 decentralize_nextstate_reward(self.gridcells_dqn, performance_logger, number_of_decentralize_periods)
@@ -420,7 +416,10 @@ class Environment:
                         os.path.join(requested_decentralized_path, f"requested{index}.pkl"),
                         outlet.dqn.environment.reward.service_requested,
                     )
-
+                    add_value_to_pickle(
+                        os.path.join(ratio_of_occupancy_decentralized_path, f"ratio_of_occupancy{index}.pkl"),
+                        outlet.dqn.environment.state.ratio_of_occupancy,
+                    )
                     # add_value_to_pickle(
                     #     os.path.join(sum_power_allocation_path, f"sum_power_allocation{index}.pkl"),
                     #     sum(performance_logger.outlet_services_power_allocation_with_action_period[outlet]),
@@ -432,18 +431,20 @@ class Environment:
                         os.path.join(ensured_decentralized_path, f"ensured{index}.pkl"),
                         outlet.dqn.environment.reward.service_ensured,
                     )
-
+                # for outlet in self.temp_outlets:
+                #     print("current cap : ", outlet.current_capacity)
+                #     print("current occupancy : ", outlet.dqn.environment.state.ratio_of_occupancy)
                 decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets, performance_logger)
 
                 decentralize_state_action(performance_logger, self.gridcells_dqn, number_of_decentralize_periods,
                                           self.steps)
-                if self.steps == 310:
-                    for i, gridcell in enumerate(self.gridcells_dqn):
-                        for j, outlet_ in enumerate(gridcell.agents.grid_outlets):
-                            print(outlet_.dqn.agents.action.command.action_value_decentralize)
-
-                            outlet_.dqn.agents.action.command.action_value_decentralize = (0, 0, 0)
-                            print(outlet_.dqn.agents.action.command.action_value_decentralize)
+                # if self.steps >= 250:
+                #     for i, gridcell in enumerate(self.gridcells_dqn):
+                #         for j, outlet_ in enumerate(gridcell.agents.grid_outlets):
+                #             print(outlet_.dqn.agents.action.command.action_value_decentralize)
+                #
+                #             outlet_.dqn.agents.action.command.action_value_decentralize = (0, 0, 0)
+                #             print(outlet_.dqn.agents.action.command.action_value_decentralize)
                 # for index, outlet in enumerate(self.temp_outlets):
 
                 # decentralize_processing_old_requested_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger)

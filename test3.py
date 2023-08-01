@@ -2,13 +2,13 @@ import pickle
 
 import pandas as pd
 
-reward ="C://Users//Windows dunya//Downloads//resultsss//reward_decentralized//reward1.pkl"
-action ="C://Users//Windows dunya//Downloads//resultsss//action_decentralized//action1.pkl"
-utility ="C://Users//Windows dunya//Downloads//resultsss//utility_decentralized//utility1.pkl"
-requested = "C://Users//Windows dunya//Downloads//resultsss//requested_decentralized//requested1.pkl"
-ensured = "C://Users//Windows dunya//Downloads//resultsss//ensured_decentralized//ensured1.pkl"
-supported = "C://Users//Windows dunya//Downloads//resultsss//supported_service_decentralized//supported_services1.pkl"
-occu = "C://Users//Windows dunya//Downloads//resultsss//ratio_of_occupancy_decentralized//ratio_of_occupancy1.pkl"
+reward ="C://Users//Windows dunya//Downloads//testing//reward_decentralized//reward1.pkl"
+action ="C://Users//Windows dunya//Downloads//testing//action_decentralized//action1.pkl"
+utility ="C://Users//Windows dunya//Downloads//testing//utility_decentralized//utility1.pkl"
+requested = "C://Users//Windows dunya//Downloads//testing//requested_decentralized//requested1.pkl"
+ensured = "C://Users//Windows dunya//Downloads//testing//ensured_decentralized//ensured1.pkl"
+supported = "C://Users//Windows dunya//Downloads//testing//supported_service_decentralized//supported_services1.pkl"
+occu = "C://Users//Windows dunya//Downloads//testing//ratio_of_occupancy_decentralized//ratio_of_occupancy1.pkl"
 av_cap = []
 rew =[]
 act=[]
@@ -129,4 +129,4 @@ data = list(zip(columns['occu'],columns['utility'],columns['action'],columns['re
 
 df = pd.DataFrame(data = data)
 
-df.to_csv('3G_resultssss.csv', index=False, header=False)
+df.to_csv('4G_testing3.csv', index=False, header=False)
