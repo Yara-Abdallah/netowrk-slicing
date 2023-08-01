@@ -153,11 +153,11 @@ class DeCentralizedReward(Reward):
         #     invers_of_complement_waisted_requests = (served/accepted)  - 1
         # print("invers_of_complement_waisted_requests : ", invers_of_complement_waisted_requests)
         #
-        print("self.perv_occupancy : ",self.perv_occupancy)
-        print("occupancy_ratio : ", occupancy_ratio)
+        # print("self.perv_occupancy : ",self.perv_occupancy)
+        # print("occupancy_ratio : ", occupancy_ratio)
 
         # print("self.perv_wasting_requests_ratio : ", self.perv_wasting_requests_ratio)
-        print("derivation_of_occupancy : ", derivation_of_occupancy)
+        # print("derivation_of_occupancy : ", derivation_of_occupancy)
         # print("derivation_of_invers_of_complement_waisted_requests : ",
         #       derivation_of_invers_of_complement_waisted_requests)
 
