@@ -214,21 +214,21 @@ def decentralize_reset(outlets, performance_logger,time_step_simulation):
         # print("ensured buffer  : ", len(performance_logger.queue_ensured_buffer[outlet]))
         # print("len : ", len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
         count  = 0
-        print("befor ")
-        print("ensure    ", len(performance_logger.queue_ensured_buffer))
-        print("req : ",len(performance_logger.queue_requested_buffer[outlet]))
-        print("serv : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
-        print("serv : ",(performance_logger.queue_power_for_requested_in_buffer[outlet]))
+        # print("befor ")
+        # print("ensure    ", len(performance_logger.queue_ensured_buffer))
+        # print("req : ",len(performance_logger.queue_requested_buffer[outlet]))
+        # print("serv : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
+        # print("serv : ",(performance_logger.queue_power_for_requested_in_buffer[outlet]))
 
         for j in range(len(performance_logger.queue_ensured_buffer[outlet])):
             performance_logger.queue_requested_buffer[outlet].popleft()
             service, flag = performance_logger.queue_power_for_requested_in_buffer[outlet].popleft()
-            if flag == True :
-                count = count +1
-                start_time = performance_logger.queue_provisioning_time_buffer[service][0]
-                period_of_termination = performance_logger.queue_provisioning_time_buffer[service][1]
-                if start_time + period_of_termination != time_step_simulation:
-                    outlet.current_capacity = outlet.current_capacity + service.service_power_allocate
+            # if flag == True :
+            #     count = count +1
+            #     start_time = performance_logger.queue_provisioning_time_buffer[service][0]
+            #     period_of_termination = performance_logger.queue_provisioning_time_buffer[service][1]
+            #     if start_time + period_of_termination != time_step_simulation:
+            #         outlet.current_capacity = outlet.current_capacity + service.service_power_allocate
             performance_logger.queue_provisioning_time_buffer.pop(service)
         performance_logger.queue_ensured_buffer[outlet].clear()
 
