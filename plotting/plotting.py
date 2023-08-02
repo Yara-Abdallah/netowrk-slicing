@@ -5,11 +5,11 @@ import os
 import sys
 
 paths = ["ratio_of_occupancy_decentralized//ratio_of_occupancy","reward_accumilated_decentralize//accu_reward","qvalue_decentralized_for_plotting//qvalue","utility_decentralized//utility"]
-phases_number  = 3
+phases_number  = 4
 def paths_reading_from(outlet_number):
     filesname = []
     for phase_number in range(phases_number):
-        filesname.append(f"C://Users//Windows dunya//Downloads//action_masking_period3_phase{phase_number+1}_derivation_occ_westing_req//utility_decentralized//utility{outlet_number}.pkl")
+        filesname.append(f"C://Users//Windows dunya//Downloads//action_masking_period3_phase{phase_number+1}_derivation_occ_westing_req//ratio_of_occupancy_decentralized//ratio_of_occupancy{outlet_number}.pkl")
     return filesname
 
 results_dir = os.path.join(sys.path[0],
