@@ -9,7 +9,7 @@ phases_number  = 1
 def paths_reading_from(outlet_number):
     filesname = []
     for phase_number in range(phases_number):
-        filesname.append(f"H://work_projects//network_slicing//ns//result_occ_with_derivation//ratio_of_occupancy_decentralized//ratio_of_occupancy{1}.pkl")
+        filesname.append(f"C://Users//Windows dunya//Downloads//result_occ_with_derivation//ratio_of_occupancy_decentralized//ratio_of_occupancy{1}.pkl")
     return filesname
 
 results_dir = os.path.join(sys.path[0],
