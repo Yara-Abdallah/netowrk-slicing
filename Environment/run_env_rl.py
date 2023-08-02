@@ -434,7 +434,7 @@ class Environment:
                 # for outlet in self.temp_outlets:
                 #     print("current cap : ", outlet.current_capacity)
                 #     print("current occupancy : ", outlet.dqn.environment.state.ratio_of_occupancy)
-                decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets, performance_logger)
+                decentralize_reset(self.gridcells_dqn[0].agents.grid_outlets, performance_logger,self.steps)
 
                 decentralize_state_action(performance_logger, self.gridcells_dqn, number_of_decentralize_periods,
                                           self.steps)

@@ -203,7 +203,7 @@ def centralize_nextstate_reward(gridcells_dqn):
         )
 
 
-def decentralize_reset(outlets, performance_logger):
+def decentralize_reset(outlets, performance_logger,time_step_simulation):
     for i, outlet in enumerate(outlets):
         # performance_logger.set_outlet_services_power_allocation_10_TimeStep(outlet,[0,0,0])
         # print(outlet.__class__.__name__)
@@ -213,10 +213,22 @@ def decentralize_reset(outlets, performance_logger):
         # print("requested buffer  : ", len(performance_logger.queue_requested_buffer[outlet]))
         # print("ensured buffer  : ", len(performance_logger.queue_ensured_buffer[outlet]))
         # print("len : ", len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
+        count  = 0
+        print("befor ")
+        print("ensure    ", len(performance_logger.queue_ensured_buffer))
+        print("req : ",len(performance_logger.queue_requested_buffer[outlet]))
+        print("serv : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
+        print("serv : ",(performance_logger.queue_power_for_requested_in_buffer[outlet]))
 
         for j in range(len(performance_logger.queue_ensured_buffer[outlet])):
             performance_logger.queue_requested_buffer[outlet].popleft()
             service, flag = performance_logger.queue_power_for_requested_in_buffer[outlet].popleft()
+            if flag == True :
+                count = count +1
+                start_time = performance_logger.queue_provisioning_time_buffer[service][0]
+                period_of_termination = performance_logger.queue_provisioning_time_buffer[service][1]
+                if start_time + period_of_termination != time_step_simulation:
+                    outlet.current_capacity = outlet.current_capacity + service.service_power_allocate
             performance_logger.queue_provisioning_time_buffer.pop(service)
         performance_logger.queue_ensured_buffer[outlet].clear()
 
@@ -300,6 +312,8 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
 
                                 performance_logger.queue_power_for_requested_in_buffer[outlet].appendleft(
                                     [service, False])
+                                performance_logger.queue_power_for_requested_in_buffer[outlet][0][1] = False
+
                                 # print("req")
                                 # print("action : ",outlet.dqn.agents.action.command.action_value_decentralize)
                                 # print("action[service_index] : ", action[service_index])
