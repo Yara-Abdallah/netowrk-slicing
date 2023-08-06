@@ -39,7 +39,7 @@ class PerformanceLogger(metaclass=SingletonMeta):
 
     _queue_ensured_buffer: Dict[Outlet, deque[int]] = field(default_factory=dict)
 
-    _queue_provisioning_time_buffer: Dict[Service, List[int]] = field(default_factory=dict)
+    _queue_provisioning_time_buffer: Dict[Outlet,Dict[Service, List[int]] ]= field(default_factory=dict)
 
     _outlet_services_power_allocation: Dict[Outlet, List[float]] = field(default_factory=dict)
 
@@ -68,10 +68,13 @@ class PerformanceLogger(metaclass=SingletonMeta):
     def queue_provisioning_time_buffer(self):
         return self._queue_provisioning_time_buffer
 
-    def set_queue_provisioning_time_buffer(self, service, value):
+    def set_queue_provisioning_time_buffer(self, outlet,service, value):
         if service not in self._queue_provisioning_time_buffer:
-            self._queue_provisioning_time_buffer[service] = 0
-        self._queue_provisioning_time_buffer[service] = value
+            self._queue_provisioning_time_buffer[outlet] = {}
+        new_value = {service: value}
+        self._queue_provisioning_time_buffer[outlet].update(new_value)
+
+
     @property
     def queue_power_for_requested_in_buffer(self):
         return self._queue_power_for_requested_in_buffer

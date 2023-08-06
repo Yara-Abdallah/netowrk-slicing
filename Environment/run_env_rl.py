@@ -368,9 +368,9 @@ class Environment:
 
                 # list(map(lambda veh: decentralize_period_processing(veh, observer, performance_logger),env_variables.vehicles.values(),))
 
-            provisioning_time_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger, self.steps)
             list(map(lambda veh: enable_sending_requests(veh, observer, self.gridcells_dqn, performance_logger,
                                                          self.steps), vehicles, ))
+            provisioning_time_services(self.gridcells_dqn[0].agents.grid_outlets, performance_logger, self.steps)
 
             if self.steps - self.previous_period >= 10:
                 # print("decentralize new period  .......   ")

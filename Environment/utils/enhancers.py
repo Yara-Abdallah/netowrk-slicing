@@ -215,27 +215,22 @@ def decentralize_reset(outlets, performance_logger,time_step_simulation):
         # print("len : ", len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
         count  = 0
         # print("befor ")
-        # print("ensure    ", len(performance_logger.queue_ensured_buffer))
-        # print("req : ",len(performance_logger.queue_requested_buffer[outlet]))
-        # print("serv : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
+        print("ensure    ", len(performance_logger.queue_ensured_buffer[outlet]))
+        print("req : ",len(performance_logger.queue_requested_buffer[outlet]))
+        print("serv : ",len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
         # print("serv : ",(performance_logger.queue_power_for_requested_in_buffer[outlet]))
 
         for j in range(len(performance_logger.queue_ensured_buffer[outlet])):
             performance_logger.queue_requested_buffer[outlet].popleft()
             service, flag = performance_logger.queue_power_for_requested_in_buffer[outlet].popleft()
-            # if flag == True :
-            #     count = count +1
-            #     start_time = performance_logger.queue_provisioning_time_buffer[service][0]
-            #     period_of_termination = performance_logger.queue_provisioning_time_buffer[service][1]
-            #     if start_time + period_of_termination != time_step_simulation:
-            #         outlet.current_capacity = outlet.current_capacity + service.service_power_allocate
-            performance_logger.queue_provisioning_time_buffer.pop(service)
+            # performance_logger.queue_provisioning_time_buffer.pop(service)
+            del service
         performance_logger.queue_ensured_buffer[outlet].clear()
-
-        # print("after resetting : ")
-        # print("requested buffer  after : ", len(performance_logger.queue_requested_buffer[outlet]))
-        # print("ensured buffer  after : ", len(performance_logger.queue_ensured_buffer[outlet]))
-        # print("len : ", len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
+        print("count >>>>>>>>>>>>>>>>>>>>>>>> ",count)
+        print("after resetting :....................................... ")
+        print("requested buffer  after : ", len(performance_logger.queue_requested_buffer[outlet]))
+        print("ensured buffer  after : ", len(performance_logger.queue_ensured_buffer[outlet]))
+        print("serv : ", len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
 
 
 def provisioning_time_services(outlets, performance_logger, time_step_simulation):
@@ -243,17 +238,21 @@ def provisioning_time_services(outlets, performance_logger, time_step_simulation
         # print("current befor terminate ", outlet.current_capacity)
         # print("befor outlet.dqn.environment.state.ratio_of_occupancy   : ",outlet.dqn.environment.state.ratio_of_occupancy)
         count = 0
-        for service, flag in performance_logger.queue_power_for_requested_in_buffer[outlet]:
-            if flag == True:
+        terminated_services = []
+        for service in performance_logger.queue_provisioning_time_buffer[outlet]:
                 # print("true ")
-                start_time = performance_logger.queue_provisioning_time_buffer[service][0]
-                period_of_termination = performance_logger.queue_provisioning_time_buffer[service][1]
+                start_time = performance_logger.queue_provisioning_time_buffer[outlet][service][0]
+                period_of_termination = performance_logger.queue_provisioning_time_buffer[outlet][service][1]
                 if start_time + period_of_termination == time_step_simulation:
-                    count = count +1
+                    count = count + 1
                     # print("start_time + period_of_termination..... ")
                     # print("service.service_power_allocate : ", service.service_power_allocate)
                     # print("outlet.current_capacity : " ,outlet.current_capacity)
+                    terminated_services.append(service)
                     outlet.current_capacity = outlet.current_capacity + service.service_power_allocate
+        for service in terminated_services:
+            performance_logger.queue_provisioning_time_buffer[outlet].pop(service)
+
         # print("current after terminate ", outlet.current_capacity, "   number of terminated services : " ,count )
         # print("after outlet.dqn.environment.state.ratio_of_occupancy   : ",outlet.dqn.environment.state.ratio_of_occupancy)
 
@@ -288,7 +287,8 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
                             if action[service_index] == 1 and outlet.supported_services[service_index] == 1:
                                 # print(action,"  ",service.request_supported(outlet)," ",outlet.current_capacity)
                                 performance_logger.queue_requested_buffer[outlet].appendleft(1)
-                                performance_logger.set_queue_provisioning_time_buffer(service, [0, 0])
+
+                                performance_logger.set_queue_provisioning_time_buffer(outlet,service, [[0, 0]])
 
                                 request_bandwidth = Bandwidth(service.bandwidth, service.criticality)
                                 request_cost = RequestCost(request_bandwidth, service.realtime)
@@ -312,8 +312,9 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
 
                                 performance_logger.queue_power_for_requested_in_buffer[outlet].appendleft(
                                     [service, False])
-                                performance_logger.queue_power_for_requested_in_buffer[outlet][0][1] = False
+                                # print(".... before ....  ",performance_logger.queue_power_for_requested_in_buffer[outlet])
 
+                                performance_logger.queue_power_for_requested_in_buffer[outlet][0][1] = False
                                 # print("req")
                                 # print("action : ",outlet.dqn.agents.action.command.action_value_decentralize)
                                 # print("action[service_index] : ", action[service_index])
@@ -331,8 +332,11 @@ def enable_sending_requests(car, observer, gridcells_dqn, performance_logger, st
 
                                     performance_logger.queue_ensured_buffer[outlet].appendleft(1)
                                     performance_logger.queue_power_for_requested_in_buffer[outlet][0][1] = True
+                                    # print(".... len queue .... ",
+                                    #       len(performance_logger.queue_power_for_requested_in_buffer[outlet]))
+                                    # print(".... len ensure .... ",len(performance_logger.queue_ensured_buffer[outlet]))
 
-                                    performance_logger.queue_provisioning_time_buffer[service] = [start_time,
+                                    performance_logger.queue_provisioning_time_buffer[outlet][service] = [start_time,
                                                                                                   service.calcualate_processing_time()]
 
                                     outlet.current_capacity = outlet.current_capacity - service.service_power_allocate
@@ -426,7 +430,7 @@ def decentralize_state_action(performancelogger, gridcells_dqn, number_of_decent
                         if outlet.current_capacity >= service.service_power_allocate:
                             # performance_logger.queue_requested_buffer[outlet].popleft(1)
                             performancelogger.queue_power_for_requested_in_buffer[outlet][i][1] = True
-                            performancelogger.queue_provisioning_time_buffer[service] = [start_time,
+                            performancelogger.queue_provisioning_time_buffer[outlet][service] = [start_time,
                             service.calcualate_processing_time()]
                             ensured_service_aggrigation(
                                 performancelogger.outlet_services_ensured_number,
