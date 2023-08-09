@@ -161,7 +161,7 @@ class DeCentralizedReward(Reward):
         # print("derivation_of_invers_of_complement_waisted_requests : ",
         #       derivation_of_invers_of_complement_waisted_requests)
 
-        return self.derivation_occupancy_weight * derivation_of_occupancy + self.inverse_of_complement_wasting_requests_weight * invers_of_complement_waisted_requests
+        return self.occupancy_weight * occupancy_ratio + self.inverse_of_complement_wasting_requests_weight * invers_of_complement_waisted_requests
             # + self.derivation_wasting_requests_weight * derivation_of_invers_of_complement_waisted_requests \
             # + self.derivation_occupancy_weight * derivation_of_occupancy
 

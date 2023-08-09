@@ -31,9 +31,6 @@ class CentralizeDQN(AbstractRL):
     @model.setter
     def model(self, m):
         self._model = m
-
-
-
     @property
     def environment(self):
         return self._environment
