@@ -475,6 +475,7 @@ def decentralize_nextstate_reward(gridcells_dqn, performancelogger, number_of_de
                 if number_of_decentralize_periods % 32 == 0:
                     outlet.dqn.environment.state.state_value_decentralize = [0] * 7
 
+                # print("state : ",outlet.dqn.environment.state.state_value_decentralize)
                 outlet.dqn.environment.reward.prev_utility = outlet.dqn.environment.reward.utility
                 # outlet.dqn.environment.reward.prev_mean_power_allocation_3services_this_period = outlet.dqn.environment.reward._mean_power_allocation_3services_this_period
                 # print("outlet.dqn.environment.reward._prev_mean_power_allocation_3services_this_period  : ", outlet.dqn.environment.reward._prev_mean_power_allocation_3services_this_period )
