@@ -228,24 +228,12 @@ def serving_requests(performancelogger,outlet,start_time):
             performancelogger.queue_provisioning_time_buffer[outlet] = dict()
         if outlet not in performancelogger.queue_requested_buffer:
             performancelogger.queue_requested_buffer[outlet] = deque([])
-        # print("len of queue power : ",len(performancelogger.queue_power_for_requested_in_buffer[outlet]))
-        # print("len of requested buffer : ", len(performancelogger.queue_requested_buffer[outlet]))
-        # print("outlet ", outlet.__class__.__name__)
 
         for i,(service, flag) in enumerate(performancelogger.queue_power_for_requested_in_buffer[outlet]):
-            # service, flag = performancelogger.queue_power_for_requested_in_buffer[outlet][i]
-            # print("outlet.current_capacity : ", outlet.current_capacity)
-            # print("outlet capacity : ", outlet.current_capacity)
             p = False
             if flag == False :
-                # print("service.service_power_allocate : ", service.service_power_allocate)
-                # print("outlet capacity : ", outlet.current_capacity)
-                # print("no ",False )
                 if outlet.current_capacity >= service.service_power_allocate:
-                    # print("yes")
                     p = True
-
-                    # performance_logger.queue_requested_buffer[outlet].popleft(1)
                     performancelogger.queue_power_for_requested_in_buffer[outlet][i][1] = True
                     performancelogger.queue_provisioning_time_buffer[outlet][service] = [start_time,
                                                                                          service.calcualate_processing_time()]
